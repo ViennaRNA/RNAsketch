@@ -64,7 +64,7 @@ def main():
                 count = 0
             else:
                 count += 1
-                if count > 50000:
+                if count > 25000:
                     break
         
         # finally print the result
@@ -82,12 +82,12 @@ def calculate_objective(sequence, structures):
 
 # function which prints the result nicely to the screen
 def print_result(sequence, structures, score):
-    sys.stdout.write("\r" + result_seq + '\t' + str(score) + "\n")
+    sys.stdout.write("\r" + sequence + '\t' + str(score) + "\n")
     sys.stdout.flush()
     eos = []
     for struct in structures:
-        print struct + '\t' + str(RNA.energy_of_struct(result_seq, struct))
-    print '\t'.join(str(x) for x in RNA.fold(result_seq))
+        print struct + '\t' + str(RNA.energy_of_struct(sequence, struct))
+    print '\t'.join(str(x) for x in RNA.fold(sequence))
 
 
 if __name__ == "__main__":
