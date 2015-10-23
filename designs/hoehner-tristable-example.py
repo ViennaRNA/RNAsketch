@@ -52,7 +52,7 @@ def main():
         # mutate globally for 1000 times and print
         for i in range(0, 500000):
             # write progress
-            sys.stdout.write("\rMutate global: " + str(i) + "/" + str(count) + " from NOS: " + str(dg.mutate_global()))
+            sys.stdout.write("\rMutate global: {0:7.0f}/{1:5.0f} from NOS: {2:7.0f}".format(i, count, dg.mutate_global()))
             sys.stdout.flush()
             
             this_score = calculate_objective(dg.get_sequence(), structures);
@@ -82,13 +82,16 @@ def calculate_objective(sequence, structures):
 
 # function which prints the result nicely to the screen
 def print_result(sequence, structures, score):
-    sys.stdout.write("\r")
+    sys.stdout.write("\r                                                       \r")
     sys.stdout.flush()
-    print sequence + '\t' + str(score)
-    eos = []
+    print sequence + '\t{0:4.5f}'.format(score)
+    (mfe_struct, mfe_energy) = RNA.fold(sequence)
+    
     for struct in structures:
-        print struct + '\t' + str(RNA.energy_of_struct(sequence, struct))
-    print '\t'.join(str(x) for x in RNA.fold(sequence))
+        eos = RNA.energy_of_struct(sequence, struct)
+        print struct + '\t{0:4.5f}\t{1:4.5f}'.format(eos, mfe_energy-eos)
+    
+    print mfe_struct + '\t{0:4.5f}'.format(mfe_energy)
 
 
 if __name__ == "__main__":
