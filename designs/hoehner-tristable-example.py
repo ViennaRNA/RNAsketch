@@ -82,8 +82,9 @@ def calculate_objective(sequence, structures):
 
 # function which prints the result nicely to the screen
 def print_result(sequence, structures, score):
-    sys.stdout.write("\r" + sequence + '\t' + str(score) + "\n")
+    sys.stdout.write("\r")
     sys.stdout.flush()
+    print sequence + '\t' + str(score)
     eos = []
     for struct in structures:
         print struct + '\t' + str(RNA.energy_of_struct(sequence, struct))
