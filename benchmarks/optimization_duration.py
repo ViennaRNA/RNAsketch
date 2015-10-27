@@ -38,6 +38,8 @@ def main():
     parser.add_argument("-p", "--progress", default=False, action='store_true', help='Show progress of optimization')
     parser.add_argument("-i", "--input", default=False, action='store_true', help='Read custom structures and sequence constraints from stdin')
     args = parser.parse_args()
+    
+    print "Options: number={0:d}, optimization={1:d}\n".format(args.number, args.optimization)
 
     # define structures
     structures = []
