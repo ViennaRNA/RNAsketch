@@ -22,16 +22,19 @@ class Result:
         (self.mfe_struct, self.mfe_energy) = RNA.fold(self.sequence)
         for struct in self.structures:
             self.eos.append(RNA.energy_of_struct(self.sequence, struct))
-    def write(self):
-        print(self.sequence + '\t{0:4.5f}'.format(self.score))
+    def write_out(self):
+        #first clean up last line
+        sys.stdout.write("\r                                                             \r")
+        sys.stdout.flush()
+        print(self.sequence + '\t{0:9.4f}'.format(self.score))
         for i, struct in enumerate(self.structures):
-            print(struct + '\t{0:4.5f}\t{1:4.5f}'.format(self.eos[i], self.mfe_energy-self.eos[i]))
-        
-        print(self.mfe_struct + '\t{0:4.5f}'.format(self.mfe_energy))
-
+            print(struct + '\t{0:9.4f}\t{1:9.4f}'.format(self.eos[i], self.eos[i]-self.mfe_energy))
+        print(self.mfe_struct + '\t{0:9.4f}'.format(self.mfe_energy))
 
 def main():
     parser = argparse.ArgumentParser(description='Design a tri-stable example same to Hoehner 2013 paper.')
+    parser.add_argument("-n", "--number", type=int, default=40, help='Number of designs to generate')
+    parser.add_argument("-o", "--optimization", type=int, default=500000, help='Maximal number of optimization iterations')
     parser.add_argument("-p", "--progress", default=False, action='store_true', help='Show progress of optimization')
     parser.add_argument("-i", "--input", default=False, action='store_true', help='Read custom structures and sequence constraints from stdin')
     args = parser.parse_args()
@@ -66,47 +69,14 @@ def main():
     for i in range(0, number_of_components):
         print('[' + str(i) + ']' + str(dg.component_vertices(i)))
     print('')
-
     
     
-    for d in xrange(0, 50000, 50):
+    # optmizations start here
+    for optimization_iterations in xrange(0, args.optimization, 50):
         results = [];
-        for n in range(0, 10):
-            score = 0
-            count = 0
-            
-            # randomly sample a initial sequence
-            dg.set_sequence()
-            result_seq = dg.get_sequence()
-            # print this sequence with score
-            score = calculate_objective(dg.get_sequence(), structures);
-            #print dg.get_sequence() + '\t' + str(score)
-            
-            # mutate globally for 1000 times and print
-            for i in range(0, d):
-                # write progress
-                if (args.progress):
-                    sys.stdout.write("\rMutate ({0:02d}/{1:02d}): {2:7.0f}/{3:5.0f} from NOS: {4:7.0f}".format(d, n, i, count, dg.mutate_global()))
-                    sys.stdout.flush()
-                
-                this_score = calculate_objective(dg.get_sequence(), structures);
-                #print dg.get_sequence() + '\t' + str(this_score)
-                
-                if (this_score < score):
-                    score = this_score
-                    result_seq = dg.get_sequence()
-                    count = 0
-                else:
-                    count += 1
-                    if count > d:
-                        break
-            
-            # finally print the result
-            r = Result(result_seq, score, structures)
-            #if (args.progress):
-                #sys.stdout.write("\r                                                       \r")
-                #sys.stdout.flush()
-            #r.write()
+        for n in range(0, args.number):
+            r = optimization_run(dg, structures, optimization_iterations, optimization_iterations, args.progress)
+            #r.write_out()
             results.append(r)
         
         # process results
@@ -122,8 +92,42 @@ def main():
         if (args.progress):
             sys.stdout.write("\r                                                       \r")
             sys.stdout.flush()
-        print(d, eos_diff, reached_mfe)
+        print(optimization_iterations, eos_diff, reached_mfe)
 
+# main optimization
+def optimization_run(dg, structures, num_opt, early_exit, progress):
+    score = 0
+    count = 0
+    
+    # randomly sample a initial sequence
+    dg.set_sequence()
+    result_seq = dg.get_sequence()
+    # print this sequence with score
+    score = calculate_objective(dg.get_sequence(), structures);
+    #print dg.get_sequence() + '\t' + str(score)
+    
+    # mutate globally for num_opt times and print
+    for i in range(0, num_opt):
+        # mutate sequence
+        mut_nos = dg.mutate_global()
+        # write progress
+        if (progress):
+            sys.stdout.write("\rMutate global: {0:7.0f}/{1:5.0f} from NOS: {2:7.0f}".format(i, count, mut_nos))
+            sys.stdout.flush()
+        
+        this_score = calculate_objective(dg.get_sequence(), structures);
+        
+        if (this_score < score):
+            score = this_score
+            result_seq = dg.get_sequence()
+            count = 0
+        else:
+            count += 1
+            if count > early_exit:
+                break
+    
+    # finally return the result
+    return Result(result_seq, score, structures)
 
 # objective function: eos(1)+eos(2)+eos(3) - 3 * gibbs + 1 * ((eos(1)-eos(2))^2 + (eos(1)-eos(3))^2 + (eos(2)-eos(3))^2)
 def calculate_objective(sequence, structures):
@@ -139,7 +143,6 @@ def calculate_objective(sequence, structures):
             objective_difference_part += pow(value - j, 2)
     
     return sum(eos) - len(eos) * gibbs[1] + 1 * objective_difference_part
-
 
 if __name__ == "__main__":
     main()
