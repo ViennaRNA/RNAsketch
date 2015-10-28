@@ -1,3 +1,4 @@
+from __future__ import print_function
 import RNAdesign as rd
 import RNA
 import argparse
@@ -41,7 +42,8 @@ def main():
     parser.add_argument("-i", "--input", default=False, action='store_true', help='Read custom structures and sequence constraints from stdin')
     args = parser.parse_args()
     
-    print "# Options: number={0:d}, optimization_min={1:d}, optimization_max={2:d}, local={3:}".format(args.number, args.optimization_min, args.optimization_max, args.local)
+    print ("# optimization_duration.py")
+    print ("# Options: number={0:d}, optimization_min={1:d}, optimization_max={2:d}, local={3:}".format(args.number, args.optimization_min, args.optimization_max, args.local))
 
     # define structures
     structures = []
@@ -72,31 +74,25 @@ def main():
 
     for i in range(0, number_of_components):
         print('# [' + str(i) + ']' + str(dg.component_vertices(i)))
-    print('')
     
     
     # optmizations start here
     for optimization_iterations in xrange(args.optimization_min, args.optimization_max, 50):
-        results = [];
         for n in range(0, args.number):
             r = optimization_run(dg, structures, optimization_iterations, optimization_iterations, args)
-            #r.write_out()
-            results.append(r)
-        
-        # process results
-        eos_diff = []
-        reached_mfe = 0
-        for i in range(0, len(structures)):
-            eos_diff.append(sum(r.eos[i]-r.mfe_energy for r in results)/len(results))
-        for r in results:
-            for s in r.structures:
-                if (s == r.mfe_struct):
-                    reached_mfe += 1
-        
-        if (args.progress):
-            sys.stdout.write("\r                                                       \r")
-            sys.stdout.flush()
-        print(optimization_iterations, eos_diff, reached_mfe/args.number)
+            
+            # process result and write result of this optimization to stdout
+            eos_diff = []
+            reached_mfe = 0
+            for i in range(0, len(r.structures)):
+                eos_diff.append(r.eos[i]-r.mfe_energy)
+                if (r.structures[i] == r.mfe_struct):
+                    reached_mfe = 1
+            
+            if (args.progress):
+                sys.stdout.write("\r                                                       \r")
+                sys.stdout.flush()
+            print (optimization_iterations, reached_mfe, *eos_diff, sep=";")
 
 # main optimization
 def optimization_run(dg, structures, num_opt, early_exit, args):

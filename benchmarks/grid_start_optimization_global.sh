@@ -14,4 +14,4 @@ SCRIPT=/scr/minos/jango/Software/RNAdesign-toolbox/benchmarks/optimization_durat
 START=$(($SGE_TASK_ID*1000-1000))
 END=$(($SGE_TASK_ID*1000-1))
 
-python $SCRIPT -x $START -y $END > $DPATH/global_optimization_duration_$START.out;
+python -u $SCRIPT -x $START -y $END > $DPATH/global_optimization_duration_$START.out;
