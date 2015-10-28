@@ -34,12 +34,14 @@ class Result:
 def main():
     parser = argparse.ArgumentParser(description='Design a tri-stable example same to Hoehner 2013 paper.')
     parser.add_argument("-n", "--number", type=int, default=40, help='Number of designs to generate')
-    parser.add_argument("-o", "--optimization", type=int, default=500000, help='Maximal number of optimization iterations')
+    parser.add_argument("-x", "--optimization_min", type=int, default=0, help='Minimal number of optimization iterations')
+    parser.add_argument("-y", "--optimization_max", type=int, default=500000, help='Maximal number of optimization iterations')
     parser.add_argument("-p", "--progress", default=False, action='store_true', help='Show progress of optimization')
+    parser.add_argument("-l", "--local", default=False, action='store_true', help='Only mutate locally instead of globally')
     parser.add_argument("-i", "--input", default=False, action='store_true', help='Read custom structures and sequence constraints from stdin')
     args = parser.parse_args()
     
-    print "Options: number={0:d}, optimization={1:d}\n".format(args.number, args.optimization)
+    print "# Options: number={0:d}, optimization_min={1:d}, optimization_max={2:d}, local={3:}".format(args.number, args.optimization_min, args.optimization_max, args.local)
 
     # define structures
     structures = []
@@ -61,23 +63,23 @@ def main():
     # construct dependency graph with these structures
     dg = rd.DependencyGraphMT(structures, constraint)
     
-    print("\n".join(structures) + "\n" + constraint + "\n")
+    print("# " + "\n# ".join(structures) + "\n# " + constraint)
     # print the amount of solutions
-    print('Maximal number of solutions: ' + str(dg.number_of_sequences()))
+    print('# Maximal number of solutions: ' + str(dg.number_of_sequences()))
     # print the amount of connected components
     number_of_components = dg.number_of_connected_components()
-    print('Number of Connected Components: ' + str(number_of_components))
+    print('# Number of Connected Components: ' + str(number_of_components))
 
     for i in range(0, number_of_components):
-        print('[' + str(i) + ']' + str(dg.component_vertices(i)))
+        print('# [' + str(i) + ']' + str(dg.component_vertices(i)))
     print('')
     
     
     # optmizations start here
-    for optimization_iterations in xrange(0, args.optimization, 50):
+    for optimization_iterations in xrange(args.optimization_min, args.optimization_max, 50):
         results = [];
         for n in range(0, args.number):
-            r = optimization_run(dg, structures, optimization_iterations, optimization_iterations, args.progress)
+            r = optimization_run(dg, structures, optimization_iterations, optimization_iterations, args)
             #r.write_out()
             results.append(r)
         
@@ -94,10 +96,10 @@ def main():
         if (args.progress):
             sys.stdout.write("\r                                                       \r")
             sys.stdout.flush()
-        print(optimization_iterations, eos_diff, reached_mfe)
+        print(optimization_iterations, eos_diff, reached_mfe/args.number)
 
 # main optimization
-def optimization_run(dg, structures, num_opt, early_exit, progress):
+def optimization_run(dg, structures, num_opt, early_exit, args):
     score = 0
     count = 0
     
@@ -111,9 +113,12 @@ def optimization_run(dg, structures, num_opt, early_exit, progress):
     # mutate globally for num_opt times and print
     for i in range(0, num_opt):
         # mutate sequence
-        mut_nos = dg.mutate_global()
+        if (args.local):
+            mut_nos = dg.mutate_local()
+        else:
+            mut_nos = dg.mutate_global()
         # write progress
-        if (progress):
+        if (args.progress):
             sys.stdout.write("\rMutate global: {0:7.0f}/{1:5.0f} from NOS: {2:7.0f}".format(i, count, mut_nos))
             sys.stdout.flush()
         

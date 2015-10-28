@@ -40,6 +40,8 @@ def main():
     parser.add_argument("-i", "--input", default=False, action='store_true', help='Read custom structures and sequence constraints from stdin')
     args = parser.parse_args()
 
+    print "# Options: number={0:d}, optimization={1:d}, early_exit={2:d}".format(args.number, args.optimization, args.early_exit)
+
     # define structures
     structures = []
     constraint = ""
@@ -60,24 +62,24 @@ def main():
     # construct dependency graph with these structures
     dg = rd.DependencyGraphMT(structures, constraint)
     
-    print("\n".join(structures) + "\n" + constraint + "\n")
+    print("# " + "\n# ".join(structures) + "\n# " + constraint)
     # print the amount of solutions
-    print('Maximal number of solutions: ' + str(dg.number_of_sequences()))
+    print('# Maximal number of solutions: ' + str(dg.number_of_sequences()))
     # print the amount of connected components
     number_of_components = dg.number_of_connected_components()
-    print('Number of Connected Components: ' + str(number_of_components))
+    print('# Number of Connected Components: ' + str(number_of_components))
 
     for i in range(0, number_of_components):
-        print('[' + str(i) + ']' + str(dg.component_vertices(i)))
+        print('# [' + str(i) + ']' + str(dg.component_vertices(i)))
     print('')
     
     # main loop from zero to number of solutions
     for n in range(0, args.number):
-        r = optimization_run(dg, structures, args.optimization, args.early_exit, args.progress)
+        r = optimization_run(dg, structures, args)
         r.write_out()
 
 # main optimization
-def optimization_run(dg, structures, num_opt, early_exit, progress):
+def optimization_run(dg, structures, args):
     score = 0
     count = 0
     
@@ -89,11 +91,11 @@ def optimization_run(dg, structures, num_opt, early_exit, progress):
     #print dg.get_sequence() + '\t' + str(score)
     
     # mutate globally for num_opt times and print
-    for i in range(0, num_opt):
+    for i in range(0, args.optimization):
         # mutate sequence
         mut_nos = dg.mutate_global()
         # write progress
-        if (progress):
+        if (args.progress):
             sys.stdout.write("\rMutate global: {0:7.0f}/{1:5.0f} from NOS: {2:7.0f}".format(i, count, mut_nos))
             sys.stdout.flush()
         
@@ -105,7 +107,7 @@ def optimization_run(dg, structures, num_opt, early_exit, progress):
             count = 0
         else:
             count += 1
-            if count > early_exit:
+            if count > args.early_exit:
                 break
     
     # finally return the result
