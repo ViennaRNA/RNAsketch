@@ -1,21 +1,42 @@
 import RNAdesign as rd
+import RNA
 
 # define structures
-structures = ['(((((....)))))', '(((....)))....']
+structures = ['((((....)))).............']
+constraint = 'NNNNNNNNNNNNNNNNNNNNNNNNN'
 # construct dependency graph with these structures
-dg = rd.DependencyGraphMT(structures)
+dg = rd.DependencyGraphMT(structures, constraint)
 
 # randomly sample a initial sequence
 dg.set_sequence()
+
+seq = dg.get_sequence()
 # print this sequence
-print dg.get_sequence()
+print seq
 
-# mutate globally for 1000 times and print
-for i in range(0, 1000):
-    dg.mutate_global()
-    print dg.get_sequence()
 
-# print the amount of solutions
-print 'Maximal number of solutions: ' + str(dg.number_of_sequences())
-# print the amount of connected components
-print 'Number of Connected Components: ' + str(dg.number_of_connected_components())
+
+(struct, mfe) = RNA.fold(seq)
+print struct
+#print mfe
+
+pos_constraint = '((((....))))...(((....)))'
+
+neg_structures = []
+
+if pos_constraint == struct:
+	neg_structures.append(seq)
+	
+	#optimieren, mutieren...
+	
+else:
+	print seq
+	print struct
+
+def optimization(seq):
+	dg.mutate_local()
+	
+
+
+
+
