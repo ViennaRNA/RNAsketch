@@ -1,3 +1,4 @@
+from __future__ import print_function
 import RNAdesign as rd
 import RNA
 import argparse
@@ -33,14 +34,17 @@ class Result:
 
 def main():
     parser = argparse.ArgumentParser(description='Design a tri-stable example same to Hoehner 2013 paper.')
-    parser.add_argument("-n", "--number", type=int, default=4, help='Number of designs to generate')
+    parser.add_argument("-n", "--number", type=int, default=40, help='Number of designs to generate')
     parser.add_argument("-j", "--jump", type=int, default=100, help='Do random jumps in the solution space for the first (jump) trials.')
-    parser.add_argument("-e", "--exit", type=int, default=1000, help='Exit optimization run if no better solution is aquired after (exit) trials.')
+    parser.add_argument("-x", "--exit_min", type=int, default=0, help='Minimal number of unsuccessful iterations before exit')
+    parser.add_argument("-y", "--exit_max", type=int, default=5000, help='Maximal number of unsuccessful iterations before exit')
     parser.add_argument("-p", "--progress", default=False, action='store_true', help='Show progress of optimization')
+    parser.add_argument("-l", "--local", default=False, action='store_true', help='Only mutate locally instead of globally')
     parser.add_argument("-i", "--input", default=False, action='store_true', help='Read custom structures and sequence constraints from stdin')
     args = parser.parse_args()
-
-    print "# Options: number={0:d}, jump={1:d}, exit={2:d}".format(args.number, args.jump, args.exit)
+    
+    print ("# exit_duration.py")
+    print ("# Options: number={0:d}, jump={1:d}, exit_min={2:d}, exit_max={3:d}, local={4:}".format(args.number, args.jump, args.exit_min, args.exit_max, args.local))
 
     # define structures
     structures = []
@@ -71,15 +75,28 @@ def main():
 
     for i in range(0, number_of_components):
         print('# [' + str(i) + ']' + str(dg.component_vertices(i)))
-    print('')
     
-    # main loop from zero to number of solutions
-    for n in range(0, args.number):
-        r = optimization_run(dg, structures, args)
-        r.write_out()
+    
+    # optmizations start here
+    for exit_iterations in xrange(args.exit_min, args.exit_max, 20):
+        for n in range(0, args.number):
+            r = optimization_run(dg, structures, args, exit_iterations)
+            
+            # process result and write result of this optimization to stdout
+            eos_diff = []
+            reached_mfe = 0
+            for i in range(0, len(r.structures)):
+                eos_diff.append(r.eos[i]-r.mfe_energy)
+                if (r.structures[i] == r.mfe_struct):
+                    reached_mfe = 1
+            
+            if (args.progress):
+                sys.stdout.write("\r" + " " * 60 + "\r")
+                sys.stdout.flush()
+            print (exit_iterations, reached_mfe, *eos_diff, sep=";")
 
 # main optimization
-def optimization_run(dg, structures, args):
+def optimization_run(dg, structures, args, exit_iterations):
     score = 0
     count = 0
     jumps = args.jump
@@ -112,7 +129,7 @@ def optimization_run(dg, structures, args):
         else:
             dg.revert_sequence();
             count += 1
-            if count > args.exit:
+            if count > exit_iterations:
                 break
         i += 1
     
