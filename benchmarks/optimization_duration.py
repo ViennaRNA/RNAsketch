@@ -92,7 +92,7 @@ def main():
             if (args.progress):
                 sys.stdout.write("\r                                                       \r")
                 sys.stdout.flush()
-            print (optimization_iterations, reached_mfe, *eos_diff, sep=";")
+            print (optimization_iterations, r.score, reached_mfe, *eos_diff, sep=";")
 
 # main optimization
 def optimization_run(dg, structures, num_opt, early_exit, args):
