@@ -35,16 +35,15 @@ class Result:
 def main():
     parser = argparse.ArgumentParser(description='Design a tri-stable example same to Hoehner 2013 paper.')
     parser.add_argument("-n", "--number", type=int, default=40, help='Number of designs to generate')
-    parser.add_argument("-j", "--jump", type=int, default=100, help='Do random jumps in the solution space for the first (jump) trials.')
-    parser.add_argument("-x", "--exit_min", type=int, default=0, help='Minimal number of unsuccessful iterations before exit')
-    parser.add_argument("-y", "--exit_max", type=int, default=5000, help='Maximal number of unsuccessful iterations before exit')
+    parser.add_argument("-x", "--optimization_min", type=int, default=0, help='Minimal number of random optimization iterations')
+    parser.add_argument("-y", "--optimization_max", type=int, default=50000, help='Maximal number of random optimization iterations')
+    parser.add_argument("-m", "--mode", type=str, default='sample', help='Mode for getting a new sequence: sample, mutate_local, mutate_global')
     parser.add_argument("-p", "--progress", default=False, action='store_true', help='Show progress of optimization')
-    parser.add_argument("-l", "--local", default=False, action='store_true', help='Only mutate locally instead of globally')
     parser.add_argument("-i", "--input", default=False, action='store_true', help='Read custom structures and sequence constraints from stdin')
     args = parser.parse_args()
     
-    print ("# exit_duration.py")
-    print ("# Options: number={0:d}, jump={1:d}, exit_min={2:d}, exit_max={3:d}, local={4:}".format(args.number, args.jump, args.exit_min, args.exit_max, args.local))
+    print ("# random_optimization.py")
+    print ("# Options: number={0:d}, optimization_min={1:d}, optimization_max={2:d}, mode={3:}".format(args.number, args.optimization_min, args.optimization_max, args.mode))
 
     # define structures
     structures = []
@@ -78,9 +77,9 @@ def main():
     
     
     # optmizations start here
-    for exit_iterations in xrange(args.exit_min, args.exit_max, 20):
+    for optimization_iterations in xrange(args.optimization_min, args.optimization_max, 500):
         for n in range(0, args.number):
-            r = optimization_run(dg, structures, args, exit_iterations)
+            r = optimization_run(dg, structures, args, optimization_iterations)
             
             # process result and write result of this optimization to stdout
             eos_diff = []
@@ -93,48 +92,44 @@ def main():
             if (args.progress):
                 sys.stdout.write("\r" + " " * 60 + "\r")
                 sys.stdout.flush()
-            print (exit_iterations, r.score, reached_mfe, *eos_diff, sep=";")
+            print (optimization_iterations, r.score, reached_mfe, *eos_diff, sep=";")
 
 # main optimization
-def optimization_run(dg, structures, args, exit_iterations):
+def optimization_run(dg, structures, args, optimization_iterations):
     score = 0
-    count = 0
-    jumps = args.jump
+    
     # randomly sample a initial sequence
     dg.set_sequence()
+    result_sequence = dg.get_sequence()
     # print this sequence with score
     score = calculate_objective(dg.get_sequence(), structures);
     #print dg.get_sequence() + '\t' + str(score)
     
     # mutate globally for num_opt times and print
-    i = 0
-    while 1:
-        # mutate sequence
-        if jumps:
+    for i in range(0, optimization_iterations):
+        # mutate sequence completely random
+        if args.mode == 'sample':
             mut_nos = dg.set_sequence()
-            jumps -= 1
-            count = 0
-        else:
+        elif args.mode == 'mutate_global':
             mut_nos = dg.mutate_global()
+        elif args.mode == 'mutate_local':
+            mut_nos = dg.mutate_local()
+        else:
+            sys.stdout.write("Wrong mutate argument: " + args.mutate + "\n")
+            sys.exit(1)
         # write progress
         if (args.progress):
-            sys.stdout.write("\rMutate global: {0:7.0f}/{1:5.0f} from NOS: {2:7.0f}".format(i, count, mut_nos) + " " * 20)
+            sys.stdout.write("\rMutate global: {0:7.0f} from NOS: {1:7.0f}".format(i, mut_nos) + " " * 20)
             sys.stdout.flush()
         
         this_score = calculate_objective(dg.get_sequence(), structures);
         
         if (this_score < score):
             score = this_score
-            count = 0
-        else:
-            dg.revert_sequence();
-            count += 1
-            if count > exit_iterations:
-                break
-        i += 1
+            result_sequence = dg.get_sequence()
     
     # finally return the result
-    return Result(dg.get_sequence(), score, structures)
+    return Result(result_sequence, score, structures)
 
 # objective function: eos(1)+eos(2)+eos(3) - 3 * gibbs + 1 * ((eos(1)-eos(2))^2 + (eos(1)-eos(3))^2 + (eos(2)-eos(3))^2)
 def calculate_objective(sequence, structures):

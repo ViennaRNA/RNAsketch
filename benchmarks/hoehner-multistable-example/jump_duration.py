@@ -44,7 +44,7 @@ def main():
     args = parser.parse_args()
     
     print ("# jump_duration.py")
-    print ("# Options: number={0:d}, jump_min={1:d}, jump_max={2:d}, , exit={3:d}, local={4:}".format(args.number, args.jump_min, args.jump_max, args.exit, args.local))
+    print ("# Options: number={0:d}, jump_min={1:d}, jump_max={2:d}, exit={3:d}, local={4:}".format(args.number, args.jump_min, args.jump_max, args.exit, args.local))
 
     # define structures
     structures = []
@@ -115,7 +115,10 @@ def optimization_run(dg, structures, args, jump_iterations):
             jumps -= 1
             count = 0
         else:
-            mut_nos = dg.mutate_global()
+            if args.local:
+                mut_nos = dg.mutate_local()
+            else:
+                mut_nos = dg.mutate_global()
         # write progress
         if (args.progress):
             sys.stdout.write("\rMutate global: {0:7.0f}/{1:5.0f} from NOS: {2:7.0f}".format(i, count, mut_nos) + " " * 20)
