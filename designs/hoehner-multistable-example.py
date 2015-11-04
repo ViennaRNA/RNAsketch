@@ -37,6 +37,7 @@ def main():
     parser.add_argument("-j", "--jump", type=int, default=100, help='Do random jumps in the solution space for the first (jump) trials.')
     parser.add_argument("-e", "--exit", type=int, default=1000, help='Exit optimization run if no better solution is aquired after (exit) trials.')
     parser.add_argument("-p", "--progress", default=False, action='store_true', help='Show progress of optimization')
+    parser.add_argument("-g", "--graphml", type=str, default=None, help='Write a graphml file with the given filename.')
     parser.add_argument("-i", "--input", default=False, action='store_true', help='Read custom structures and sequence constraints from stdin')
     args = parser.parse_args()
 
@@ -72,6 +73,11 @@ def main():
     for i in range(0, number_of_components):
         print('# [' + str(i) + ']' + str(dg.component_vertices(i)))
     print('')
+    
+    # if requested write out a graphml file
+    if args.graphml is not None:
+        with open(args.graphml, 'w') as f:
+            f.write(dg.get_graphml() + "\n")
     
     # main loop from zero to number of solutions
     for n in range(0, args.number):
