@@ -14,7 +14,7 @@ class Result:
 
         (self.mfe_struct, self.mfe_energy) = RNA.fold(self.sequence)
 
-        print("temporary result...")
+        print("Result...")
         print(self.sequence)
         print(self.mfe_struct)
         print(self.mfe_energy)
@@ -26,35 +26,39 @@ class Result:
 
 
 def main():
-
-    '''parser = argparse.ArgumentParser(description='constrained sequence generation')
-    parser.add_argument("--structure", help='Specify structure')
+    parser = argparse.ArgumentParser(description='constrained sequence generation')
+    parser.add_argument("-o", "--optimization", type=int, default=25000, help='Number of optimization iterations')
+    parser.add_argument("-e", "--early_exit", type=int, default=10000, help='Exit optimization run if no better solution is aquired after early-exit trials.')
+    parser.add_argument("-p", "--progress", default=False, action='store_true', help='Show progress of optimization')
+    parser.add_argument("-i", "--input", default=False, action='store_true',
+                        help='Read custom structures and sequence constraints from stdin')
     args = parser.parse_args()
-    print args.structure
 
-
-    # define structures
+    seq_constraint = ''
     pos_constraint = []
-    if (args.structure):
+    # define structures
+    if args.input:
+        for line in sys.stdin:
+            if re.match(re.compile("[\(\)\.]"), line, flags=0):
+                pos_constraint.append(line.rstrip('\n'))
+            elif re.match(re.compile("[ACGTUWSMKRYBDHVN]"), line, flags=0):
+                seq_constraint = line.rstrip('\n')
+            elif re.search(re.compile("@"), line, flags=0):
+                break
 
-        pos_constraint = args.structure
-
-    else:'''
-    pos_constraint = ['((((....))))...(((....)))']
-    seq_constraint = 'NNNNNNNNNNNNNNNNNNNNNNNNN'
+    else:
+        pos_constraint = ['((((....))))...(((....)))']
+        seq_constraint = 'NNNNNNNNNNNNNNNNNNNNNNNNN'
 
     print("Positive constraint: "),
     print pos_constraint[0]
 
-    global count
-    count = 0
     # construct dependency graph with these structures
     seed = int(2)
     dg = rd.DependencyGraphMT(pos_constraint, seq_constraint, seed)
 
     # randomly sample a initial sequence
     dg.set_sequence()
-
     seq = dg.get_sequence()
 
     (struct, mfe) = RNA.fold(seq)
@@ -68,61 +72,60 @@ def main():
     print "initial mfe",
     print mfe
     neg_structures = collections.deque(maxlen=10)
-    neg_structures_energy = collections.deque(maxlen=10)
 
-    check_constraint(dg, seq, computed_struct, pos_constraint, neg_structures, neg_structures_energy)
+    check_constraint(dg, seq, computed_struct, pos_constraint, neg_structures, args)
 
 
-def check_constraint(dg, sequence, structure, pos_constraint, neg_structures, neg_structures_energy):
-    #print 'checking constraints'
-
+def check_constraint(dg, sequence, structure, pos_constraint, neg_structures, args):
     if structure[0] != pos_constraint[0]:
-        neg_energy = RNA.energy_of_struct(sequence, structure[0])
-
-        neg_structures.append(structure[0])
-        #neg_structures_energy.append(neg_energy)
-        # optimieren, mutieren... #neuen dg?
-        optimization(dg, sequence, structure, pos_constraint, neg_structures, neg_structures_energy)
+        optimization(dg, structure, pos_constraint, neg_structures, args)
 
     else:
         return Result(sequence, structure)
 
 
-def optimization(dg, seq, struct, pos_constraint, neg_structures, neg_structures_energy):
-    #print "optimizing"
-    global count
-    dg.mutate_global()
+def optimization(dg, structure, pos_constraint, neg_structures, args):
+    count = 0
+    result_seq = dg.get_sequence()
+    result_struct = structure
 
-    old_seq = seq
-    old_struct = struct
+    result_energy = RNA.energy_of_struct(result_seq, result_struct[0])
 
-    new_seq = dg.get_sequence()
-    (new_seq_struct, new_seq_mfe) = RNA.fold(new_seq)
+    for i in range(0, args.optimization):
+        mut_nos = dg.mutate_global()
+        new_seq = dg.get_sequence()
+        (new_seq_struct, new_seq_mfe) = RNA.fold(new_seq)
+        new_seq_energy = RNA.energy_of_struct(new_seq, new_seq_struct)
 
-    new_seq_struct_list = [new_seq_struct]
+        if args.progress:
+            sys.stdout.write("\rMutate global: {0:7.0f}/{1:5.0f} from NOS: {2:7.0f}".format(i, count, mut_nos))
+            sys.stdout.flush()
 
-    new_seq_energy = RNA.energy_of_struct(new_seq, new_seq_struct)
-    seq_energy = RNA.energy_of_struct(old_seq, struct[0])
+        if float(result_energy) <= float(new_seq_energy) and new_seq_struct not in neg_structures:
+            count += 1
 
-    if float(seq_energy) <= float(new_seq_energy):
-        count += 1
-        if count > 100:
-            print "Die letzten hundert Mutationen fuehren zu keinem besseren Ergebnis."
-            print neg_structures
-            sys.exit(Result(old_seq, old_struct))
-
-        # optimize nur, wenn structure nicht schon in negative constraint list
-        if new_seq_struct not in neg_structures: # and float(new_seq_energy) < float(neg_structures_energy[-1]):
             neg_structures.append(new_seq_struct)
 
-        optimization(dg, old_seq, struct, pos_constraint, neg_structures, neg_structures_energy)
+            if count > args.early_exit:
+                if new_seq_struct not in neg_structures:  # and float(new_seq_energy) < float(neg_structures_energy[-1])
+                    neg_structures.append(new_seq_struct)
+                break
 
-    else:
-        count = 0
-        dg = rd.DependencyGraphMT(pos_constraint, new_seq)
-        neg_structures.append(old_struct[0])
-        check_constraint(dg, new_seq, new_seq_struct_list, pos_constraint, neg_structures, neg_structures_energy)
+        else:
+            count = 0
+            result_seq = new_seq
+            result_energy = new_seq_energy
+            result_struct = new_seq_struct
+
+            if new_seq_struct not in neg_structures:
+                if new_seq_struct == pos_constraint[0]:
+                    print 'found'
+                    break
+                else:
+                    neg_structures.append(new_seq_struct)
+
+    return Result(result_seq, result_struct)
+
 
 if __name__ == "__main__":
     main()
-
