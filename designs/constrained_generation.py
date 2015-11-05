@@ -8,25 +8,25 @@ import re
 
 
 class Result:
-    def __init__(self, sequence, structure):
+    def __init__(self, sequence, structure, pos_constraint, sequences):
         self.sequence = sequence
         self.structure = structure
+        self.pos_constraint = pos_constraint
+        self.sequences = sequences
 
         (self.mfe_struct, self.mfe_energy) = RNA.fold(self.sequence)
 
-        print("Result...")
-        print(self.sequence)
-        print(self.mfe_struct)
-        print(self.mfe_energy)
-
-    '''def write_out(self):
-
-        print(self.sequence)
-        print(self.mfe_struct + '\t{0:9.4f}'.format(self.mfe_energy))'''
+    def write_out(self):
+        # first clean up last line
+        sys.stdout.write("\r                                                             \r")
+        sys.stdout.flush()
+        print(self.sequence + '\t{0:9.4f}'.format(self.mfe_energy))
+        # print(self.mfe_struct)
 
 
 def main():
     parser = argparse.ArgumentParser(description='constrained sequence generation')
+    parser.add_argument("-n", "--number", type=int, default=4, help='Number of designs to generate')
     parser.add_argument("-o", "--optimization", type=int, default=25000, help='Number of optimization iterations')
     parser.add_argument("-e", "--early_exit", type=int, default=10000, help='Exit optimization run if no better solution is aquired after early-exit trials.')
     parser.add_argument("-p", "--progress", default=False, action='store_true', help='Show progress of optimization')
@@ -34,9 +34,9 @@ def main():
                         help='Read custom structures and sequence constraints from stdin')
     args = parser.parse_args()
 
+    # define structures
     seq_constraint = ''
     pos_constraint = []
-    # define structures
     if args.input:
         for line in sys.stdin:
             if re.match(re.compile("[\(\)\.]"), line, flags=0):
@@ -48,68 +48,73 @@ def main():
 
     else:
         pos_constraint = ['((((....))))...(((....)))']
-        seq_constraint = 'NNNNNNNNNNNNNNNNNNNNNNNNN'
+        seq_constraint = ''
 
-    print("Positive constraint: "),
-    print pos_constraint[0]
+    print("Positive constraint: ")
+    print(pos_constraint[0])
+
+    if seq_constraint is not '':
+        print("Sequence constraint: ")
+        print(seq_constraint)
+    print
 
     # construct dependency graph with these structures
-    seed = int(2)
-    dg = rd.DependencyGraphMT(pos_constraint, seq_constraint, seed)
+    # seed = int(2)
+    # dg = rd.DependencyGraphMT(pos_constraint, seq_constraint, seed)
+    dg = rd.DependencyGraphMT(pos_constraint, seq_constraint)
 
     # randomly sample a initial sequence
     dg.set_sequence()
     seq = dg.get_sequence()
 
     (struct, mfe) = RNA.fold(seq)
-    computed_struct = [struct]
+    init_struct = [struct]
 
-    print "initial struct: ",
-    print struct
-    print "initial seq: ",
-    print seq
+    # collect sequences in order to exclude duplicates
+    sequences = []
 
-    print "initial mfe",
-    print mfe
     neg_structures = collections.deque(maxlen=10)
 
-    check_constraint(dg, seq, computed_struct, pos_constraint, neg_structures, args)
+    # main loop from zero to number of solutions
+    for i in range(0, args.number):
+        r = optimization(dg, init_struct, pos_constraint, neg_structures, sequences, args)
+        if r is not None:
+            r.write_out()
+        else:
+            sys.stdout.write("\r                                                             \r")
+            sys.stdout.flush()
+            print("No sequence with positive constraint.")
 
 
-def check_constraint(dg, sequence, structure, pos_constraint, neg_structures, args):
-    if structure[0] != pos_constraint[0]:
-        optimization(dg, structure, pos_constraint, neg_structures, args)
-
-    else:
-        return Result(sequence, structure)
-
-
-def optimization(dg, structure, pos_constraint, neg_structures, args):
-    count = 0
+def optimization(dg, result_struct, pos_constraint, neg_structures, sequences, args):
     result_seq = dg.get_sequence()
-    result_struct = structure
+    if result_struct[0] == pos_constraint[0]:
+        sequences.append(result_seq)
+        return Result(result_seq, result_struct, pos_constraint, sequences)
 
     result_energy = RNA.energy_of_struct(result_seq, result_struct[0])
+    count = 0
 
+    # number of mutations
     for i in range(0, args.optimization):
-        mut_nos = dg.mutate_global()
+        dg.mutate_global()
         new_seq = dg.get_sequence()
         (new_seq_struct, new_seq_mfe) = RNA.fold(new_seq)
         new_seq_energy = RNA.energy_of_struct(new_seq, new_seq_struct)
 
         if args.progress:
-            sys.stdout.write("\rMutate global: {0:7.0f}/{1:5.0f} from NOS: {2:7.0f}".format(i, count, mut_nos))
+            sys.stdout.write("\rOptimization iteration: {0:5.0f}/{1:5.0f}".format(i, args.optimization))
             sys.stdout.flush()
 
-        if float(result_energy) <= float(new_seq_energy) and new_seq_struct not in neg_structures:
+        if float(result_energy) <= float(new_seq_energy) and new_seq_struct not in neg_structures and new_seq_struct != pos_constraint[0]:
             count += 1
 
             neg_structures.append(new_seq_struct)
 
             if count > args.early_exit:
-                if new_seq_struct not in neg_structures:  # and float(new_seq_energy) < float(neg_structures_energy[-1])
+                if new_seq_struct not in neg_structures:
                     neg_structures.append(new_seq_struct)
-                break
+                return None
 
         else:
             count = 0
@@ -117,14 +122,13 @@ def optimization(dg, structure, pos_constraint, neg_structures, args):
             result_energy = new_seq_energy
             result_struct = new_seq_struct
 
-            if new_seq_struct not in neg_structures:
-                if new_seq_struct == pos_constraint[0]:
-                    print 'found'
-                    break
+            if result_struct not in neg_structures:
+                if result_struct == pos_constraint[0] and result_seq not in sequences:
+                    sequences.append(result_seq)
+                    return Result(result_seq, result_struct, pos_constraint, sequences)
                 else:
-                    neg_structures.append(new_seq_struct)
-
-    return Result(result_seq, result_struct)
+                    neg_structures.append(result_struct)
+    return None
 
 
 if __name__ == "__main__":
