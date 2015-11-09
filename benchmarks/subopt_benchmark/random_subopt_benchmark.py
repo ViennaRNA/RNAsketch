@@ -35,7 +35,8 @@ def main():
     
     for n in range(0, args.number):
         dg1.set_sequence()
-        print (dg1.get_sequence())
+        input_sequence = dg1.get_sequence()
+        print (input_sequence)
         
         # calculate a RNAsubopt
         subopt_solution = RNA.subopt(dg1.get_sequence(), "N" * args.length, 600, None)
@@ -44,13 +45,9 @@ def main():
         
         # get random structures
         structures = []
-        energy = 0
         for i in range(0, args.structures):
             rand = random.randint(0, subopt_solution.size()-1)
             structures.append(subopt_solution.get(rand).structure)
-            if energy > subopt_solution.get(rand).energy:
-                energy = subopt_solution.get(rand).energy
-        
         print(*structures, sep="\n")
         
         # try to construct dependency graph, catch errors and timeouts
@@ -64,19 +61,23 @@ def main():
         
         if (dg is not None):
             graph_construction_count += 1
-            print (dg.number_of_sequences())
+            print ("NOS: %d" % dg.number_of_sequences())
             
             # do optimization to mfe
             dg.set_sequence()
-            for o in range(0, 1000):
-                (mfe_struct, mfe_energy) = RNA.fold(dg.get_sequence())
-                if (mfe_energy < energy):
+            for o in range(0, 10000):
+                current_sequence = dg.get_sequence()
+                if (current_sequence == input_sequence):
                     input_sequence_found_count += 1
-                    print (dg.get_sequence())
                     print ("Input sequence found!")
                     break
                 else:
-                    dg.mutate_global()
+                    for pos, c in enumerate(input_sequence):
+                        if c != current_sequence[pos]:
+                            dg.mutate(pos)
+                            break
+            
+            print (dg.get_sequence())
         
         print ("-" * args.length)
         
