@@ -61,7 +61,11 @@ def main():
     # construct dependency graph with these structures
     # seed = int(2)
     # dg = rd.DependencyGraphMT(pos_constraint, seq_constraint, seed)
-    dg = rd.DependencyGraphMT(pos_constraint, seq_constraint)
+    try:
+        dg = rd.DependencyGraphMT(pos_constraint, seq_constraint)
+    except Exception as e:
+        print e
+        quit()
 
     # randomly sample a initial sequence
     dg.set_sequence()

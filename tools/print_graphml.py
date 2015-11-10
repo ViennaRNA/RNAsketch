@@ -28,7 +28,11 @@ def main():
             elif re.search(re.compile("@"), line, flags=0):
                 break;
         # get graphml from library
-        graphml = RNAdesign.structures_to_graphml(structures, constraint)
+        try:
+            graphml = RNAdesign.structures_to_graphml(structures, constraint)
+        except Exception as e:
+            print e
+            quit()
         
         # write out a temporary graphml file
         with tempfile.NamedTemporaryFile() as f:

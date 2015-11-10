@@ -64,7 +64,11 @@ def main():
         constraint = 'NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN'
     
     # construct dependency graph with these structures
-    dg = rd.DependencyGraphMT(structures, constraint)
+    try:
+        dg = rd.DependencyGraphMT(structures, constraint)
+    except Exception as e:
+        print e
+        quit()
     
     print("# " + "\n# ".join(structures) + "\n# " + constraint)
     # print the amount of solutions
