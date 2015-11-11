@@ -59,10 +59,14 @@ def main():
     print
 
     # construct dependency graph with these structures
-    seed = int(2)
-    dg = rd.DependencyGraphMT(pos_constraint, seq_constraint, seed)
-    # dg = rd.DependencyGraphMT(pos_constraint, seq_constraint)
-
+    # seed = int(2)
+    # dg = rd.DependencyGraphMT(pos_constraint, seq_constraint, seed)
+    try:
+        dg = rd.DependencyGraphMT(pos_constraint, seq_constraint)
+    except Exception as e:
+        print e
+        quit()
+	
     # collect sequences in order to exclude duplicates
     sequences = []
 
@@ -81,8 +85,8 @@ def main():
 
 def optimization(dg, pos_constraint, neg_structures, sequences, args):
     # randomly sample a initial sequence
-    # dg.set_sequence()
-    # result_seq = dg.get_sequence()
+    dg.set_sequence()
+    result_seq = dg.get_sequence()
 
      # number of mutations
     for i in range(0, args.optimization):

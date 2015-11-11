@@ -34,7 +34,7 @@ class Result:
 def main():
     parser = argparse.ArgumentParser(description='Design a tri-stable example same to Hoehner 2013 paper.')
     parser.add_argument("-n", "--number", type=int, default=4, help='Number of designs to generate')
-    parser.add_argument("-j", "--jump", type=int, default=100, help='Do random jumps in the solution space for the first (jump) trials.')
+    parser.add_argument("-j", "--jump", type=int, default=1000, help='Do random jumps in the solution space for the first (jump) trials.')
     parser.add_argument("-e", "--exit", type=int, default=1000, help='Exit optimization run if no better solution is aquired after (exit) trials.')
     parser.add_argument("-p", "--progress", default=False, action='store_true', help='Show progress of optimization')
     parser.add_argument("-g", "--graphml", type=str, default=None, help='Write a graphml file with the given filename.')
@@ -61,7 +61,11 @@ def main():
         constraint = 'NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN'
     
     # construct dependency graph with these structures
-    dg = rd.DependencyGraphMT(structures, constraint)
+    try:
+        dg = rd.DependencyGraphMT(structures, constraint)
+    except Exception as e:
+        print e
+        quit()
     
     print("# " + "\n# ".join(structures) + "\n# " + constraint)
     # print the amount of solutions
