@@ -32,8 +32,10 @@ def main():
     parser.add_argument("-p", "--progress", default=False, action='store_true', help='Show progress of optimization')
     parser.add_argument("-i", "--input", default=False, action='store_true',
                         help='Read custom structures and sequence constraints from stdin')
+    parser.add_argument("-d", "--debug", default=False, action='store_true', help='Show debug information of library')
     args = parser.parse_args()
-
+    rd.initialize_library(args.debug)
+    
     # define structures
     seq_constraint = ''
     pos_constraint = []

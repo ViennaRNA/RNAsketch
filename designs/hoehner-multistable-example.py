@@ -39,10 +39,11 @@ def main():
     parser.add_argument("-p", "--progress", default=False, action='store_true', help='Show progress of optimization')
     parser.add_argument("-g", "--graphml", type=str, default=None, help='Write a graphml file with the given filename.')
     parser.add_argument("-i", "--input", default=False, action='store_true', help='Read custom structures and sequence constraints from stdin')
+    parser.add_argument("-d", "--debug", default=False, action='store_true', help='Show debug information of library')
     args = parser.parse_args()
 
     print "# Options: number={0:d}, jump={1:d}, exit={2:d}".format(args.number, args.jump, args.exit)
-
+    rd.initialize_library(args.debug)
     # define structures
     structures = []
     constraint = ""

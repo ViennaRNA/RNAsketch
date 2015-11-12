@@ -25,7 +25,10 @@ def main():
     parser.add_argument("-n", "--number", type=int, default=40, help='Number of subpots to generate')
     parser.add_argument("-l", "--length", type=int, default=60, help='Length of random sequence')
     parser.add_argument("-s", "--structures", type=int, default=4, help='Number of structures as constraints input')
+    parser.add_argument("-d", "--debug", default=False, action='store_true', help='Show debug information of library')
     args = parser.parse_args()
+    
+    rd.initialize_library(args.debug)
     
     dg1 = rd.DependencyGraphMT(["." * args.length])
     

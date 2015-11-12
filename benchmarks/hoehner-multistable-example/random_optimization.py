@@ -40,11 +40,12 @@ def main():
     parser.add_argument("-m", "--mode", type=str, default='sample', help='Mode for getting a new sequence: sample, mutate_local, mutate_global')
     parser.add_argument("-p", "--progress", default=False, action='store_true', help='Show progress of optimization')
     parser.add_argument("-i", "--input", default=False, action='store_true', help='Read custom structures and sequence constraints from stdin')
+    parser.add_argument("-d", "--debug", default=False, action='store_true', help='Show debug information of library')
     args = parser.parse_args()
     
     print ("# random_optimization.py")
     print ("# Options: number={0:d}, optimization_min={1:d}, optimization_max={2:d}, mode={3:}".format(args.number, args.optimization_min, args.optimization_max, args.mode))
-
+    rd.initialize_library(args.debug)
     # define structures
     structures = []
     constraint = ""
