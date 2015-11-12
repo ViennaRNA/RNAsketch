@@ -57,7 +57,7 @@ def main():
         dg = None
         
         try:
-            with timeout(seconds=8):
+            with timeout(seconds=20):
                 dg = rd.DependencyGraphMT(structures)
         except Exception as e:
             print( "Error: %s" % e )
