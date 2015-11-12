@@ -8,20 +8,24 @@ import re
 
 
 class Result:
-    def __init__(self, sequence, structure, pos_constraint, sequences):
-        self.sequence = sequence
-        self.structure = structure
-        self.pos_constraint = pos_constraint
-        self.sequences = sequences
+	def __init__(self, sequence, score, pos_constraint):
+		self.sequence = sequence
+		self.pos_constraint = pos_constraint
+		self.score = score
+		self.eos = []
 
-        (self.mfe_struct, self.mfe_energy) = RNA.fold(self.sequence)
+		(self.mfe_struct, self.mfe_energy) = RNA.fold(self.sequence)
+		for struct in self.pos_constraint:
+			self.eos.append(RNA.energy_of_struct(self.sequence, struct))		
 
-    def write_out(self):
-        # first clean up last line
-        sys.stdout.write("\r                                                             \r")
-        sys.stdout.flush()
-        print(self.sequence + '\t{0:9.4f}'.format(self.mfe_energy))
-        print(self.mfe_struct)
+	def write_out(self):
+		# first clean up last line
+		sys.stdout.write("\r                                                             \r")
+		sys.stdout.flush()
+		print(self.sequence + '\t{0:9.4f}'.format(self.score))
+		for i, struct in enumerate(self.pos_constraint):
+			print(struct + '\t{0:9.4f}\t{1:+9.4f}'.format(self.eos[i], self.eos[i]-self.mfe_energy))
+		print(self.mfe_struct + '\t{0:9.4f}'.format(self.mfe_energy))
 
 
 def main():
@@ -49,16 +53,13 @@ def main():
                 break
 
     else:
-        pos_constraint = ['((((....))))...(((....)))']
+        # pos_constraint = ['((((....))))...(((....)))']
+        pos_constraint = ['((((....))))....((((....))))........',
+            '........((((....((((....))))....))))','((((((((....))))((((....))))....))))']
         seq_constraint = ''
 
-    print("Positive constraint: ")
-    print(pos_constraint[0])
-
-    if seq_constraint is not '':
-        print("Sequence constraint: ")
-        print(seq_constraint)
-    print
+	print("Positive constraint: ")
+	print("\n".join(pos_constraint) + "\n" + seq_constraint)
 
     # construct dependency graph with these structures
     try:
@@ -70,7 +71,7 @@ def main():
     # collect sequences in order to exclude duplicates
     sequences = []
 
-    neg_structures = collections.deque(maxlen=100)
+    neg_structures = collections.deque(maxlen=20)
 	
     # main loop from zero to number of solutions
     for i in range(0, args.number):
@@ -84,9 +85,12 @@ def main():
 
 
 def optimization(dg, pos_constraint, neg_structures, sequences, args):
+
+	score = float('Infinity')
+	count = 0
     # randomly sample a initial sequence
 	dg.set_sequence()
-	result_seq = dg.get_sequence()
+	current_seq = dg.get_sequence()
 
      # number of mutations
 	for i in range(0, args.optimization):
@@ -95,39 +99,61 @@ def optimization(dg, pos_constraint, neg_structures, sequences, args):
 			sys.stdout.flush()
 
 		
-		(result_seq_struct, result_seq_mfe) = RNA.fold(result_seq)
+		(current_seq_struct, current_seq_mfe) = RNA.fold(current_seq)
      	
-		if result_seq_struct is in pos_constraint:
+		if current_seq_struct in pos_constraint:
 		    # calculate difference: sum all pos const (eos(pos) - mfe energy) -> should be smaller than previous solution
 		    # if 0 or not better after args.exit trials return result, otherwise remember solution and go on.
-			return Result(result_seq, result_seq_struct, pos_constraint, sequences)
+			current_score = 0		
+
+			for l in range(0, len(pos_constraint)):
+				eos_pos_cons = RNA.energy_of_struct(current_seq, pos_constraint[l])
+				eos_mfe = eos_pos_cons - current_seq_mfe 
+				current_score += eos_mfe
+
+			if current_score < score:
+				score = current_score
+				result_seq = current_seq
+				count = 0
+				if score == 0:
+					return Result(result_seq, score, pos_constraint)
+				
+			else:
+				count += 1
+				if count > args.exit: 
+					return Result(result_seq, score, pos_constraint) 
+			
+			# 
 		
-		if result_seq_struct not in neg_structures:
-			neg_structures.append(result_seq_struct)
+		if current_seq_struct not in neg_structures:
+			neg_structures.append(current_seq_struct)
 
 		#print neg_structures
-		# neg_structures.append(result_seq_struct)
+		# neg_structures.append(current_seq_struct)
 		while (True):
 			dg.mutate_global()
-			result_seq = dg.get_sequence()
-			pos_energy_constraint = RNA.energy_of_struct(result_seq, pos_constraint[0])
+			current_seq = dg.get_sequence()
 			perfect = True
-			# print result_seq
-			for k in range(0, len(neg_structures)):
-				neg_energy_constraint = RNA.energy_of_struct(result_seq, neg_structures[k])
+	
+			for x in range(0, len(pos_constraint)):
+				pos_energy_constraint = RNA.energy_of_struct(current_seq, pos_constraint[x])
 				
-				if (float(neg_energy_constraint) - float(pos_energy_constraint) < 0):
-					# print pos_energy_constraint
-					# print neg_energy_constraint
-					perfect = False
-					break
-				
-			if perfect:
-				break
-			
+				# print current_seq
+				for k in range(0, len(neg_structures)):
 					
+					neg_energy_constraint = RNA.energy_of_struct(current_seq, neg_structures[k])
+				
+					if (float(neg_energy_constraint) - float(pos_energy_constraint) < 0):
+						perfect = False
+						break	
+				
+				if perfect:
+					break
+			
+			if perfect:
+				break		
 
-	return Result(result_seq, result_seq_struct, pos_constraint, sequences)
+	return Result(result_seq, score, pos_constraint) # result_seq
 
 
 if __name__ == "__main__":
