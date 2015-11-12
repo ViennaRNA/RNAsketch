@@ -103,7 +103,7 @@ def optimization(dg, pos_constraint, neg_structures, sequences, args):
 		if result_seq_struct not in neg_structures:
 			neg_structures.append(result_seq_struct)
 
-		print neg_structures
+		#print neg_structures
 		# neg_structures.append(result_seq_struct)
 		while (True):
 			dg.mutate_global()
@@ -114,7 +114,7 @@ def optimization(dg, pos_constraint, neg_structures, sequences, args):
 			for k in range(0, len(neg_structures)):
 				neg_energy_constraint = RNA.energy_of_struct(result_seq, neg_structures[k])
 				
-				if float(pos_energy_constraint) > float(neg_energy_constraint):
+				if (float(neg_energy_constraint) - float(pos_energy_constraint) < 0):
 					# print pos_energy_constraint
 					# print neg_energy_constraint
 					perfect = False
