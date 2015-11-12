@@ -28,7 +28,7 @@ def main():
     parser = argparse.ArgumentParser(description='constrained sequence generation')
     parser.add_argument("-n", "--number", type=int, default=1, help='Number of designs to generate')
     parser.add_argument("-o", "--optimization", type=int, default=25000, help='Number of optimization iterations')
-    parser.add_argument("-e", "--early_exit", type=int, default=10000, help='Exit optimization run if no better solution is aquired after early-exit trials.')
+    parser.add_argument("-e", "--exit", type=int, default=1000, help='Exit optimization run if no better solution is aquired after exit trials.')
     parser.add_argument("-p", "--progress", default=False, action='store_true', help='Show progress of optimization')
     parser.add_argument("-i", "--input", default=False, action='store_true',
                         help='Read custom structures and sequence constraints from stdin')
@@ -97,7 +97,9 @@ def optimization(dg, pos_constraint, neg_structures, sequences, args):
 		
 		(result_seq_struct, result_seq_mfe) = RNA.fold(result_seq)
      	
-		if result_seq_struct == pos_constraint[0]:
+		if result_seq_struct is in pos_constraint:
+		    # calculate difference: sum all pos const (eos(pos) - mfe energy) -> should be smaller than previous solution
+		    # if 0 or not better after args.exit trials return result, otherwise remember solution and go on.
 			return Result(result_seq, result_seq_struct, pos_constraint, sequences)
 		
 		if result_seq_struct not in neg_structures:
