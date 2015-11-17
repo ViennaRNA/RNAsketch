@@ -4,6 +4,7 @@ import RNA
 import argparse
 import sys
 import re
+import math
 
 # a tri-stable example target. (optional comment)
 # ((((....))))....((((....))))........
@@ -13,31 +14,37 @@ import re
 # CKNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNB
 # objective function: eos(1)+eos(2)+eos(3) - 3 * gibbs + 1 * ((eos(1)-eos(2))^2 + (eos(1)-eos(3))^2 + (eos(2)-eos(3))^2)
 
+kT = ((37+273.15)*1.98717)/1000.0; # kT = (betaScale*((temperature+K0)*GASCONST))/1000.0; /* in Kcal */
+
 class Result:
     def __init__(self, sequence, score, structures):
         self.sequence = sequence
         self.score = score
         self.structures = structures
         self.eos = []
+        self.probs = []
         
         (self.mfe_struct, self.mfe_energy) = RNA.fold(self.sequence)
+        self.part_funct = RNA.pf_fold(self.sequence)[1]
         for struct in self.structures:
-            self.eos.append(RNA.energy_of_struct(self.sequence, struct))
+            this_eos = RNA.energy_of_struct(self.sequence, struct)
+            self.eos.append(this_eos)
+            self.probs.append( math.exp((self.part_funct-this_eos) / kT ) )
     def write_out(self):
         #first clean up last line
         sys.stdout.write("\r" + " " * 60 + "\r")
         sys.stdout.flush()
         print(self.sequence + '\t{0:9.4f}'.format(self.score))
         for i, struct in enumerate(self.structures):
-            print(struct + '\t{0:9.4f}\t{1:+9.4f}'.format(self.eos[i], self.eos[i]-self.mfe_energy))
+            print(struct + '\t{0:9.4f}\t{1:+9.4f}\t{2:9.4f}'.format(self.eos[i], self.eos[i]-self.mfe_energy, self.probs[i]))
         print(self.mfe_struct + '\t{0:9.4f}'.format(self.mfe_energy))
 
 def main():
     parser = argparse.ArgumentParser(description='Design a tri-stable example same to Hoehner 2013 paper.')
-    parser.add_argument("-n", "--number", type=int, default=40, help='Number of designs to generate')
-    parser.add_argument("-j", "--jump", type=int, default=100, help='Do random jumps in the solution space for the first (jump) trials.')
+    parser.add_argument("-n", "--number", type=int, default=100, help='Number of designs to generate')
+    parser.add_argument("-j", "--jump", type=int, default=0, help='Do random jumps in the solution space for the first (jump) trials.')
     parser.add_argument("-x", "--exit_min", type=int, default=0, help='Minimal number of unsuccessful iterations before exit')
-    parser.add_argument("-y", "--exit_max", type=int, default=5000, help='Maximal number of unsuccessful iterations before exit')
+    parser.add_argument("-y", "--exit_max", type=int, default=3000, help='Maximal number of unsuccessful iterations before exit')
     parser.add_argument("-p", "--progress", default=False, action='store_true', help='Show progress of optimization')
     parser.add_argument("-l", "--local", default=False, action='store_true', help='Only mutate locally instead of globally')
     parser.add_argument("-i", "--input", default=False, action='store_true', help='Read custom structures and sequence constraints from stdin')
@@ -68,7 +75,7 @@ def main():
     try:
         dg = rd.DependencyGraphMT(structures, constraint)
     except Exception as e:
-        print e
+        print(e)
         quit()
     
     print("# " + "\n# ".join(structures) + "\n# " + constraint)
@@ -83,7 +90,7 @@ def main():
     
     
     # optmizations start here
-    for exit_iterations in xrange(args.exit_min, args.exit_max, 20):
+    for exit_iterations in xrange(args.exit_min, args.exit_max, 60):
         for n in range(0, args.number):
             r = optimization_run(dg, structures, args, exit_iterations)
             
@@ -98,7 +105,8 @@ def main():
             if (args.progress):
                 sys.stdout.write("\r" + " " * 60 + "\r")
                 sys.stdout.flush()
-            print (exit_iterations, r.score, reached_mfe, *eos_diff, sep=";")
+                
+            print (exit_iterations, r.score, reached_mfe, *(eos_diff+r.probs), sep=";")
 
 # main optimization
 def optimization_run(dg, structures, args, exit_iterations):

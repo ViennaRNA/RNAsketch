@@ -71,7 +71,7 @@ def main():
     # collect sequences in order to exclude duplicates
     sequences = []
 
-    neg_structures = collections.deque(maxlen=20)
+    neg_structures = collections.deque(maxlen=200/len(pos_constraint))
 	
     # main loop from zero to number of solutions
     for i in range(0, args.number):
