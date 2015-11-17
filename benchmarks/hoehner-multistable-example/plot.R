@@ -32,7 +32,7 @@ cdata1 <- ddply(data, c("x"), summarise,
                dEmean = mean(dE1)
                dEsd   = sd(dE1),
                dEse   = dEsd / sqrt(length(dE1)),
-               pmean = mean(p1) + mean(p2) + mean(p3) / 3
+               pmean = mean(p1) + mean(p2) + mean(p3)
 )
 cdata2 <- ddply(data, c("x"), summarise,
                struct = '2',
@@ -41,7 +41,7 @@ cdata2 <- ddply(data, c("x"), summarise,
                dEmean = mean(dE2),
                dEsd   = sd(dE2),
                dEse   = dEsd / sqrt(length(dE2)),
-               pmean = mean(p1) + mean(p2) + mean(p3) / 3
+               pmean = mean(p1) + mean(p2) + mean(p3)
 )
 cdata3 <- ddply(data, c("x"), summarise,
                struct = '3',
@@ -50,7 +50,7 @@ cdata3 <- ddply(data, c("x"), summarise,
                dEmean = mean(dE3),
                dEsd   = sd(dE3),
                dEse   = dEsd / sqrt(length(dE3)),
-               pmean = mean(p1) + mean(p2) + mean(p3) / 3
+               pmean = mean(p1) + mean(p2) + mean(p3)
 )
 # merge frames
 cdata<-rbind(cdata1, cdata2, cdata3)
