@@ -61,7 +61,6 @@ def main():
     structures = []
     constraint = ""
 
-
     fileinput = open("alpha_operon_edif0.0.inp","r") #constraints
     for line in fileinput:
         if line.startswith("(") or line.startswith("."):
