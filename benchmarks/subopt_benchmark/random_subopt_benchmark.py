@@ -103,7 +103,7 @@ def main():
                 elif args.mode == 'sample_local':
                     mut_nos = dg.sample_local()
                 else:
-                    sys.stdout.write("Wrong sample argument: " + args.sample + "\n")
+                    sys.stdout.write("Wrong sample argument: " + args.mode + "\n")
                     sys.exit(1)
             sample_time = time.clock() - start
 

@@ -14,4 +14,4 @@ SCRIPT=/scr/minos/jango/Software/RNAdesign-toolbox/benchmarks/hoehner-multistabl
 START=$(($SGE_TASK_ID*500-500))
 END=$(($SGE_TASK_ID*500-1))
 
-python $SCRIPT -m mutate_global -x $START -y $END > $DPATH/random_optimization_global_$START.out;
+python $SCRIPT -m sample_global -x $START -y $END > $DPATH/random_optimization_global_$START.out;

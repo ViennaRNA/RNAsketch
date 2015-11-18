@@ -1,7 +1,9 @@
 #!/bin/bash
 
 #$ -N random_subopt_local
-#$ -q c_main.q
+#$ -q c_highmem.q
+#$ -l h=archer
+#$ -l h_vmem=4G
 #$ -e /scr/minos/jango/Software/RNAdesign-toolbox/benchmarks/subopt_benchmark/results/error_global.log
 #$ -o /scr/minos/jango/Software/RNAdesign-toolbox/benchmarks/subopt_benchmark/results
 #$ -t 3-30
@@ -14,5 +16,5 @@ SCRIPT=/scr/minos/jango/Software/RNAdesign-toolbox/benchmarks/subopt_benchmark/r
 LENGTH=$(($SGE_TASK_ID*10))
 
 for STRUCT in {2..10}; do
-    python $SCRIPT -l $LENGTH -s $STRUCT -m mutate_local > $DPATH/random_subopt_local_${LENGTH}_${STRUCT}.out;
+    python $SCRIPT -l $LENGTH -s $STRUCT -m sample_local > $DPATH/random_subopt_local_${LENGTH}_${STRUCT}.out;
 done
