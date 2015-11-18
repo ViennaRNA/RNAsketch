@@ -113,7 +113,7 @@ def optimization_run(dg, structures, args, jump_iterations):
     count = 0
     jumps = jump_iterations
     # randomly sample a initial sequence
-    dg.set_sequence()
+    dg.sample()
     # print this sequence with score
     score = calculate_objective(dg.get_sequence(), structures);
     #print dg.get_sequence() + '\t' + str(score)
@@ -123,7 +123,7 @@ def optimization_run(dg, structures, args, jump_iterations):
     while 1:
         # sample sequence
         if jumps:
-            mut_nos = dg.set_sequence()
+            mut_nos = dg.sample()
             jumps -= 1
             count = 0
         else:

@@ -111,7 +111,7 @@ def optimization_run(dg, structures, args, optimization_iterations):
     score = 0
     
     # randomly sample a initial sequence
-    dg.set_sequence()
+    dg.sample()
     result_sequence = dg.get_sequence()
     # print this sequence with score
     score = calculate_objective(dg.get_sequence(), structures);
@@ -121,7 +121,7 @@ def optimization_run(dg, structures, args, optimization_iterations):
     for i in range(0, optimization_iterations):
         # sample sequence completely random
         if args.mode == 'sample':
-            mut_nos = dg.set_sequence()
+            mut_nos = dg.sample()
         elif args.mode == 'sample_global':
             mut_nos = dg.sample_global()
         elif args.mode == 'sample_local':

@@ -42,7 +42,7 @@ def main():
     input_sequence_found_count = 0
     
     for n in range(0, args.number):
-        dg1.set_sequence()
+        dg1.sample()
         input_sequence = dg1.get_sequence()
         if(args.debug):
             print (input_sequence)
@@ -92,12 +92,12 @@ def main():
             
             # do sampling of sequences
             start = time.clock()
-            dg.set_sequence()
+            dg.sample()
             for o in range(0, 10000):
                 current_sequence = dg.get_sequence()
                 # sample sequence completely random
                 if args.mode == 'sample':
-                    mut_nos = dg.set_sequence()
+                    mut_nos = dg.sample()
                 elif args.mode == 'sample_global':
                     mut_nos = dg.sample_global()
                 elif args.mode == 'sample_local':
