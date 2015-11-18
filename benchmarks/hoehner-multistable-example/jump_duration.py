@@ -4,6 +4,7 @@ import RNA
 import argparse
 import sys
 import re
+import math
 
 # a tri-stable example target. (optional comment)
 # ((((....))))....((((....))))........
@@ -13,33 +14,39 @@ import re
 # CKNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNB
 # objective function: eos(1)+eos(2)+eos(3) - 3 * gibbs + 1 * ((eos(1)-eos(2))^2 + (eos(1)-eos(3))^2 + (eos(2)-eos(3))^2)
 
+kT = ((37+273.15)*1.98717)/1000.0; # kT = (betaScale*((temperature+K0)*GASCONST))/1000.0; /* in Kcal */
+
 class Result:
     def __init__(self, sequence, score, structures):
         self.sequence = sequence
         self.score = score
         self.structures = structures
         self.eos = []
+        self.probs = []
         
         (self.mfe_struct, self.mfe_energy) = RNA.fold(self.sequence)
+        self.part_funct = RNA.pf_fold(self.sequence)[1]
         for struct in self.structures:
-            self.eos.append(RNA.energy_of_struct(self.sequence, struct))
+            this_eos = RNA.energy_of_struct(self.sequence, struct)
+            self.eos.append(this_eos)
+            self.probs.append( math.exp((self.part_funct-this_eos) / kT ) )
     def write_out(self):
         #first clean up last line
         sys.stdout.write("\r" + " " * 60 + "\r")
         sys.stdout.flush()
         print(self.sequence + '\t{0:9.4f}'.format(self.score))
         for i, struct in enumerate(self.structures):
-            print(struct + '\t{0:9.4f}\t{1:+9.4f}'.format(self.eos[i], self.eos[i]-self.mfe_energy))
+            print(struct + '\t{0:9.4f}\t{1:+9.4f}\t{2:9.4f}'.format(self.eos[i], self.eos[i]-self.mfe_energy, self.probs[i]))
         print(self.mfe_struct + '\t{0:9.4f}'.format(self.mfe_energy))
 
 def main():
     parser = argparse.ArgumentParser(description='Design a tri-stable example same to Hoehner 2013 paper.')
-    parser.add_argument("-n", "--number", type=int, default=40, help='Number of designs to generate')
+    parser.add_argument("-n", "--number", type=int, default=100, help='Number of designs to generate')
     parser.add_argument("-x", "--jump_min", type=int, default=0, help='Minimal number of random jump iterations')
-    parser.add_argument("-y", "--jump_max", type=int, default=1000, help='Maximal number of random jump iterations')
+    parser.add_argument("-y", "--jump_max", type=int, default=3000, help='Maximal number of random jump iterations')
     parser.add_argument("-e", "--exit", type=int, default=1000, help='Exit optimization run if no better solution is aquired after (exit) trials.')
     parser.add_argument("-p", "--progress", default=False, action='store_true', help='Show progress of optimization')
-    parser.add_argument("-l", "--local", default=False, action='store_true', help='Only mutate locally instead of globally')
+    parser.add_argument("-l", "--local", default=False, action='store_true', help='Only sample locally instead of globally')
     parser.add_argument("-i", "--input", default=False, action='store_true', help='Read custom structures and sequence constraints from stdin')
     parser.add_argument("-d", "--debug", default=False, action='store_true', help='Show debug information of library')
     args = parser.parse_args()
@@ -68,7 +75,7 @@ def main():
     try:
         dg = rd.DependencyGraphMT(structures, constraint)
     except Exception as e:
-        print e
+        print(e)
         quit()
     
     print("# " + "\n# ".join(structures) + "\n# " + constraint)
@@ -83,7 +90,7 @@ def main():
     
     
     # optmizations start here
-    for jump_iterations in xrange(args.jump_min, args.jump_max, 20):
+    for jump_iterations in xrange(args.jump_min, args.jump_max, 60):
         for n in range(0, args.number):
             r = optimization_run(dg, structures, args, jump_iterations)
             
@@ -98,7 +105,7 @@ def main():
             if (args.progress):
                 sys.stdout.write("\r" + " " * 60 + "\r")
                 sys.stdout.flush()
-            print (jump_iterations, r.score, reached_mfe, *eos_diff, sep=";")
+            print (jump_iterations, r.score, reached_mfe, *(eos_diff+r.probs), sep=";")
 
 # main optimization
 def optimization_run(dg, structures, args, jump_iterations):
@@ -106,24 +113,24 @@ def optimization_run(dg, structures, args, jump_iterations):
     count = 0
     jumps = jump_iterations
     # randomly sample a initial sequence
-    dg.set_sequence()
+    dg.sample()
     # print this sequence with score
     score = calculate_objective(dg.get_sequence(), structures);
     #print dg.get_sequence() + '\t' + str(score)
     
-    # mutate globally for num_opt times and print
+    # sample globally for num_opt times and print
     i = 0
     while 1:
-        # mutate sequence
+        # sample sequence
         if jumps:
-            mut_nos = dg.set_sequence()
+            mut_nos = dg.sample()
             jumps -= 1
             count = 0
         else:
             if args.local:
-                mut_nos = dg.mutate_local()
+                mut_nos = dg.sample_local()
             else:
-                mut_nos = dg.mutate_global()
+                mut_nos = dg.sample_global()
         # write progress
         if (args.progress):
             sys.stdout.write("\rMutate global: {0:7.0f}/{1:5.0f} from NOS: {2:7.0f}".format(i, count, mut_nos) + " " * 20)

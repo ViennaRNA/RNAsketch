@@ -3,6 +3,7 @@ import RNA
 import argparse
 import sys
 import re
+import math
 
 # a tri-stable example target. (optional comment)
 # ((((....))))....((((....))))........
@@ -12,23 +13,29 @@ import re
 # CKNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNB
 # objective function: eos(1)+eos(2)+eos(3) - 3 * gibbs + 1 * ((eos(1)-eos(2))^2 + (eos(1)-eos(3))^2 + (eos(2)-eos(3))^2)
 
+kT = ((37+273.15)*1.98717)/1000.0; # kT = (betaScale*((temperature+K0)*GASCONST))/1000.0; /* in Kcal */
+
 class Result:
     def __init__(self, sequence, score, structures):
         self.sequence = sequence
         self.score = score
         self.structures = structures
         self.eos = []
+        self.probs = []
         
         (self.mfe_struct, self.mfe_energy) = RNA.fold(self.sequence)
+        self.part_funct = RNA.pf_fold(self.sequence)[1]
         for struct in self.structures:
-            self.eos.append(RNA.energy_of_struct(self.sequence, struct))
+            this_eos = RNA.energy_of_struct(self.sequence, struct)
+            self.eos.append(this_eos)
+            self.probs.append( math.exp((self.part_funct-this_eos) / kT ) )
     def write_out(self):
         #first clean up last line
         sys.stdout.write("\r" + " " * 60 + "\r")
         sys.stdout.flush()
         print(self.sequence + '\t{0:9.4f}'.format(self.score))
         for i, struct in enumerate(self.structures):
-            print(struct + '\t{0:9.4f}\t{1:+9.4f}'.format(self.eos[i], self.eos[i]-self.mfe_energy))
+            print(struct + '\t{0:9.4f}\t{1:+9.4f}\t{2:9.4f}'.format(self.eos[i], self.eos[i]-self.mfe_energy, self.probs[i]))
         print(self.mfe_struct + '\t{0:9.4f}'.format(self.mfe_energy))
 
 def main():
@@ -95,21 +102,21 @@ def optimization_run(dg, structures, args):
     count = 0
     jumps = args.jump
     # randomly sample a initial sequence
-    dg.set_sequence()
+    dg.sample()
     # print this sequence with score
     score = calculate_objective(dg.get_sequence(), structures);
     #print dg.get_sequence() + '\t' + str(score)
     
-    # mutate globally for num_opt times and print
+    # sample globally for num_opt times and print
     i = 0
     while 1:
-        # mutate sequence
+        # sample sequence
         if jumps:
-            mut_nos = dg.set_sequence()
+            mut_nos = dg.sample()
             jumps -= 1
             count = 0
         else:
-            mut_nos = dg.mutate_global()
+            mut_nos = dg.sample_global()
         # write progress
         if (args.progress):
             sys.stdout.write("\rMutate global: {0:7.0f}/{1:5.0f} from NOS: {2:7.0f}".format(i, count, mut_nos) + " " * 20)
