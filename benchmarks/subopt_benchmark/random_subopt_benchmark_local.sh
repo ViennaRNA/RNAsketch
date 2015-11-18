@@ -14,5 +14,5 @@ SCRIPT=/scr/minos/jango/Software/RNAdesign-toolbox/benchmarks/subopt_benchmark/r
 LENGTH=$(($SGE_TASK_ID*10))
 
 for STRUCT in {2..10}; do
-    python $SCRIPT -l $LENGTH -s $STRUCT -m mutate_local > $DPATH/random_subopt_local_$LENGTH_$STRUCT.out;
+    python $SCRIPT -l $LENGTH -s $STRUCT -m mutate_local > $DPATH/random_subopt_local_${LENGTH}_${STRUCT}.out;
 done

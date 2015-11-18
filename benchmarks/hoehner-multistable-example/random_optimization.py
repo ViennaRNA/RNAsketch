@@ -44,7 +44,7 @@ def main():
     parser.add_argument("-n", "--number", type=int, default=100, help='Number of designs to generate')
     parser.add_argument("-x", "--optimization_min", type=int, default=0, help='Minimal number of random optimization iterations')
     parser.add_argument("-y", "--optimization_max", type=int, default=25000, help='Maximal number of random optimization iterations')
-    parser.add_argument("-m", "--mode", type=str, default='sample', help='Mode for getting a new sequence: sample, mutate_local, mutate_global')
+    parser.add_argument("-m", "--mode", type=str, default='sample', help='Mode for getting a new sequence: sample, sample_local, sample_global')
     parser.add_argument("-p", "--progress", default=False, action='store_true', help='Show progress of optimization')
     parser.add_argument("-i", "--input", default=False, action='store_true', help='Read custom structures and sequence constraints from stdin')
     parser.add_argument("-d", "--debug", default=False, action='store_true', help='Show debug information of library')
@@ -117,17 +117,17 @@ def optimization_run(dg, structures, args, optimization_iterations):
     score = calculate_objective(dg.get_sequence(), structures);
     #print dg.get_sequence() + '\t' + str(score)
     
-    # mutate globally for num_opt times and print
+    # sample globally for num_opt times and print
     for i in range(0, optimization_iterations):
-        # mutate sequence completely random
+        # sample sequence completely random
         if args.mode == 'sample':
             mut_nos = dg.set_sequence()
-        elif args.mode == 'mutate_global':
-            mut_nos = dg.mutate_global()
-        elif args.mode == 'mutate_local':
-            mut_nos = dg.mutate_local()
+        elif args.mode == 'sample_global':
+            mut_nos = dg.sample_global()
+        elif args.mode == 'sample_local':
+            mut_nos = dg.sample_local()
         else:
-            sys.stdout.write("Wrong mutate argument: " + args.mutate + "\n")
+            sys.stdout.write("Wrong sample argument: " + args.sample + "\n")
             sys.exit(1)
         # write progress
         if (args.progress):

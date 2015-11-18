@@ -25,7 +25,7 @@ def main():
     parser.add_argument("-n", "--number", type=int, default=100, help='Number of tests to generate')
     parser.add_argument("-l", "--length", type=int, default=60, help='Length of random sequence')
     parser.add_argument("-s", "--structures", type=int, default=4, help='Number of structures as constraints input')
-    parser.add_argument("-m", "--mode", type=str, default='sample', help='Mode for getting a new sequence: sample, mutate_local, mutate_global')
+    parser.add_argument("-m", "--mode", type=str, default='sample', help='Mode for getting a new sequence: sample, sample_local, sample_global')
     parser.add_argument("-d", "--debug", default=False, action='store_true', help='Show debug information of library')
     args = parser.parse_args()
     
@@ -95,15 +95,15 @@ def main():
             dg.set_sequence()
             for o in range(0, 10000):
                 current_sequence = dg.get_sequence()
-                # mutate sequence completely random
+                # sample sequence completely random
                 if args.mode == 'sample':
                     mut_nos = dg.set_sequence()
-                elif args.mode == 'mutate_global':
-                    mut_nos = dg.mutate_global()
-                elif args.mode == 'mutate_local':
-                    mut_nos = dg.mutate_local()
+                elif args.mode == 'sample_global':
+                    mut_nos = dg.sample_global()
+                elif args.mode == 'sample_local':
+                    mut_nos = dg.sample_local()
                 else:
-                    sys.stdout.write("Wrong mutate argument: " + args.mutate + "\n")
+                    sys.stdout.write("Wrong sample argument: " + args.sample + "\n")
                     sys.exit(1)
             sample_time = time.clock() - start
 

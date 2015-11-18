@@ -46,7 +46,7 @@ def main():
     parser.add_argument("-y", "--jump_max", type=int, default=3000, help='Maximal number of random jump iterations')
     parser.add_argument("-e", "--exit", type=int, default=1000, help='Exit optimization run if no better solution is aquired after (exit) trials.')
     parser.add_argument("-p", "--progress", default=False, action='store_true', help='Show progress of optimization')
-    parser.add_argument("-l", "--local", default=False, action='store_true', help='Only mutate locally instead of globally')
+    parser.add_argument("-l", "--local", default=False, action='store_true', help='Only sample locally instead of globally')
     parser.add_argument("-i", "--input", default=False, action='store_true', help='Read custom structures and sequence constraints from stdin')
     parser.add_argument("-d", "--debug", default=False, action='store_true', help='Show debug information of library')
     args = parser.parse_args()
@@ -118,19 +118,19 @@ def optimization_run(dg, structures, args, jump_iterations):
     score = calculate_objective(dg.get_sequence(), structures);
     #print dg.get_sequence() + '\t' + str(score)
     
-    # mutate globally for num_opt times and print
+    # sample globally for num_opt times and print
     i = 0
     while 1:
-        # mutate sequence
+        # sample sequence
         if jumps:
             mut_nos = dg.set_sequence()
             jumps -= 1
             count = 0
         else:
             if args.local:
-                mut_nos = dg.mutate_local()
+                mut_nos = dg.sample_local()
             else:
-                mut_nos = dg.mutate_global()
+                mut_nos = dg.sample_global()
         # write progress
         if (args.progress):
             sys.stdout.write("\rMutate global: {0:7.0f}/{1:5.0f} from NOS: {2:7.0f}".format(i, count, mut_nos) + " " * 20)

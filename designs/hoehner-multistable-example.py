@@ -107,16 +107,16 @@ def optimization_run(dg, structures, args):
     score = calculate_objective(dg.get_sequence(), structures);
     #print dg.get_sequence() + '\t' + str(score)
     
-    # mutate globally for num_opt times and print
+    # sample globally for num_opt times and print
     i = 0
     while 1:
-        # mutate sequence
+        # sample sequence
         if jumps:
             mut_nos = dg.set_sequence()
             jumps -= 1
             count = 0
         else:
-            mut_nos = dg.mutate_global()
+            mut_nos = dg.sample_global()
         # write progress
         if (args.progress):
             sys.stdout.write("\rMutate global: {0:7.0f}/{1:5.0f} from NOS: {2:7.0f}".format(i, count, mut_nos) + " " * 20)
