@@ -65,10 +65,12 @@ cdata<-rbind(cdata1, cdata2, cdata3)
 # add the coordinates for the error bars
 cdata <- ddply(cdata,.(x),transform,ystart = cumsum(dEmean),yend = cumsum(dEmean) + dEse)
 
+number_ticks <- function(n) {function(limits) pretty(limits, n)}
+
 # Standard deviation of the mean as error bar
 pdf(paste(opt$file, ".pdf", sep=""))
 p <- ggplot(cdata, aes(x=x, y=dEmean, fill=struct)) + geom_bar(stat="identity") + 
-    scale_y_continuous(limits = c(-0.2, NA)) + 
+    scale_y_continuous(limits = c(-0.2, NA), breaks=number_ticks(5)) + 
     expand_limits(y=5.5) + 
     ylab(expression(paste("mean ", delta, "E [kcal]"))) +
     xlab(opt$xlabel) + 
@@ -78,7 +80,7 @@ p <- ggplot(cdata, aes(x=x, y=dEmean, fill=struct)) + geom_bar(stat="identity") 
 p + geom_segment(aes(xend=x,y=ystart,yend=yend), size = 0.1) + 
     geom_point(aes(x=x,y=yend), shape = "-", show_guide = FALSE, size = 1.5) +
     geom_point(aes(x=x,y=0.0, colour=mfe), shape = 15, show_guide = FALSE, size = 3) +
-    labs(colour="reached MFE [%]")
+    labs(colour="MFE reached [%]")
 #    geom_point(aes(x=x,y=-0.8, colour=pmean), shape = 15, show_guide = FALSE, size = 3)
 
 dev.off()
