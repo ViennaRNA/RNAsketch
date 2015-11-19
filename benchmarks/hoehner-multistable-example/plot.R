@@ -29,10 +29,10 @@ cdata1 <- ddply(data, c("x"), summarise,
                struct = '1',
                score = mean(score),
                mfe = mean(mfe),
-               dEmean = mean(dE1)
+               dEmean = mean(dE1),
                dEsd   = sd(dE1),
                dEse   = dEsd / sqrt(length(dE1)),
-               pmean = mean(p1) + mean(p2) + mean(p3)
+               pmean  = mean(p1) + mean(p2) + mean(p3)
 )
 cdata2 <- ddply(data, c("x"), summarise,
                struct = '2',
@@ -41,7 +41,7 @@ cdata2 <- ddply(data, c("x"), summarise,
                dEmean = mean(dE2),
                dEsd   = sd(dE2),
                dEse   = dEsd / sqrt(length(dE2)),
-               pmean = mean(p1) + mean(p2) + mean(p3)
+               pmean  = mean(p1) + mean(p2) + mean(p3)
 )
 cdata3 <- ddply(data, c("x"), summarise,
                struct = '3',
@@ -50,7 +50,7 @@ cdata3 <- ddply(data, c("x"), summarise,
                dEmean = mean(dE3),
                dEsd   = sd(dE3),
                dEse   = dEsd / sqrt(length(dE3)),
-               pmean = mean(p1) + mean(p2) + mean(p3)
+               pmean  = mean(p1) + mean(p2) + mean(p3)
 )
 # merge frames
 cdata<-rbind(cdata1, cdata2, cdata3)
@@ -63,7 +63,8 @@ p <- ggplot(cdata, aes(x=x, y=dEmean, fill=struct)) + geom_bar(stat="identity")
 
 p + geom_segment(aes(xend=x,y=ystart,yend=yend), size = 0.1) + 
     geom_point(aes(x=x,y=yend), shape = "-", show_guide = FALSE, size = 1.5) +
-    geom_point(aes(x=x,y=.02, colour=mfe), shape = 15, show_guide = FALSE, size = 3) + 
-    geom_point(aes(x=x,y=.12, colour=pmean), shape = 15, show_guide = FALSE, size = 3)
+    geom_point(aes(x=x,y=-0.1, colour=mfe), shape = 15, show_guide = FALSE, size = 3)
+#    geom_point(aes(x=x,y=-0.8, colour=pmean), shape = 15, show_guide = FALSE, size = 3)
+
 dev.off()
 # plot done!
