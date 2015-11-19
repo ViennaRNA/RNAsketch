@@ -48,7 +48,7 @@ def main():
             print (input_sequence)
         
         # calculate a RNAsubopt
-        subopt_solution = RNA.subopt(dg1.get_sequence(), "N" * args.length, 500, None)
+        subopt_solution = RNA.subopt(dg1.get_sequence(), "N" * args.length, 600, None)
         #for i in range(0, subopt_solution.size()-1):
         #    print (subopt_solution.get(i).structure, subopt_solution.get(i).energy)
         
