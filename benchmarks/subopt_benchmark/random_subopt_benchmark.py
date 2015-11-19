@@ -76,7 +76,7 @@ def main():
                 dg = rd.DependencyGraphMT(structures)
                 construction_time = time.clock() - start
         except Exception as e:
-            print( "Error: %s" % e )
+            print( "Error: %s" % e , file=sys.stderr)
         
         if (dg is not None):
             graph_construction = 1
