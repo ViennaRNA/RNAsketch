@@ -51,44 +51,31 @@ def main():
     parser.add_argument("-e", "--exit", type=int, default=500, help='Exit optimization run if no better solution is aquired after (exit) trials.')
     parser.add_argument("-p", "--progress", default=False, action='store_true', help='Show progress of optimization')
     parser.add_argument("-g", "--graphml", type=str, default=None, help='Write a graphml file with the given filename.')
-    parser.add_argument("-i", "--input", default=False, action='store_true', help='Read custom structures and sequence constraints from stdin')
+    parser.add_argument("-f", "--file", type = str, default=False, help='Read file')
     parser.add_argument("-d", "--debug", default=False, action='store_true', help='Show debug information of library')
     args = parser.parse_args()
 
-    print ("# Options: number={0:d}, jump={1:d}, exit={2:d}".format(args.number, args.jump, args.exit))
+    print ("# Options: file={0:s}, number={1:d}, jump={2:d}, exit={3:d}".format(args.file, args.number, args.jump, args.exit))
     rd.initialize_library(args.debug)
     # define structures
     structures = []
     constraint = ""
 
-    fileinput = open("alpha_operon_edif0.0.inp","r") #constraints
-    for line in fileinput:
-        if line.startswith("(") or line.startswith("."):
-            structure_constraint = line.strip("\n")
-            structures.append(structure_constraint)
-        '''
-        if line.startswith(" ") or line.startswith("G") or line.startswith("C") or line.startswith("U") or line.startswith("A"):
-           sequence_constraint = line.strip("\n")
-            sequence_constraint.replace(" ", "N")
-            print(sequence_constraint)'''
-    '''
-    structures = ['((((....))))....((((....))))........',
-            '........((((....((((....))))....))))']
-    constraint = 'NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN'''''
-    """
-    if (args.input):
-        for line in sys.stdin:
-            if re.match(re.compile("[\(\)\.]"), line, flags=0):
-                structures.append(line.rstrip('\n'))
-            elif re.match(re.compile("[ACGTUWSMKRYBDHVN]"), line, flags=0):
-                constraint = line.rstrip('\n')
-            elif re.search(re.compile("@"), line, flags=0):
-                break;
-    else:
-        structures = ['((((....))))....((((....))))........',
-            '........((((....((((....))))....))))']
-        constraint = 'NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN'
-    """
+    if (args.file):
+        filename = args.file
+        # filename = "alpha_operon_edif0.0.inp"
+        with open(filename) as f:
+            data = f.read()
+            lines = data.split("\n")
+            for line in lines:
+                if line.startswith(".") or line.startswith("("):
+                    structures.append(line)
+                if line.startswith(" "):
+                    elements = str(line)
+                    sequence = elements.replace(" ", "N")
+                if line.startswith(";"):
+                    break
+
     
     # construct dependency graph with these structures
     try:
@@ -115,9 +102,14 @@ def main():
     
     # main loop from zero to number of solutions
 
+    number_of_sequences_with_mfe = {'n1': 0, 'n2': 0}
+    find_min_max = []
+
+    inf = float('Infinity')
+    deltas = {'d1': inf, 'd2': inf}
 
     # optmizations start here
-    print ("# Number of generated sequences; n1; n2; difference eos-mfe")
+    print ("Number of generated sequences total; count; length of sequence; n1; n2; d1; d2; sequence")
     for n in range(0, args.number):
         r = optimization_run(dg, structures, args)
         r.write_out()
@@ -132,41 +124,33 @@ def main():
             eos_mfe = r.eos[i] - r.mfe_energy
             diff_eos_mfe.append(eos_mfe)
             if r.eos[i] == r.mfe_energy:
-                reached_mfe  += 1
+                reached_mfe += 1
+        diff_eos_mfe.sort()
 
+    
         if reached_mfe == 2:
+            # number_of_sequences_with_mfe['n1'] += 1
+            # number_of_sequences_with_mfe['n2'] += 1
             n1 = 1
             n2 = 1
 
-        if reached_mfe == 1:
+        elif reached_mfe == 1:
             n1 = 1
             n2 = 0
-        if reached_mfe == 0:
+            # number_of_sequences_with_mfe['n1'] += 1
+            # number_of_sequences_with_mfe['n2'] += 0
+
+        elif reached_mfe == 0:
+            # number_of_sequences_with_mfe['n1'] += 0
+            # number_of_sequences_with_mfe['n2'] += 0
             n1 = 0
             n2 = 0
-
-        #diff_eos_mfe =
-            # eos_diff.append(r.eos[i]-r.mfe_energy)
-            #if (r.structures[i] == r.mfe_struct):
-            #    reached_mfe = 1
 
         if (args.progress):
             sys.stdout.write("\r" + " " * 60 + "\r")
             sys.stdout.flush()
-        print (args.number, len(r.sequence), n1, n2, diff_eos_mfe, sep=";")
-
-        """
-        eos_diff = []
-        reached_mfe = 0
-        for i in range(0, len(r.structures)):
-            eos_diff.append(r.eos[i]-r.mfe_energy)
-            if (r.structures[i] == r.mfe_struct):
-                reached_mfe = 1
-
-            if (args.progress):
-                sys.stdout.write("\r" + " " * 60 + "\r")
-                sys.stdout.flush()
-            print (args.number, r.score, reached_mfe, *(eos_diff+r.probs), sep=";")"""
+     
+        print (args.number, n + 1, len(r.sequence), n1, n2, diff_eos_mfe[0], diff_eos_mfe[1], "\"" + r.sequence + "\"", sep=";")    
 
 # main optimization
 def optimization_run(dg, structures, args):
@@ -226,5 +210,6 @@ def calculate_objective(sequence, structures):
 
 if __name__ == "__main__":
     main()
+
 
 
