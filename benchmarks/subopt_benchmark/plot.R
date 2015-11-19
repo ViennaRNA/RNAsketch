@@ -31,10 +31,15 @@ data <- read.csv(opt$file, header=FALSE, sep = ";", dec = ".", comment.char='#',
 
 data_failed <- subset(data, graph_construction==0)
 data_failed <- data_failed[, (names(data_failed) %in% c("length", "structures"))]
-# plot failed
+failed_count <- ddply(data_failed, .(structures, length), count)
+
+# plot failed xy with correlation curve
 pdf(paste(opt$file, "_failed.pdf", sep=""))
-p <- qplot(data=data_failed, x=structures, y=length, geom='bin2d')
-p + xlab("Number of Structural Constraints") +
+p <- ggplot(failed_count, aes(x=structures, y=length))
+p + geom_point(aes(size=freq, colour=freq)) + 
+    guides(color=guide_legend(), size = guide_legend()) + 
+    geom_smooth(method=lm, fullrange=TRUE) + 
+    xlab("Number of Structures") +
     ylab("Design Length") + 
     ggtitle("Graph Construction Timeouts")
 dev.off()
