@@ -1,8 +1,7 @@
 #!/bin/bash
 
 #$ -N random_subopt_global
-#$ -q c_highmem.q
-#$ -l h=archer
+#$ -q c_main.q
 #$ -l h_vmem=10G
 #$ -e /scr/minos/jango/Software/RNAdesign-toolbox/benchmarks/subopt_benchmark/results/error_global.log
 #$ -o /scr/minos/jango/Software/RNAdesign-toolbox/benchmarks/subopt_benchmark/results
