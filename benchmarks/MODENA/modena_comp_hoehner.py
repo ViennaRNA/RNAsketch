@@ -51,7 +51,7 @@ def main():
     parser.add_argument("-e", "--exit", type=int, default=500, help='Exit optimization run if no better solution is aquired after (exit) trials.')
     parser.add_argument("-p", "--progress", default=False, action='store_true', help='Show progress of optimization')
     parser.add_argument("-g", "--graphml", type=str, default=None, help='Write a graphml file with the given filename.')
-    parser.add_argument("-f", "--file", type = str, default=False, help='Read file')
+    parser.add_argument("-f", "--file", type = str, default=False, help='Read file in *.inp format')
     parser.add_argument("-d", "--debug", default=False, action='store_true', help='Show debug information of library')
     args = parser.parse_args()
 
@@ -68,11 +68,11 @@ def main():
             data = f.read()
             lines = data.split("\n")
             for line in lines:
-                if line.startswith(".") or line.startswith("("):
+                if re.match(re.compile("[\(\)\.]"), line):
                     structures.append(line)
-                if line.startswith(" "):
+                if re.match(re.compile("[\ AUGC]"), line):
                     elements = str(line)
-                    sequence = elements.replace(" ", "N")
+                    constraint = elements.replace(" ", "N")
                 if line.startswith(";"):
                     break
 
