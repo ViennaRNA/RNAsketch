@@ -20,6 +20,23 @@ class timeout:
     def __exit__(self, type, value, traceback):
         signal.alarm(0)
 
+def get_structures(sequence, args):
+    # calculate a RNAsubopt
+    subopt_solution = RNA.subopt(sequence, "N" * args.length, 550, None)
+    #for i in range(0, subopt_solution.size()-1):
+    #    print (subopt_solution.get(i).structure, subopt_solution.get(i).energy)
+    
+    # get random structures
+    structures = []
+    for i in range(0, args.structures):
+        rand = random.randint(0, subopt_solution.size()-1)
+        structures.append(subopt_solution.get(rand).structure)
+    if (args.debug):
+        print(*structures, sep="\n")
+    del subopt_solution
+    # return structurs
+    return structures
+
 def main():
     parser = argparse.ArgumentParser(description='Generate a random sequence, get suboptimal structures and see if dependencygraph exists.')
     parser.add_argument("-n", "--number", type=int, default=100, help='Number of tests to generate')
@@ -47,18 +64,8 @@ def main():
         if(args.debug):
             print (input_sequence)
         
-        # calculate a RNAsubopt
-        subopt_solution = RNA.subopt(dg1.get_sequence(), "N" * args.length, 600, None)
-        #for i in range(0, subopt_solution.size()-1):
-        #    print (subopt_solution.get(i).structure, subopt_solution.get(i).energy)
-        
-        # get random structures
-        structures = []
-        for i in range(0, args.structures):
-            rand = random.randint(0, subopt_solution.size()-1)
-            structures.append(subopt_solution.get(rand).structure)
-        if (args.debug):
-            print(*structures, sep="\n")
+        # get random subopt structures
+        structures = get_structures(input_sequence, args)
         
         # try to construct dependency graph, catch errors and timeouts
         dg = None

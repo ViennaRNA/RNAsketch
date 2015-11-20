@@ -4,7 +4,7 @@
 #$ -q c_main.q
 #$ -l h_vmem=10G
 #$ -e /scr/minos/jango/Software/RNAdesign-toolbox/benchmarks/subopt_benchmark/results/error_global.log
-#$ -o /scr/minos/jango/Software/RNAdesign-toolbox/benchmarks/subopt_benchmark/results
+#$ -o /scr/minos/jango/Software/RNAdesign-toolbox/benchmarks/subopt_benchmark/results/
 #$ -t 3-30
 
 #################################### DONT FORGET TO CHANGE ALL FOLDERS AND SETTINGS!!
@@ -15,5 +15,7 @@ SCRIPT=/scr/minos/jango/Software/RNAdesign-toolbox/benchmarks/subopt_benchmark/r
 LENGTH=$(($SGE_TASK_ID*10))
 STRUCT=$1
 
-python $SCRIPT -l $LENGTH -s $STRUCT -m sample > $DPATH/random_subopt_sample_${LENGTH}_${STRUCT}.out;
-
+if [ ! -f $DPATH/random_subopt_sample_${LENGTH}_${STRUCT}.out ]
+then
+    python $SCRIPT -l $LENGTH -s $STRUCT -m sample > $DPATH/random_subopt_sample_${LENGTH}_${STRUCT}.out;
+fi
