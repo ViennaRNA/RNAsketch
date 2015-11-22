@@ -46,7 +46,6 @@ dev.off()
 
 times <- c(grep("time$", names(data), value=TRUE))
 data_sub <- subset(data, graph_construction!=0)
-data_melt <- melt(data_sub, id.vars="mean_special_ratio", measure.vars=times)
 
 cor.mtest <- function(mat, conf.level = 0.95) {
     mat <- as.matrix(mat)
@@ -75,6 +74,7 @@ dev.off()
 
 number_ticks <- function(n) {function(limits) pretty(limits, n)}
 
+data_melt <- melt(data_sub, id.vars="mean_special_ratio", measure.vars=times)
 # plot times vs special ratio
 pdf(paste(opt$file, "_time.pdf", sep=""))
 p <- ggplot(data_melt, aes(x=mean_special_ratio, y=value, color=variable, shape=variable, group=variable))
