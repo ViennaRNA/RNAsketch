@@ -20,20 +20,21 @@ class timeout:
     def __exit__(self, type, value, traceback):
         signal.alarm(0)
 
-def get_structures(sequence, args):
-    # calculate a RNAsubopt
-    subopt_solution = RNA.subopt(sequence, "N" * args.length, 550, None)
-    #for i in range(0, subopt_solution.size()-1):
-    #    print (subopt_solution.get(i).structure, subopt_solution.get(i).energy)
-    
-    # get random structures
+def get_structures(dg, args):
+    # calculate a RNAfold for random structures
     structures = []
-    for i in range(0, args.structures):
-        rand = random.randint(0, subopt_solution.size()-1)
-        structures.append(subopt_solution.get(rand).structure)
+    amount = args.structures
+    while (amount > 0):
+        dg.sample()
+        structure = RNA.fold(dg.get_sequence())[0]
+        structures.append(structure)
+        bipartite = rd.graph_is_bipartite(structures)
+        if (bipartite):
+            amount -= 1
+        else:
+            structures.pop()
     if (args.debug):
         print(*structures, sep="\n")
-    del subopt_solution
     # return structurs
     return structures
 
@@ -42,16 +43,18 @@ def main():
     parser.add_argument("-n", "--number", type=int, default=100, help='Number of tests to generate')
     parser.add_argument("-l", "--length", type=int, default=60, help='Length of random sequence')
     parser.add_argument("-s", "--structures", type=int, default=4, help='Number of structures as constraints input')
+    parser.add_argument("-t", "--temperature", type=int, default=0, help='Temperature for the random sequence MFE folds (lower means more basepairs)')
     parser.add_argument("-m", "--mode", type=str, default='sample', help='Mode for getting a new sequence: sample, sample_local, sample_global')
     parser.add_argument("-k", "--kill", type=int, default=20, help='Timeout value of graph construction in seconds. (default: 20)')
     parser.add_argument("-d", "--debug", default=False, action='store_true', help='Show debug information of library')
     args = parser.parse_args()
     
     print ("# random_subopt_benchmark.py")
-    print ("# Options: number={0:d}, length={1:d}, structures={2:d}, mode={3:}, kill={4:d}".format(args.number, args.length, args.structures, args.mode, args.kill))
+    print ("# Options: number={0:d}, length={1:d}, structures={2:d}, temperature={3:d} mode={4:}, kill={5:d}".format(args.number, args.length, args.structures, args.temperature, args.mode, args.kill))
     print ("# length", "structures", "graph_construction", "num_cc", "max_special_ratio", "mean_special_ratio", "nos", "construction_time", "sample_time", sep=";")
     
     rd.initialize_library(args.debug)
+    RNA.temperature = args.temperature
     
     dg1 = rd.DependencyGraphMT(["." * args.length])
     
@@ -59,14 +62,9 @@ def main():
     graph_construction_count = 0
     input_sequence_found_count = 0
     
-    for n in range(0, args.number):
-        dg1.sample()
-        input_sequence = dg1.get_sequence()
-        if(args.debug):
-            print (input_sequence)
-        
+    for n in range(0, args.number):        
         # get random subopt structures
-        structures = get_structures(input_sequence, args)
+        structures = get_structures(dg1, args)
         
         # try to construct dependency graph, catch errors and timeouts
         dg = None

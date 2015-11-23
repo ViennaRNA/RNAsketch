@@ -41,7 +41,7 @@ p + geom_point(aes(size=freq, colour=freq)) +
     geom_smooth(method=lm, fullrange=TRUE) + 
     xlab("Number of Structures") +
     ylab("Design Length") + 
-    ggtitle("Graph Construction Timeouts (20s)")
+    ggtitle("Graph Construction Timeouts (15s)")
 dev.off()
 
 times <- c(grep("time$", names(data), value=TRUE))
