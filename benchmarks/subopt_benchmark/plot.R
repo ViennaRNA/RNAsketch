@@ -38,7 +38,7 @@ pdf(paste(opt$file, "_failed.pdf", sep=""))
 p <- ggplot(failed_count, aes(x=structures, y=length))
 p + geom_point(aes(size=freq, colour=freq)) + 
     guides(color=guide_legend(), size = guide_legend()) + 
-    geom_smooth(method=lm, fullrange=TRUE) + 
+    geom_smooth(method=lm, formula=y~exp(-x), fullrange=FALSE) + 
     xlab("Number of Structures") +
     ylab("Design Length") + 
     ggtitle("Graph Construction Timeouts (15s)")

@@ -25,17 +25,17 @@ evaluate <- function(file) {
   d2_min <- min_d2[1,7] # all entries in this column mimima, therefore take first entry
  
   # mean, median, standard deviation and standard error of d1 and d2, not used 
-  #   mean_d1 <- mean(data$d1)
-  #   median_d1 <- median(data$d1)
-  #   sd_d1 <- sd(data$d1)
-  #   se_d1 <- sd_d1/sqrt(length(data$d1))
-  #   mean_d2 <- mean(data$d2)
-  #   median_d2 <- median(data$d2)
-  #   sd_d2 <- sd(data$d2)
-  #   se_d2 <- sd_d2/sqrt(length(data$d2))
+  mean_d1 <- mean(data$d1)
+  median_d1 <- median(data$d1)
+  sd_d1 <- sd(data$d1)
+  se_d1 <- sd_d1/sqrt(length(data$d1))
+  mean_d2 <- mean(data$d2)
+  median_d2 <- median(data$d2)
+  sd_d2 <- sd(data$d2)
+  se_d2 <- sd_d2/sqrt(length(data$d2))
   
   # result values
-  result <-data.frame(file, sequence_length, d1_min, d2_min, sum_n1, sum_n2)
+  result <-data.frame(file, sequence_length, sum_n1, sum_n2, d1_min, d2_min, mean_d1, median_d1, mean_d2, median_d2)
  
   return(result)
 }
@@ -43,17 +43,16 @@ evaluate <- function(file) {
 all_infiles <- lapply(infiles, evaluate)
 all_infiles <- do.call(rbind,all_infiles)
 
-colnames(all_infiles) <- c("RNA", "l", "d1", "d2", "n1", "n2") # RNA = file
+colnames(all_infiles) <- c("RNA", "l", "n1", "n2", "d1", "d2",  "mean_d1", "median_d1", "mean_d2", "median_d2") # RNA = file
 
-# calculate mean and median (without SV11!!!) from allinfiles d1 and d2  
-all_without_SV11 <- all_infiles[all_infiles[,1] != "modena_comp_rb5_edif0.0.inp.out",] # richtiges file ausnehmen (SV11) 
-mean_all_d1 <- mean(all_without_SV11$d1)
-median_all_d1 <- median(all_without_SV11$d1)
-mean_all_d2 <- mean(all_without_SV11$d2)
-median_all_d2 <- median(all_without_SV11$d2)
+# calculate mean and median from all_infiles d1 and d2  
+mean_all_d1 <- mean(all_infiles$d1)
+median_all_d1 <- median(all_infiles$d1)
+mean_all_d2 <- mean(all_infiles$d2)
+median_all_d2 <- median(all_infiles$d2)
 
-all_infiles <- rbind(all_infiles, data.frame(RNA="mean", l = "-", d1= mean_all_d1, d2 = mean_all_d2, n1 = "-", n2= "-"))
-all_infiles <- rbind(all_infiles, data.frame(RNA="median", l = "-", d1= median_all_d1, d2 = median_all_d2, n1 = "-" , n2= "-"))
+all_infiles <- rbind(all_infiles, data.frame(RNA="mean", l = NA, n1 = NA, n2= NA, d1= mean_all_d1, d2 = mean_all_d2, mean_d1= NA, median_d1= NA, mean_d2= NA, median_d2= NA))
+all_infiles <- rbind(all_infiles, data.frame(RNA="median", l = NA, n1 = NA , n2= NA, d1= median_all_d1, d2 = median_all_d2, mean_d1= NA, median_d1= NA, mean_d2= NA, median_d2= NA))
 
 # generate latex table
-latex(all_infiles, cdec=c(0,0,2,2,0,0), na.blank=TRUE, booktabs=FALSE, table.env=FALSE, center="none", file="", title="")
+latex.default(all_infiles, cdec=c(0,0,0,0,2,2,2,2), na.blank=TRUE, booktabs=FALSE, table.env=FALSE, center="none", file="", title="")
