@@ -50,8 +50,8 @@ def main():
     args = parser.parse_args()
     
     print ("# random_subopt_benchmark.py")
-    print ("# Options: number={0:d}, length={1:d}, structures={2:d}, temperature={3:d} mode={4:}, kill={5:d}".format(args.number, args.length, args.structures, args.temperature, args.mode, args.kill))
-    print ("# length", "structures", "graph_construction", "num_cc", "max_special_ratio", "mean_special_ratio", "nos", "construction_time", "sample_time", sep=";")
+    print ("# Options: number={0:d}, length={1:d}, structures={2:d}, temperature={3:d}, mode={4:}, kill={5:d}".format(args.number, args.length, args.structures, args.temperature, args.mode, args.kill))
+    print ("# length", "structures", "graph_construction", "num_cc", "max_specials", "max_component_vertices", "max_special_ratio", "mean_special_ratio", "nos", "construction_time", "sample_time", sep=";")
     
     rd.initialize_library(args.debug)
     RNA.temperature = args.temperature
@@ -71,6 +71,8 @@ def main():
         graph_construction = 0
         construction_time = 0.0
         sample_time = 0.0
+        max_specials = 0
+        max_component_vertices = 0
         max_special_ratio = 0
         mean_special_ratio = 0
         num_cc = 0
@@ -91,7 +93,13 @@ def main():
             
             special_ratios = []
             for cc in range(0, num_cc):
-                special_ratios.append(float(len(dg.special_vertices(cc)))/float(len(dg.component_vertices(cc))))
+                cv = len(dg.component_vertices(cc))
+                sv = len(dg.special_vertices(cc))
+                special_ratios.append(float(sv)/float(cv))
+                if (max_specials < sv):
+                    max_specials = sv
+                if (max_component_vertices < cv):
+                    max_component_vertices = cv
             
             max_special_ratio = max(special_ratios)
             mean_special_ratio = sum(special_ratios)/len(special_ratios)
@@ -114,7 +122,7 @@ def main():
             sample_time = time.clock() - start
 
         
-        print (args.length, args.structures, graph_construction, num_cc, max_special_ratio, mean_special_ratio, nos, construction_time, sample_time, structures, sep=";")
+        print (args.length, args.structures, graph_construction, num_cc, max_specials, max_component_vertices, max_special_ratio, mean_special_ratio, nos, construction_time, sample_time, structures, sep=";")
     
 if __name__ == "__main__":
     main()

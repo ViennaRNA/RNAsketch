@@ -5,7 +5,7 @@
 #$ -l h_vmem=2G
 #$ -e /scr/minos/jango/Software/RNAdesign-toolbox/benchmarks/fold_benchmark/results/error_global.log
 #$ -o /scr/minos/jango/Software/RNAdesign-toolbox/benchmarks/fold_benchmark/results/
-#$ -t 2-10
+#$ -t 2-20
 
 #################################### DONT FORGET TO CHANGE ALL FOLDERS AND SETTINGS!!
 
