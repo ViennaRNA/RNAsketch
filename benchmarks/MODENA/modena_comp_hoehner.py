@@ -19,10 +19,11 @@ import collections
 kT = ((37+273.15)*1.98717)/1000.0; # kT = (betaScale*((temperature+K0)*GASCONST))/1000.0; /* in Kcal */
 
 class Result:
-    def __init__(self, sequence, score, structures):
+    def __init__(self, sequence, score, structures, number_of_mutations):
         self.sequence = sequence
         self.score = score
         self.structures = structures
+        self.number_of_mutations = number_of_mutations
         self.eos = []
         self.probs = []
         
@@ -47,7 +48,7 @@ class Result:
 def main():
     parser = argparse.ArgumentParser(description='Design a tri-stable example same to Hoehner 2013 paper.')
     parser.add_argument("-n", "--number", type=int, default=100, help='Number of designs to generate')
-    parser.add_argument("-j", "--jump", type=int, default=1000, help='Do random jumps in the solution space for the first (jump) trials.')
+    parser.add_argument("-j", "--jump", type=int, default=200, help='Do random jumps in the solution space for the first (jump) trials.')
     parser.add_argument("-e", "--exit", type=int, default=500, help='Exit optimization run if no better solution is aquired after (exit) trials.')
     parser.add_argument("-p", "--progress", default=False, action='store_true', help='Show progress of optimization')
     parser.add_argument("-g", "--graphml", type=str, default=None, help='Write a graphml file with the given filename.')
@@ -102,55 +103,32 @@ def main():
     
     # main loop from zero to number of solutions
 
-    number_of_sequences_with_mfe = {'n1': 0, 'n2': 0}
-    find_min_max = []
-
-    inf = float('Infinity')
-    deltas = {'d1': inf, 'd2': inf}
-
     # optmizations start here
-    print ("Number of generated sequences total; count; length of sequence; n1; n2; d1; d2; sequence")
+    mfe_reached_str = ""
+    diff_eos_mfe_str = ""
+    for s in range(0, len(structures)):
+        mfe_reached_str = mfe_reached_str + "mfe_reached_" + str(s) +";"
+        diff_eos_mfe_str = diff_eos_mfe_str + "diff_eos_mfe_" + str(s) + ";"
+    print ("num_mutations;seq_length;sequence;" + mfe_reached_str + diff_eos_mfe_str)
     for n in range(0, args.number):
         r = optimization_run(dg, structures, args)
         r.write_out()
 
-    # process result and write result of this optimization to stdout
-        n1 = 0
-        n2 = 0
-
+        # process result and write result of this optimization to stdout
         diff_eos_mfe = []
-        reached_mfe = 0
+        mfe_reached = []
         for i in range(0, len(r.structures)):
+            mfe_reached.append(0)
             eos_mfe = r.eos[i] - r.mfe_energy
             diff_eos_mfe.append(eos_mfe)
             if r.eos[i] == r.mfe_energy:
-                reached_mfe += 1
-        diff_eos_mfe.sort()
-
-    
-        if reached_mfe == 2:
-            # number_of_sequences_with_mfe['n1'] += 1
-            # number_of_sequences_with_mfe['n2'] += 1
-            n1 = 1
-            n2 = 1
-
-        elif reached_mfe == 1:
-            n1 = 1
-            n2 = 0
-            # number_of_sequences_with_mfe['n1'] += 1
-            # number_of_sequences_with_mfe['n2'] += 0
-
-        elif reached_mfe == 0:
-            # number_of_sequences_with_mfe['n1'] += 0
-            # number_of_sequences_with_mfe['n2'] += 0
-            n1 = 0
-            n2 = 0
-
+                mfe_reached[i] = 1
+        
         if (args.progress):
             sys.stdout.write("\r" + " " * 60 + "\r")
             sys.stdout.flush()
      
-        print (args.number, n + 1, len(r.sequence), n1, n2, diff_eos_mfe[0], diff_eos_mfe[1], "\"" + r.sequence + "\"", sep=";")    
+        print (r.number_of_mutations, len(r.sequence), "\"" + r.sequence + "\"", *(mfe_reached + diff_eos_mfe), sep=";")
 
 # main optimization
 def optimization_run(dg, structures, args):
@@ -191,7 +169,7 @@ def optimization_run(dg, structures, args):
         i += 1
     
     # finally return the result
-    return Result(dg.get_sequence(), score, structures)
+    return Result(dg.get_sequence(), score, structures, i)
 
 # objective function: eos(1)+eos(2)+eos(3) - 3 * gibbs + 1 * ((eos(1)-eos(2))^2 + (eos(1)-eos(3))^2 + (eos(2)-eos(3))^2)
 def calculate_objective(sequence, structures):
