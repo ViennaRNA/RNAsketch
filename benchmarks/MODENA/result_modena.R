@@ -13,7 +13,6 @@ evaluate <- function(file) {
   data <- read.csv(file, header = TRUE, sep=";", dec = ".", comment.char='#')
   data <- cbind(data,path=file) # add column with filename
   
-  sequence_length <- data[1,3] #sequence length: first entry of column 3, since all entries are the same
   sum_n1 <- sum(data$n1)
   sum_n2 <- sum(data$n2)
   
@@ -35,7 +34,7 @@ evaluate <- function(file) {
   se_d2 <- sd_d2/sqrt(length(data$d2))
   
   # result values
-  result <-data.frame(file, sequence_length, sum_n1, sum_n2, d1_min, d2_min, mean_d1, median_d1, mean_d2, median_d2)
+  result <-data.frame(file, max(data$seq_lengh), sum_n1, sum_n2, d1_min, d2_min, mean_d1, median_d1, mean_d2, median_d2)
  
   return(result)
 }
