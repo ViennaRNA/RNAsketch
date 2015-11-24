@@ -68,8 +68,7 @@ def main():
     except Exception as e:
         print e
         quit()
-
-<<<<<<< HEAD
+    
     if args.constraint:
         neg_structures = collections.deque(maxlen=args.constraint)
     else:
@@ -77,11 +76,7 @@ def main():
             neg_structures = collections.deque(maxlen=100)
         else:
             neg_structures = collections.deque(maxlen=20)
-
-=======
-    neg_structures = collections.deque(maxlen=200/len(pos_constraint))
-	
->>>>>>> d95bf5f31d0448e1239cd76b9d34f9a07726bb80
+    
     # main loop from zero to number of solutions
     for i in range(0, args.number):
         r = optimization(dg, pos_constraint, neg_structures, args)
