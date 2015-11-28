@@ -33,7 +33,7 @@ evaluate <- function(file) {
   
   n2 <- d2[d2 == 0]
   sum_n2 <- length(n2)
-  
+ 
   # find min d2 and min d1, if there are more than one min d2
   deltas <- data.frame(d1, d2) 
   min_d2 <-  deltas[deltas$d2 == min(deltas$d2),] # rows where column d2 is minimum
@@ -54,7 +54,7 @@ evaluate <- function(file) {
  
   # result values
   result <-data.frame(file, sequence_length, sum_n1, sum_n2, d1_min, d2_min, mean_d1, median_d1, mean_d2, median_d2, mean_num_mutations)
- 
+
   return(result)
 }
 

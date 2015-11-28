@@ -54,9 +54,9 @@ def main():
                 break
 
     else:
-        # pos_constraint = ['((((....))))...(((....)))']
-        pos_constraint = ['((((....))))....((((....))))........',
-            '........((((....((((....))))....))))','((((((((....))))((((....))))....))))']
+        pos_constraint = ['((((....))))...(((....)))']
+        # pos_constraint = ['((((....))))....((((....))))........',
+        #     '........((((....((((....))))....))))','((((((((....))))((((....))))....))))']
         seq_constraint = ''
 
     print("Positive constraint: ")
@@ -68,8 +68,7 @@ def main():
     except Exception as e:
         print e
         quit()
-
-<<<<<<< HEAD
+    
     if args.constraint:
         neg_structures = collections.deque(maxlen=args.constraint)
     else:
@@ -77,11 +76,7 @@ def main():
             neg_structures = collections.deque(maxlen=100)
         else:
             neg_structures = collections.deque(maxlen=20)
-
-=======
-    neg_structures = collections.deque(maxlen=200/len(pos_constraint))
-	
->>>>>>> d95bf5f31d0448e1239cd76b9d34f9a07726bb80
+    
     # main loop from zero to number of solutions
     for i in range(0, args.number):
         r = optimization(dg, pos_constraint, neg_structures, args)
@@ -108,7 +103,13 @@ def optimization(dg, pos_constraint, neg_structures, args):
     for i in range(0, args.optimization):
 
         (current_seq_struct, current_seq_mfe) = RNA.fold(current_seq)
-
+        # if shapes option on -> calculate shape:
+        # RNAshapes -D '(((((....)))))..((...((....))))....' -t 1
+        # and then string-compare shapes 
+        
+        # if tree-distance optin is on calculate tree-edit distance between
+        # current struct and all pos constraint. if dist < args.treexxx then ok 
+        # int = RNA.tree_edit_distance(RNA.make_tree(struct1), RNA.make_tree(struct2))
         if current_seq_struct in pos_constraint:
 
             current_score = calculate_objective(current_seq, pos_constraint)
@@ -143,7 +144,6 @@ def optimization(dg, pos_constraint, neg_structures, args):
                 pos_energy_constraint = RNA.energy_of_struct(current_seq, pos_constraint[x])
 
                 for k in range(0, len(neg_structures)):
-
                     neg_energy_constraint = RNA.energy_of_struct(current_seq, neg_structures[k])
 
                     if float(neg_energy_constraint) - float(pos_energy_constraint) < 0:
