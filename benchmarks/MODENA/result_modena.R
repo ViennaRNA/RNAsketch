@@ -10,6 +10,9 @@ check_package("Hmisc")
 infiles <- list.files(pattern = '*.out')
 
 evaluate <- function(file) {
+  if (file.info(file)$size == 0) # check if file ist empty
+	{ print(file) }
+
   data <- read.csv(file, header = TRUE, sep=";", dec = ".", comment.char='#')
   data <- cbind(data,path=file) # add column with filename
   
@@ -20,7 +23,7 @@ evaluate <- function(file) {
   all_deltas <- data[,grep("^diff_eos_mfe_", colnames(data))] # find all entries concerning diff_eos
  
   # sort all deltas
-#  sorted_deltas <- t(apply(all_deltas, 1, sort)) # all delta entries sorted row-wise for calculating mean and median t?
+#  sorted_deltas <- t(apply(all_deltas, 1, sort)) # all delta entries sorted row-wise for calculating mean and median
 #  colnames(sorted_deltas) <- cbind(colnames(all_deltas))
 #  rownames(sorted_deltas) <- rbind(rownames(all_deltas))
   
