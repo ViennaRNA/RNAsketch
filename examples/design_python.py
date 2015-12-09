@@ -5,8 +5,6 @@ structures = ['(((((....)))))', '(((....)))....']
 # construct dependency graph with these structures
 dg = rd.DependencyGraphMT(structures)
 
-# randomly sample a initial sequence
-dg.set_sequence()
 # print this sequence
 print dg.get_sequence()
 
