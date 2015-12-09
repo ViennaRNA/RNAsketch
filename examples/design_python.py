@@ -10,7 +10,7 @@ print dg.get_sequence()
 
 # mutate globally for 1000 times and print
 for i in range(0, 1000):
-    dg.mutate_global()
+    dg.sample_global()
     print dg.get_sequence()
 
 # print the amount of solutions
