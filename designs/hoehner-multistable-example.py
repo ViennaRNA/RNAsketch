@@ -62,7 +62,7 @@ def main():
     parser.add_argument("-n", "--number", type=int, default=4, help='Number of designs to generate')
     parser.add_argument("-j", "--jump", type=int, default=1000, help='Do random jumps in the solution space for the first (jump) trials.')
     parser.add_argument("-e", "--exit", type=int, default=1000, help='Exit optimization run if no better solution is aquired after (exit) trials.')
-    parser.add_argument("-m", "--mode", type=str, default='sample', help='Mode for getting a new sequence: sample, sample_local, sample_global')
+    parser.add_argument("-m", "--mode", type=str, default='sample_global', help='Mode for getting a new sequence: sample, sample_local, sample_global')
     parser.add_argument("-k", "--kill", type=int, default=120, help='Timeout value of graph construction in seconds. (default: 120)')
     parser.add_argument("-g", "--graphml", type=str, default=None, help='Write a graphml file with the given filename.')
     parser.add_argument("-c", "--csv", default=False, action='store_true', help='Write output as semi-colon csv file to stdout')
@@ -132,7 +132,6 @@ def main():
         # print the amount of connected components
         number_of_components = dg.number_of_connected_components()
         print('# Number of Connected Components: ' + str(number_of_components))
-
         for i in range(0, number_of_components):
             print('# [' + str(i) + ']' + str(dg.component_vertices(i)))
         
@@ -149,7 +148,6 @@ def main():
                 max_specials = sv
             if (max_component_vertices < cv):
                 max_component_vertices = cv
-
         max_special_ratio = max(special_ratios)
         mean_special_ratio = sum(special_ratios)/len(special_ratios)
 
@@ -158,13 +156,13 @@ def main():
             with open(args.graphml, 'w') as f:
                 f.write(dg.get_graphml() + "\n")
 
-        # main loop from zero to number of solutions
-        mfe_reached_str = ""
-        diff_eos_mfe_str = ""
-        for s in range(0, len(structures)):
-            mfe_reached_str = mfe_reached_str + "mfe_reached_" + str(s) +";"
-            diff_eos_mfe_str = diff_eos_mfe_str + "diff_eos_mfe_" + str(s) + ";"
+        # print header for csv file
         if (args.csv):
+            mfe_reached_str = ""
+            diff_eos_mfe_str = ""
+            for s in range(0, len(structures)):
+                mfe_reached_str = mfe_reached_str + "mfe_reached_" + str(s) +";"
+                diff_eos_mfe_str = diff_eos_mfe_str + "diff_eos_mfe_" + str(s) + ";"
             print(";".join(["jump",
                         "exit",
                         "mode",
@@ -182,7 +180,8 @@ def main():
                         "sample_time"]) + ";" + 
                         mfe_reached_str + 
                         diff_eos_mfe_str)
-
+        
+        # main loop from zero to number of solutions
         for n in range(0, args.number):
             start = time.clock()
             r = optimization_run(dg, structures, args)
@@ -226,8 +225,6 @@ def optimization_run(dg, structures, args):
     score = 0
     count = 0
     jumps = args.jump
-    # randomly sample a initial sequence
-    dg.sample()
     # print this sequence with score
     score = calculate_objective(dg.get_sequence(), structures);
     #print dg.get_sequence() + '\t' + str(score)
@@ -252,7 +249,7 @@ def optimization_run(dg, structures, args):
                 sys.exit(1)
         # write progress
         if (args.progress):
-            sys.stdout.write("\rMutate global: {0:7.0f}/{1:5.0f} from NOS: {2:7.0f}".format(i, count, mut_nos) + " " * 20)
+            sys.stdout.write("\rMutate: {0:7.0f}/{1:5.0f} from NOS: {2:7.0f}".format(i, count, mut_nos) + " " * 20)
             sys.stdout.flush()
         
         this_score = calculate_objective(dg.get_sequence(), structures);
