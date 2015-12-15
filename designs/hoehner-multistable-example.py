@@ -70,7 +70,7 @@ def main():
     parser.add_argument("-d", "--debug", default=False, action='store_true', help='Show debug information of library')
     args = parser.parse_args()
 
-    print("# Options: number={0:d}, jump={1:d}, exit={2:d}".format(args.number, args.jump, args.exit))
+    print("# Options: number={0:d}, jump={1:d}, exit={2:d}, mode={3:}".format(args.number, args.jump, args.exit, args.mode))
     rd.initialize_library(args.debug)
     # define structures
     structures = []
@@ -84,6 +84,7 @@ def main():
             elif re.search(re.compile("@"), line, flags=0):
                 break;
     elif (args.file):
+        print("# Input File: {1:}".format(args.file))
         with open(args.file) as f:
             data = f.read()
             lines = data.split("\n")
@@ -164,7 +165,10 @@ def main():
             mfe_reached_str = mfe_reached_str + "mfe_reached_" + str(s) +";"
             diff_eos_mfe_str = diff_eos_mfe_str + "diff_eos_mfe_" + str(s) + ";"
         if (args.csv):
-            print(";".join(["num_mutations", 
+            print(";".join(["jump",
+                        "exit",
+                        "mode",
+                        "num_mutations", 
                         "seq_length",
                         "sequence",
                         "graph_construction",
@@ -198,7 +202,10 @@ def main():
                     sys.stdout.write("\r" + " " * 60 + "\r")
                     sys.stdout.flush()
 
-                print(r.number_of_mutations, 
+                print(args.jump,
+                        args.exit,
+                        "\"" + args.mode + "\"",
+                        r.number_of_mutations, 
                         len(r.sequence),
                         "\"" + r.sequence + "\"",
                         graph_construction,
