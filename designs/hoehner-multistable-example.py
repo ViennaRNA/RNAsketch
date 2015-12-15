@@ -84,7 +84,7 @@ def main():
             elif re.search(re.compile("@"), line, flags=0):
                 break;
     elif (args.file):
-        print("# Input File: {1:}".format(args.file))
+        print("# Input File: {0:}".format(args.file))
         with open(args.file) as f:
             data = f.read()
             lines = data.split("\n")
