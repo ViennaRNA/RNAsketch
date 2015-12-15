@@ -57,7 +57,7 @@ class Result:
 
 def main():
     parser = argparse.ArgumentParser(description='Design a tri-stable example same to Hoehner 2013 paper.')
-    parser.add_argument("-f", "--file", type = str, default=False, help='Read file in *.inp format')
+    parser.add_argument("-f", "--file", type = str, default=None, help='Read file in *.inp format')
     parser.add_argument("-i", "--input", default=False, action='store_true', help='Read custom structures and sequence constraints from stdin')
     parser.add_argument("-n", "--number", type=int, default=4, help='Number of designs to generate')
     parser.add_argument("-j", "--jump", type=int, default=1000, help='Do random jumps in the solution space for the first (jump) trials.')
@@ -83,7 +83,7 @@ def main():
                 constraint = line.rstrip('\n')
             elif re.search(re.compile("@"), line, flags=0):
                 break;
-    elif (args.file):
+    elif (args.file is not None):
         print("# Input File: {0:}".format(args.file))
         with open(args.file) as f:
             data = f.read()

@@ -12,6 +12,8 @@ def get_structures(args):
     while (amount > 0):
         dg.sample()
         structure = RNA.fold(dg.get_sequence())[0]
+        if (structure == "." * args.length):
+            continue
         structures.append(structure)
         bipartite = rd.graph_is_bipartite(structures)
         if (bipartite):

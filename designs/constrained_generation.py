@@ -52,7 +52,7 @@ class Result:
 
 def main():
     parser = argparse.ArgumentParser(description='constrained sequence generation')
-    parser.add_argument("-f", "--file", type = str, default=False, help='Read file in *.inp format')
+    parser.add_argument("-f", "--file", type = str, default=None, help='Read file in *.inp format')
     parser.add_argument("-i", "--input", default=False, action='store_true', help='Read custom structures and sequence constraints from stdin')
     parser.add_argument("-n", "--number", type=int, default=4, help='Number of designs to generate')
     parser.add_argument("-s", "--size_constraint", type=int, default=0, help='Size of negative constraints container')
@@ -79,7 +79,7 @@ def main():
                 seq_constraint = line.rstrip('\n')
             elif re.search(re.compile("@"), line, flags=0):
                 break;
-    elif (args.file):
+    elif (args.file is not None):
         print("# Input File: {0:}".format(args.file))
         with open(args.file) as f:
             data = f.read()
