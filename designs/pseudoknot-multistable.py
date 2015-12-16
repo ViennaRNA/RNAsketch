@@ -4,12 +4,18 @@ import RNAdesign as rd
 import RNA
 import argparse
 import sys
-import collections
-from collections import deque
 import re
 import math
 import signal
 import time
+
+# a tri-stable example target. (optional comment)
+# ((((....))))....((((....))))........
+# ........((((....((((....))))....))))
+# ((((((((....))))((((....))))....))))
+# below follows a simple (and optional) sequence constraint.
+# CKNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNB
+# objective function: eos(1)+eos(2)+eos(3) - 3 * gibbs + 1 * ((eos(1)-eos(2))^2 + (eos(1)-eos(3))^2 + (eos(2)-eos(3))^2)
 
 kT = ((37+273.15)*1.98717)/1000.0; # kT = (betaScale*((temperature+K0)*GASCONST))/1000.0; /* in Kcal */
 
@@ -49,14 +55,13 @@ class Result:
             print(struct + '\t{0:9.4f}\t{1:+9.4f}\t{2:9.4f}'.format(self.eos[i], self.eos[i]-self.mfe_energy, self.probs[i]))
         print(self.mfe_struct + '\t{0:9.4f}'.format(self.mfe_energy))
 
-
 def main():
-    parser = argparse.ArgumentParser(description='constrained sequence generation')
+    parser = argparse.ArgumentParser(description='Design a tri-stable example same to Hoehner 2013 paper.')
     parser.add_argument("-f", "--file", type = str, default=None, help='Read file in *.inp format')
     parser.add_argument("-i", "--input", default=False, action='store_true', help='Read custom structures and sequence constraints from stdin')
     parser.add_argument("-n", "--number", type=int, default=4, help='Number of designs to generate')
-    parser.add_argument("-s", "--size_constraint", type=int, default=0, help='Size of negative constraints container')
-    parser.add_argument("-e", "--exit", type=int, default=1000, help='Exit optimization run if no better solution is aquired after exit trials.')
+    parser.add_argument("-j", "--jump", type=int, default=1000, help='Do random jumps in the solution space for the first (jump) trials.')
+    parser.add_argument("-e", "--exit", type=int, default=1000, help='Exit optimization run if no better solution is aquired after (exit) trials.')
     parser.add_argument("-m", "--mode", type=str, default='sample_global', help='Mode for getting a new sequence: sample, sample_local, sample_global')
     parser.add_argument("-k", "--kill", type=int, default=120, help='Timeout value of graph construction in seconds. (default: 120)')
     parser.add_argument("-g", "--graphml", type=str, default=None, help='Write a graphml file with the given filename.')
@@ -64,19 +69,18 @@ def main():
     parser.add_argument("-p", "--progress", default=False, action='store_true', help='Show progress of optimization')
     parser.add_argument("-d", "--debug", default=False, action='store_true', help='Show debug information of library')
     args = parser.parse_args()
-    
-    print("# Options: number={0:d}, size_constraint={1:d}, exit={2:d}, mode={3:}".format(args.number, args.size_constraint, args.exit, args.mode))
-    rd.initialize_library(args.debug)
 
-    # define structural and sequence constraints
-    pos_constraint = []
-    seq_constraint = ""
+    print("# Options: number={0:d}, jump={1:d}, exit={2:d}, mode={3:}".format(args.number, args.jump, args.exit, args.mode))
+    rd.initialize_library(args.debug)
+    # define structures
+    structures = []
+    constraint = ""
     if (args.input):
         for line in sys.stdin:
-            if re.match(re.compile("[\(\)\.]"), line, flags=0):
-                pos_constraint.append(line.rstrip('\n'))
+            if re.match(re.compile("[\(\)\.]"), line, flags=0): # TODO add brackets <{([
+                structures.append(line.rstrip('\n'))
             elif re.match(re.compile("[ACGTUWSMKRYBDHVN]"), line, flags=0):
-                seq_constraint = line.rstrip('\n')
+                constraint = line.rstrip('\n')
             elif re.search(re.compile("@"), line, flags=0):
                 break;
     elif (args.file is not None):
@@ -85,27 +89,18 @@ def main():
             data = f.read()
             lines = data.split("\n")
             for line in lines:
-                if re.match(re.compile("[\(\)\.]"), line):
-                    pos_constraint.append(line)
+                if re.match(re.compile("[\(\)\.]"), line): # TODO add brackets <{([
+                    structures.append(line)
                 if re.match(re.compile("[\ AUGC]"), line):
                     elements = str(line)
-                    seq_constraint = elements.replace(" ", "N")
+                    constraint = elements.replace(" ", "N")
                 if line.startswith(";"):
                     break
     else:
-        pos_constraint = ['((((....))))....((((....))))........',
+        structures = ['((((....))))....((((....))))........',
             '........((((....((((....))))....))))',
             '((((((((....))))((((....))))....))))']
-        seq_constraint = 'NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN'
-    
-    # generate negative constraints container
-    if args.size_constraint != 0:
-        neg_structures = collections.deque(maxlen=args.size_constraint)
-    else:
-        if len(pos_constraint) < 3:
-            neg_structures = collections.deque(maxlen=100)
-        else:
-            neg_structures = collections.deque(maxlen=20)
+        constraint = 'NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN'
     
     # try to construct dependency graph, catch errors and timeouts
     dg = None
@@ -119,19 +114,19 @@ def main():
     num_cc = 0
     nos = 0
     
-    # construct dependency graph with the pos_constraint
+    
+    # construct dependency graph with these structures
     try:
         with timeout(seconds=args.kill):
             start = time.clock()
-            dg = rd.DependencyGraphMT(pos_constraint)
+            dg = rd.DependencyGraphMT(structures)
             construction_time = time.clock() - start
     except Exception as e:
         print( "Error: %s" % e , file=sys.stderr)
-    
-    # main loop from zero to number of solutions
+
     if (dg is not None):
         # general DG values
-        print("# " + "\n# ".join(pos_constraint) + "\n# " + seq_constraint)
+        print("# " + "\n# ".join(structures) + "\n# " + constraint)
         # print the amount of solutions
         print('# Maximal number of solutions: ' + str(dg.number_of_sequences()))
         # print the amount of connected components
@@ -165,10 +160,10 @@ def main():
         if (args.csv):
             mfe_reached_str = ""
             diff_eos_mfe_str = ""
-            for s in range(0, len(pos_constraint)):
+            for s in range(0, len(structures)):
                 mfe_reached_str = mfe_reached_str + "mfe_reached_" + str(s) +";"
                 diff_eos_mfe_str = diff_eos_mfe_str + "diff_eos_mfe_" + str(s) + ";"
-            print(";".join(["size_constraint",
+            print(";".join(["jump",
                         "exit",
                         "mode",
                         "num_mutations", 
@@ -187,87 +182,62 @@ def main():
                         diff_eos_mfe_str)
         
         # main loop from zero to number of solutions
-        for i in range(0, args.number):
+        for n in range(0, args.number):
             start = time.clock()
-            r = optimization(dg, pos_constraint, neg_structures, args)
+            r = optimization_run(dg, structures, args)
             sample_time = time.clock() - start
-            if r is not None:
-                if (args.csv):
-                    # process result and write result of this optimization to stdout
-                    diff_eos_mfe = []
-                    mfe_reached = []
-                    for i in range(0, len(r.structures)):
-                        mfe_reached.append(0)
-                        eos_mfe = r.eos[i] - r.mfe_energy
-                        diff_eos_mfe.append(eos_mfe)
-                        if r.eos[i] == r.mfe_energy:
-                            mfe_reached[i] = 1
+            if (args.csv):
+                # process result and write result of this optimization to stdout
+                diff_eos_mfe = []
+                mfe_reached = []
+                for i in range(0, len(r.structures)):
+                    mfe_reached.append(0)
+                    eos_mfe = r.eos[i] - r.mfe_energy
+                    diff_eos_mfe.append(eos_mfe)
+                    if r.eos[i] == r.mfe_energy:
+                        mfe_reached[i] = 1
 
-                    if (args.progress):
-                        sys.stdout.write("\r" + " " * 60 + "\r")
-                        sys.stdout.flush()
+                if (args.progress):
+                    sys.stdout.write("\r" + " " * 60 + "\r")
+                    sys.stdout.flush()
 
-                    print(args.size_constraint,
-                            args.exit,
-                            "\"" + args.mode + "\"",
-                            r.number_of_mutations, 
-                            len(r.sequence),
-                            "\"" + r.sequence + "\"",
-                            graph_construction,
-                            num_cc,
-                            max_specials,
-                            max_component_vertices,
-                            max_special_ratio,
-                            mean_special_ratio,
-                            nos,
-                            construction_time,
-                            sample_time,
-                            *(mfe_reached + diff_eos_mfe), sep=";")
-                else:
-                    r.write_out()
+                print(args.jump,
+                        args.exit,
+                        "\"" + args.mode + "\"",
+                        r.number_of_mutations, 
+                        len(r.sequence),
+                        "\"" + r.sequence + "\"",
+                        graph_construction,
+                        num_cc,
+                        max_specials,
+                        max_component_vertices,
+                        max_special_ratio,
+                        mean_special_ratio,
+                        nos,
+                        construction_time,
+                        sample_time,
+                        *(mfe_reached + diff_eos_mfe), sep=";")
             else:
-                sys.stdout.write("\r                                                             \r")
-                sys.stdout.flush()
-                print("No sequence with positive constraint.")
+                r.write_out()
 
-
-def optimization(dg, pos_constraint, neg_structures, args):
-    score = float('Infinity')
+# main optimization
+def optimization_run(dg, structures, args):
+    score = 0
     count = 0
-
-    # get the initial sequence
-    current_seq = dg.get_sequence()
-
-    # number of mutations
+    jumps = args.jump
+    # print this sequence with score
+    score = calculate_objective(dg.get_sequence(), structures);
+    #print dg.get_sequence() + '\t' + str(score)
+    
+    # sample globally for num_opt times and print
     i = 0
-
-    while True:
-        (current_seq_struct, current_seq_mfe) = RNA.fold(current_seq)
-        # if shapes option on -> calculate shape:
-        # RNAshapes -D '(((((....)))))..((...((....))))....' -t 1
-        # and then string-compare shapes 
-        
-        # if tree-distance optin is on calculate tree-edit distance between
-        # current struct and all pos constraint. if dist < args.treexxx then ok 
-        # int = RNA.tree_edit_distance(RNA.make_tree(struct1), RNA.make_tree(struct2))
-        if current_seq_struct in pos_constraint:
-
-            current_score = calculate_objective(current_seq, pos_constraint)
-
-            if current_score < score:
-                score = current_score
-                result_seq = current_seq
-                count = 0
-
-            else:
-                count += 1
-                if count > args.exit:
-                    break
-
-        if current_seq_struct not in neg_structures:
-            neg_structures.append(current_seq_struct)
-
-        while True:
+    while 1:
+        # sample sequence
+        if jumps:
+            mut_nos = dg.sample()
+            jumps -= 1
+            count = 0
+        else:
             if args.mode == 'sample':
                 mut_nos = dg.sample()
             elif args.mode == 'sample_global':
@@ -277,44 +247,42 @@ def optimization(dg, pos_constraint, neg_structures, args):
             else:
                 sys.stdout.write("Wrong sample argument: " + args.mode + "\n")
                 sys.exit(1)
-            current_seq = dg.get_sequence()
-            perfect = True
-
-            if args.progress:
-                sys.stdout.write("\rMutate: {0:5.0f}/{1:5.0f} from NOS:{2:7.0f}".format(count, i, mut_nos))
-                sys.stdout.flush()
-
-            for x in range(0, len(pos_constraint)):
-                pos_energy_constraint = RNA.energy_of_struct(current_seq, pos_constraint[x])
-
-                for k in range(0, len(neg_structures)):
-                    neg_energy_constraint = RNA.energy_of_struct(current_seq, neg_structures[k])
-
-                    if float(neg_energy_constraint) - float(pos_energy_constraint) < 0:
-                        perfect = False
-                        break
-
-                if perfect:
-                    break
-
-            if perfect:
+        # write progress
+        if (args.progress):
+            sys.stdout.write("\rMutate: {0:7.0f}/{1:5.0f} from NOS: {2:7.0f}".format(i, count, mut_nos) + " " * 20)
+            sys.stdout.flush()
+        
+        this_score = calculate_objective(dg.get_sequence(), structures);
+        
+        if (this_score < score):
+            score = this_score
+            count = 0
+        else:
+            dg.revert_sequence();
+            count += 1
+            if count > args.exit:
                 break
         i += 1
+    
+    # finally return the result
+    return Result(dg.get_sequence(), score, structures, i)
 
-    return Result(result_seq, score, pos_constraint, i) # result_seq
-
-
-def calculate_objective(current_seq, pos_constraint):
-    current_score = 0
-    (current_seq_struct, current_seq_mfe) = RNA.fold(current_seq) # wird jetzt zwei mal berechnet, da oben nur in schleife, wenn struct in pos_constraints
-
-    for l in range(0, len(pos_constraint)):
-        eos_pos_cons = RNA.energy_of_struct(current_seq, pos_constraint[l])
-        diff_eos_mfe = eos_pos_cons - current_seq_mfe
-        current_score += diff_eos_mfe
-
-    return current_score
-
+# objective function: eos(1)+eos(2)+eos(3) - 3 * gibbs + 1 * ((eos(1)-eos(2))^2 + (eos(1)-eos(3))^2 + (eos(2)-eos(3))^2)
+def calculate_objective(sequence, structures):
+    eos = []
+    for struct in structures:
+        eos.append(RNA.energy_of_struct(sequence, struct)) # TODO change do NUPACK.energy(arguments) ???
+    
+    gibbs = RNA.pf_fold(sequence) # TODO change to NUPACK.pfunc(arguments)
+    
+    objective_difference_part = 0
+    for i, value in enumerate(eos):
+        for j in eos[i+1:]:
+            objective_difference_part += math.fabs(value - j)
+    
+    return sum(eos) - len(eos) * gibbs[1] + 1 * objective_difference_part
 
 if __name__ == "__main__":
     main()
+
+
