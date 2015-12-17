@@ -24,25 +24,26 @@ q(status=1);
 }
 
 # Script
-names<-cbind("length", "structures", "graph_construction", "num_cc", "max_special_ratio", "mean_special_ratio", "nos", "construction_time", "sample_time");
-data <- read.csv(opt$file, header=FALSE, sep = ";", dec = ".", comment.char='#', col.names=names);
-
-
+data <- read.csv(opt$file, header=TRUE, sep = ";", dec = ".", quote = "\"", comment.char='#');
+data <- data[ , -which(names(data) %in% c("X"))]
+summary(data)
 
 data_failed <- subset(data, graph_construction==0)
-data_failed <- data_failed[, (names(data_failed) %in% c("length", "structures"))]
-failed_count <- ddply(data_failed, .(structures, length), count)
+data_failed <- data_failed[, (names(data_failed) %in% c("seq_length", "mean_special_ratio"))]
+if (nrow(data_failed) > 0) {
+    failed_count <- ddply(data_failed, .(mean_special_ratio, seq_length), count)
 
-# plot failed xy with correlation curve
-pdf(paste(opt$file, "_failed.pdf", sep=""))
-p <- ggplot(failed_count, aes(x=structures, y=length))
-p + geom_point(aes(size=freq, colour=freq)) + 
-    guides(color=guide_legend(), size = guide_legend()) + 
-    geom_smooth(method=lm, formula=y~exp(-x), fullrange=FALSE) + 
-    xlab("Number of Structures") +
-    ylab("Design Length") + 
-    ggtitle("Graph Construction Timeouts (15s)")
-dev.off()
+    # plot failed xy with correlation curve
+    pdf(paste(opt$file, "_failed.pdf", sep=""))
+    p <- ggplot(failed_count, aes(x=mean_special_ratio, y=seq_length))
+    p + geom_point(aes(size=freq, colour=freq)) + 
+        guides(color=guide_legend(), size = guide_legend()) + 
+        geom_smooth(method=lm, formula=y~exp(-x), fullrange=FALSE) + 
+        xlab("Mean Special Ratio") +
+        ylab("Design Length") + 
+        ggtitle("Graph Construction Timeouts (15s)")
+    dev.off()
+}
 
 times <- c(grep("time$", names(data), value=TRUE))
 data_sub <- subset(data, graph_construction!=0)
@@ -66,7 +67,7 @@ cor.mtest <- function(mat, conf.level = 0.95) {
 
 # plot correlation plot
 pdf(paste(opt$file, "_corrplot.pdf", sep=""))
-cc <- cor(data_sub[, !names(data_sub)=="graph_construction"])
+cc <- cor(data_sub[ , -which(names(data_sub) %in% c("graph_construction","sequence", "mode", "seq_length"))])
 res1 <- cor.mtest(cc, 0.95)
 corrplot(cc, method = "color", order = "hclust", diag= FALSE, p.mat = res1[[1]], insig = "p-value")
 dev.off()
