@@ -8,22 +8,9 @@ import collections
 from collections import deque
 import re
 import math
-import signal
 import time
 
 kT = ((37+273.15)*1.98717)/1000.0; # kT = (betaScale*((temperature+K0)*GASCONST))/1000.0; /* in Kcal */
-
-class timeout:
-    def __init__(self, seconds=10, error_message='Timeout'):
-        self.seconds = seconds
-        self.error_message = error_message
-    def handle_timeout(self, signum, frame):
-        raise Exception(self.error_message)
-    def __enter__(self):
-        signal.signal(signal.SIGALRM, self.handle_timeout)
-        signal.alarm(self.seconds)
-    def __exit__(self, type, value, traceback):
-        signal.alarm(0)
 
 class Result:
     def __init__(self, sequence, score, structures, number_of_mutations):
@@ -58,7 +45,7 @@ def main():
     parser.add_argument("-s", "--size_constraint", type=int, default=0, help='Size of negative constraints container')
     parser.add_argument("-e", "--exit", type=int, default=1000, help='Exit optimization run if no better solution is aquired after exit trials.')
     parser.add_argument("-m", "--mode", type=str, default='sample_global', help='Mode for getting a new sequence: sample, sample_local, sample_global')
-    parser.add_argument("-k", "--kill", type=int, default=120, help='Timeout value of graph construction in seconds. (default: 120)')
+    parser.add_argument("-k", "--kill", type=int, default=0, help='Timeout value of graph construction in seconds. (default: infinite)')
     parser.add_argument("-g", "--graphml", type=str, default=None, help='Write a graphml file with the given filename.')
     parser.add_argument("-c", "--csv", default=False, action='store_true', help='Write output as semi-colon csv file to stdout')
     parser.add_argument("-p", "--progress", default=False, action='store_true', help='Show progress of optimization')
@@ -66,7 +53,7 @@ def main():
     args = parser.parse_args()
     
     print("# Options: number={0:d}, size_constraint={1:d}, exit={2:d}, mode={3:}".format(args.number, args.size_constraint, args.exit, args.mode))
-    rd.initialize_library(args.debug)
+    rd.initialize_library(args.debug, args.kill)
 
     # define structural and sequence constraints
     pos_constraint = []
@@ -119,12 +106,36 @@ def main():
     num_cc = 0
     nos = 0
     
+    # print header for csv file
+    if (args.csv):
+        mfe_reached_str = ""
+        diff_eos_mfe_str = ""
+        for s in range(0, len(pos_constraint)):
+            mfe_reached_str = mfe_reached_str + "mfe_reached_" + str(s) +";"
+            diff_eos_mfe_str = diff_eos_mfe_str + "diff_eos_mfe_" + str(s) + ";"
+        print(";".join(["size_constraint",
+                    "exit",
+                    "mode",
+                    "num_mutations", 
+                    "seq_length",
+                    "sequence",
+                    "graph_construction",
+                    "num_cc",
+                    "max_specials",
+                    "max_component_vertices",
+                    "max_special_ratio",
+                    "mean_special_ratio",
+                    "nos",
+                    "construction_time",
+                    "sample_time"]) + ";" + 
+                    mfe_reached_str + 
+                    diff_eos_mfe_str)
+    
     # construct dependency graph with the pos_constraint
     try:
-        with timeout(seconds=args.kill):
-            start = time.clock()
-            dg = rd.DependencyGraphMT(pos_constraint)
-            construction_time = time.clock() - start
+        start = time.clock()
+        dg = rd.DependencyGraphMT(pos_constraint)
+        construction_time = time.clock() - start
     except Exception as e:
         print( "Error: %s" % e , file=sys.stderr)
     
@@ -160,75 +171,63 @@ def main():
         if args.graphml is not None:
             with open(args.graphml, 'w') as f:
                 f.write(dg.get_graphml() + "\n")
-
-        # print header for csv file
-        if (args.csv):
-            mfe_reached_str = ""
-            diff_eos_mfe_str = ""
-            for s in range(0, len(pos_constraint)):
-                mfe_reached_str = mfe_reached_str + "mfe_reached_" + str(s) +";"
-                diff_eos_mfe_str = diff_eos_mfe_str + "diff_eos_mfe_" + str(s) + ";"
-            print(";".join(["size_constraint",
-                        "exit",
-                        "mode",
-                        "num_mutations", 
-                        "seq_length",
-                        "sequence",
-                        "graph_construction",
-                        "num_cc",
-                        "max_specials",
-                        "max_component_vertices",
-                        "max_special_ratio",
-                        "mean_special_ratio",
-                        "nos",
-                        "construction_time",
-                        "sample_time"]) + ";" + 
-                        mfe_reached_str + 
-                        diff_eos_mfe_str)
         
         # main loop from zero to number of solutions
         for i in range(0, args.number):
             start = time.clock()
             r = optimization(dg, pos_constraint, neg_structures, args)
             sample_time = time.clock() - start
-            if r is not None:
-                if (args.csv):
-                    # process result and write result of this optimization to stdout
-                    diff_eos_mfe = []
-                    mfe_reached = []
-                    for i in range(0, len(r.structures)):
-                        mfe_reached.append(0)
-                        eos_mfe = r.eos[i] - r.mfe_energy
-                        diff_eos_mfe.append(eos_mfe)
-                        if r.eos[i] == r.mfe_energy:
-                            mfe_reached[i] = 1
+            if (args.csv):
+                # process result and write result of this optimization to stdout
+                diff_eos_mfe = []
+                mfe_reached = []
+                for i in range(0, len(r.structures)):
+                    mfe_reached.append(0)
+                    eos_mfe = r.eos[i] - r.mfe_energy
+                    diff_eos_mfe.append(eos_mfe)
+                    if r.eos[i] == r.mfe_energy:
+                        mfe_reached[i] = 1
 
-                    if (args.progress):
-                        sys.stdout.write("\r" + " " * 60 + "\r")
-                        sys.stdout.flush()
+                if (args.progress):
+                    sys.stdout.write("\r" + " " * 60 + "\r")
+                    sys.stdout.flush()
 
-                    print(args.size_constraint,
-                            args.exit,
-                            "\"" + args.mode + "\"",
-                            r.number_of_mutations, 
-                            len(r.sequence),
-                            "\"" + r.sequence + "\"",
-                            graph_construction,
-                            num_cc,
-                            max_specials,
-                            max_component_vertices,
-                            max_special_ratio,
-                            mean_special_ratio,
-                            nos,
-                            construction_time,
-                            sample_time,
-                            *(mfe_reached + diff_eos_mfe), sep=";")
-                else:
-                    r.write_out()
+                print(args.size_constraint,
+                        args.exit,
+                        "\"" + args.mode + "\"",
+                        r.number_of_mutations, 
+                        len(r.sequence),
+                        "\"" + r.sequence + "\"",
+                        graph_construction,
+                        num_cc,
+                        max_specials,
+                        max_component_vertices,
+                        max_special_ratio,
+                        mean_special_ratio,
+                        nos,
+                        construction_time,
+                        sample_time,
+                        *(mfe_reached + diff_eos_mfe), sep=";")
             else:
-                sys.stdout.write("\r                                                             \r")
-                sys.stdout.flush()
-                print("No sequence with positive constraint.")
+                r.write_out()
+    else:
+        dummylist = [0] * len(pos_constraint)
+        print(args.size_constraint,
+                args.exit,
+                "\"" + args.mode + "\"",
+                0, 
+                len(pos_constraint[0]),
+                "\"\"",
+                graph_construction,
+                num_cc,
+                max_specials,
+                max_component_vertices,
+                max_special_ratio,
+                mean_special_ratio,
+                nos,
+                construction_time,
+                sample_time,
+                *(dummylist + dummylist), sep=";")
 
 
 def optimization(dg, pos_constraint, neg_structures, args):
