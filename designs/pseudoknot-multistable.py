@@ -225,6 +225,10 @@ def optimization_run(dg, structures, args):
     score = 0
     count = 0
     jumps = args.jump
+    
+    # sample scratch sequence
+    dg.sample()
+
     # print this sequence with score
     score = calculate_objective(dg.get_sequence(), structures);
     #print dg.get_sequence() + '\t' + str(score)

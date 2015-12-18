@@ -233,7 +233,9 @@ def main():
 def optimization(dg, pos_constraint, neg_structures, args):
     score = float('Infinity')
     count = 0
-
+    
+    # sample scratch sequence
+    dg.sample()
     # get the initial sequence
     current_seq = dg.get_sequence()
 
