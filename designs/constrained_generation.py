@@ -110,12 +110,15 @@ def main():
     if (args.csv):
         mfe_reached_str = ""
         diff_eos_mfe_str = ""
+        prob_str = ""
         for s in range(0, len(pos_constraint)):
             mfe_reached_str = mfe_reached_str + "mfe_reached_" + str(s) +";"
             diff_eos_mfe_str = diff_eos_mfe_str + "diff_eos_mfe_" + str(s) + ";"
+            prob_str = prob_str + "prob_" + str(s) + ";"
         print(";".join(["size_constraint",
                     "exit",
                     "mode",
+                    "score",
                     "num_mutations", 
                     "seq_length",
                     "sequence",
@@ -129,7 +132,8 @@ def main():
                     "construction_time",
                     "sample_time"]) + ";" + 
                     mfe_reached_str + 
-                    diff_eos_mfe_str)
+                    diff_eos_mfe_str +
+                    prob_str)
     
     # construct dependency graph with the pos_constraint
     try:
@@ -195,6 +199,7 @@ def main():
                 print(args.size_constraint,
                         args.exit,
                         "\"" + args.mode + "\"",
+                        r.score,
                         r.number_of_mutations, 
                         len(r.sequence),
                         "\"" + r.sequence + "\"",
@@ -207,7 +212,7 @@ def main():
                         nos,
                         construction_time,
                         sample_time,
-                        *(mfe_reached + diff_eos_mfe), sep=";")
+                        *(mfe_reached + diff_eos_mfe + r.probs), sep=";")
             else:
                 r.write_out()
     else:
@@ -216,6 +221,7 @@ def main():
                 args.exit,
                 "\"" + args.mode + "\"",
                 0, 
+                0,
                 len(pos_constraint[0]),
                 "\"\"",
                 graph_construction,
@@ -227,7 +233,7 @@ def main():
                 nos,
                 construction_time,
                 sample_time,
-                *(dummylist + dummylist), sep=";")
+                *(dummylist + dummylist + dummylist), sep=";")
 
 
 def optimization(dg, pos_constraint, neg_structures, args):
