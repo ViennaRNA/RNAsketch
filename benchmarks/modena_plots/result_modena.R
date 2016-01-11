@@ -1,3 +1,5 @@
+#!/usr/bin/env Rscript
+
 # Packages
 check_package <- function(x) {
   if (!require(x,character.only = TRUE)) {
@@ -7,55 +9,79 @@ check_package <- function(x) {
 
 check_package("Hmisc")
 check_package("gtools")
+check_package("getopt")
+
+# Option Parsing
+spec = matrix(c(
+    'prefix','p', 1, "character",
+    'suffix','s', 1, "character",
+    'directory', 'd', 1, "character",
+    'help', 'h', 0, "logical"
+), byrow=TRUE, ncol=4);
+opt = getopt(spec);
+
+if (!is.null(opt$help)) {
+cat(getopt(spec, usage=TRUE));
+q(status=1);
+}
+
+prefix <- opt$prefix
+postfix <- opt$suffix
+
+if (!is.null(opt$directory)) {
+setwd(opt$directory)
+}
 
 infiles <- mixedsort(list.files(pattern = '*.out'))
 
 evaluate <- function(file) {
   data <- read.csv(file, header = TRUE, sep=";", dec = ".", comment.char='#')
   
-  file <- sub("modena_comp_", "", file) 
-  file <- sub(".inp.out", "", file)
-  file <- sub("_edif0.0", "", file)
+  file <- sub(toString(prefix), "", file) 
+  file <- sub(toString(postfix), "", file)
   file <- gsub("_", " ", file)
   
   data <- cbind(data,path=file) # add column with filename
   
-  # sequence_length <- data[1,3] #sequence length: first entry of column 3, since all entries are the same
-  sequence_length <- max(data$seq_length)
-  mean_num_mutations <- mean(data$num_mutations)
-  
+  l <- max(data$seq_length)
+  mean_nom <- mean(data$num_mutations)
+  median_nom <- median(data$num_mutations)
+
   all_deltas <- data[,grep("^diff_eos_mfe_", colnames(data))] # find all entries concerning diff_eos
-  
-  d1 <- apply(all_deltas, 1, min) # find min delta of each row
-  d2 <- apply(all_deltas, 1, max) # find max delta of each row
-  
-  # number of designed sequences with mfe
-  n1 <- d1[d1 == 0]  
-  sum_n1 <- length(n1) # length of vector, because n1 contains only entries where mfe is reached
-  
-  n2 <- d2[d2 == 0]
-  sum_n2 <- length(n2)
+
+  d1_min_row<- apply(all_deltas, 1, min) # find min delta of each row
+  d2_min_row <- apply(all_deltas, 1, max) # find max delta of each row
   
   # find min d2 and min d1, if there are more than one min d2
-  deltas <- data.frame(d1, d2) 
-  min_d2 <-  deltas[deltas$d2 == min(deltas$d2),] # rows where column d2 is minimum
-  min_d1 <- min(min_d2$d1) # since min_d2 contains all entries where d2 is min, it is sufficient to find one minimum (does not matter if there are more than one)
+  deltas <- data.frame(d1_min_row, d2_min_row) 
+  min_d2 <-  deltas[deltas$d2_min_row == min(deltas$d2_min_row),] # rows where column d2 is minimum
+  min_d1 <- min(min_d2$d1_min_row) # since min_d2 contains all entries where d2 is min, it is sufficient to find one minimum (does not matter if there are more than one)
   
-  d1_min <- min_d1 # not necessary
-  d2_min <- min_d2[1,2] # all entries in this column mimima, therefore take first entry
+  d1 <- min_d1 # not necessary
+  d2 <- min_d2[1,2] # all entries in this column mimima, therefore take first entry
   
   # mean, median, standard deviation and standard error of d1 and d2 
-  mean_d1 <- mean(d1)
-  median_d1 <- median(d1)
-  sd_d1 <- sd(d1)
-  se_d1 <- sd_d1/sqrt(length(d1))
-  mean_d2 <- mean(d2)
-  median_d2 <- median(d2)
-  sd_d2 <- sd(d2)
-  se_d2 <- sd_d2/sqrt(length(d2))
+  mean_d1 <- mean(d1_min_row)
+  median_d1 <- median(d1_min_row)
+  sd_d1 <- sd(d1_min_row)
+  se_d1 <- sd_d1/sqrt(length(d1_min_row))
+  mean_d2 <- mean(d2_min_row)
+  median_d2 <- median(d2_min_row)
+  sd_d2 <- sd(d2_min_row)
+  se_d2 <- sd_d2/sqrt(length(d2_min_row))
+
+  mfe_reached <- data[,grep("^mfe_reached_", colnames(data))] # "ns"
+  sorted_mfes <- t(apply(mfe_reached, 1, sort, decreasing = TRUE))   
+
+  colnames(sorted_mfes) <- cbind(colnames(mfe_reached))
+  rownames(sorted_mfes) <- rbind(rownames(mfe_reached))
+ 
+  sum_n <- t(colSums(sorted_mfes)) # sums of ns
   
   # result values
-  result <-data.frame(file, sequence_length, sum_n1, sum_n2, d1_min, d2_min, mean_d1, median_d1, mean_d2, median_d2, mean_num_mutations)
+  RNA <- file
+  num_of_structs <- length(mfe_reached)
+  result <-data.frame(RNA, l, sum_n, d1, d2, mean_d1, median_d1, mean_d2, median_d2, mean_nom, median_nom, num_of_structs)
   return(result)
 }
 
@@ -66,7 +92,18 @@ all_infiles <- lapply(infiles,
 )
 
 all_infiles <- do.call(rbind,all_infiles)
-colnames(all_infiles) <- c("RNA", "l", "n1", "n2", "d1", "d2",  "mean_d1", "median_d1", "mean_d2", "median_d2", "mean_num_mutations") # RNA = file
+
+num_of_structs <- all_infiles$num_of_structs
+
+insert_point <- 3
+for (i in 1:num_of_structs) {
+    colnames(all_infiles)[insert_point] <- paste0("n", i)
+    insert_point <- insert_point + 1
+}
+
+last_element <- length(all_infiles) 
+all_infiles <- all_infiles[-c(last_element)] #drop last column(=number_of_structs) 
+names_infiles <- colnames(all_infiles)
 
 # calculate mean and median from all_infiles d1 and d2  
 mean_all_d1 <- mean(all_infiles$d1)
@@ -74,12 +111,42 @@ median_all_d1 <- median(all_infiles$d1)
 mean_all_d2 <- mean(all_infiles$d2)
 median_all_d2 <- median(all_infiles$d2)
 
-all_infiles <- rbind(all_infiles, data.frame(RNA="mean", l = NA, n1 = NA, n2= NA, d1= mean_all_d1, d2 = mean_all_d2, mean_d1= NA, median_d1= NA, mean_d2= NA, median_d2= NA, mean_num_mutations = NA))
-all_infiles <- rbind(all_infiles, data.frame(RNA="median", l = NA, n1 = NA , n2= NA, d1= median_all_d1, d2 = median_all_d2, mean_d1= NA, median_d1= NA, mean_d2= NA, median_d2= NA, mean_num_mutations = NA))
+# generate row for mean of d1 and d2 for latex table
+mean_all_ds <- c(rep(NA,last_element-1))
+mean_all_ds <- t(mean_all_ds)
+mean_all_ds <- as.data.frame(mean_all_ds)
+colnames(mean_all_ds) <- names_infiles
+mean_all_ds$RNA <- "mean"
+mean_all_ds$d1 <- mean_all_d1
+mean_all_ds$d2 <- mean_all_d2
 
-colnames(all_infiles) <- c("RNA", "l", "n1", "n2", "d1", "d2",  "mean d1", "median d1", "mean d2", "median d2", "mean num mutations") #change names for latex table
+# generate row for median of d1 and d2 for latex table
+median_all_ds <- c(rep(NA,last_element-1))
+median_all_ds <- t(median_all_ds)
+median_all_ds <- as.data.frame(median_all_ds)
+colnames(median_all_ds) <- names_infiles
+median_all_ds$RNA <- "median"
+median_all_ds$d1 <- median_all_d1
+median_all_ds$d2 <- median_all_d2
+
+# add mean and median d1/d2 to existing data.frame
+all_infiles <- rbind(all_infiles, mean_all_ds)
+all_infiles <- rbind(all_infiles, median_all_ds)
+
+# format names for latex table
+new_names <- colnames(all_infiles)
+new_names <- gsub(pattern="_", replacement = " ", new_names, ignore.case = T)
+new_names <- sapply(new_names, function(x) {
+  gsub(pattern="_", replacement = " ", x)
+})
+
+colnames(all_infiles) <- new_names
+
+# format numbers for latex table 
+format_numbers <- c(rep(2, last_element-1))
+format_numbers[c(1: (2 + num_of_structs))] <- 0
 
 # generate latex table
-latex.default(all_infiles, cdec=c(0,0,0,0,2,2,2,2,2,2,2), rowname=NULL, n.rgroup=c(NROW(all_infiles) - 2, 2), na.blank=TRUE, booktabs=FALSE, table.env=FALSE, center="none", file="", title="") # add line before last two rows, but unfortunately also blank rows
-# latex.default(all_infiles, cdec=c(0,0,0,0,2,2,2,2,2,2,2), rowname=NULL, na.blank=TRUE, booktabs=FALSE, table.env=FALSE, center="none", file="", title="") # add hline before mean in latex
+latex.default(all_infiles, cdec=format_numbers, rowname=NULL, n.rgroup=c(NROW(all_infiles) - 2, 2), na.blank=TRUE, booktabs=FALSE, table.env=FALSE, center="none", file="", title="") 
+
 
