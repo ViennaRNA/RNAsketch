@@ -138,7 +138,7 @@ def main():
     # construct dependency graph with the pos_constraint
     try:
         start = time.clock()
-        dg = rd.DependencyGraphMT(pos_constraint)
+        dg = rd.DependencyGraphMT(pos_constraint, seq_constraint)
         construction_time = time.clock() - start
     except Exception as e:
         print( "Error: %s" % e , file=sys.stderr)

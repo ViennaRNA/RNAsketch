@@ -133,7 +133,7 @@ def main():
     # construct dependency graph with these structures
     try:
         start = time.clock()
-        dg = rd.DependencyGraphMT(structures)
+        dg = rd.DependencyGraphMT(structures, constraint)
         construction_time = time.clock() - start
     except Exception as e:
         print( "Error: %s" % e , file=sys.stderr)
