@@ -42,7 +42,7 @@ def main():
     parser.add_argument("-f", "--file", type = str, default=None, help='Read file in *.inp format')
     parser.add_argument("-i", "--input", default=False, action='store_true', help='Read custom structures and sequence constraints from stdin')
     parser.add_argument("-n", "--number", type=int, default=4, help='Number of designs to generate')
-    parser.add_argument("-s", "--size_constraint", type=int, default=0, help='Size of negative constraints container')
+    parser.add_argument("-s", "--size_constraint", type=int, default=100, help='Size of negative constraints container')
     parser.add_argument("-e", "--exit", type=int, default=1000, help='Exit optimization run if no better solution is aquired after exit trials.')
     parser.add_argument("-m", "--mode", type=str, default='sample_global', help='Mode for getting a new sequence: sample, sample_local, sample_global')
     parser.add_argument("-k", "--kill", type=int, default=0, help='Timeout value of graph construction in seconds. (default: infinite)')
@@ -86,13 +86,7 @@ def main():
         seq_constraint = 'NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN'
     
     # generate negative constraints container
-    if args.size_constraint != 0:
-        neg_structures = collections.deque(maxlen=args.size_constraint)
-    else:
-        if len(pos_constraint) < 3:
-            neg_structures = collections.deque(maxlen=100)
-        else:
-            neg_structures = collections.deque(maxlen=20)
+    neg_structures = collections.deque(maxlen=args.size_constraint)
     
     # try to construct dependency graph, catch errors and timeouts
     dg = None
@@ -290,14 +284,17 @@ def optimization(dg, pos_constraint, neg_structures, args):
             if args.progress:
                 sys.stdout.write("\rMutate: {0:5.0f}/{1:5.0f} from NOS:{2:7.0f}".format(count, i, mut_nos))
                 sys.stdout.flush()
-
-            for x in range(0, len(pos_constraint)):
-                pos_energy_constraint = RNA.energy_of_struct(current_seq, pos_constraint[x])
-
-                for k in range(0, len(neg_structures)):
-                    neg_energy_constraint = RNA.energy_of_struct(current_seq, neg_structures[k])
-
-                    if float(neg_energy_constraint) - float(pos_energy_constraint) < 0:
+            #calculate eos of neg and pos constraints before, because we need it again and again
+            neg_energy_constraint = []
+            for n in range(0, len(neg_structures)):
+                neg_energy_constraint.append(RNA.energy_of_struct(current_seq, neg_structures[n]))
+            pos_energy_constraint = []
+            for p in range(0, len(pos_constraint)):
+                pos_energy_constraint.append(RNA.energy_of_struct(current_seq, pos_constraint[p]))
+            
+            for x in range(0, len(pos_energy_constraint)):
+                for k in range(0, len(neg_energy_constraint)):
+                    if float(neg_energy_constraint[k]) - float(pos_energy_constraint[x]) < 0:
                         perfect = False
                         break
 
@@ -310,8 +307,20 @@ def optimization(dg, pos_constraint, neg_structures, args):
 
     return Result(result_seq, score, pos_constraint, i) # result_seq
 
-
-def calculate_objective(current_seq, pos_constraint):
+# objective function: eos(1)+eos(2)+eos(3) - 3 * gibbs + 1 * ((eos(1)-eos(2))^2 + (eos(1)-eos(3))^2 + (eos(2)-eos(3))^2)
+def calculate_objective(sequence, structures):
+    eos = []
+    for struct in structures:
+        eos.append(RNA.energy_of_struct(sequence, struct))
+    
+    gibbs = RNA.pf_fold(sequence)
+    
+    objective_difference_part = 0
+    for i, value in enumerate(eos):
+        for j in eos[i+1:]:
+            objective_difference_part += math.fabs(value - j)
+    
+    return sum(eos) - len(eos) * gibbs[1] + 1 * objective_difference_part
     current_score = 0
     (current_seq_struct, current_seq_mfe) = RNA.fold(current_seq) # wird jetzt zwei mal berechnet, da oben nur in schleife, wenn struct in pos_constraints
 
