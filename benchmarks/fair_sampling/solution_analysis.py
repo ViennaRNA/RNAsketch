@@ -78,11 +78,11 @@ def plot_data(data, unfair_data, args):
     if len(unfair_data) != 0:
         plt.hist(unfair_data, bins=max(unfair_data)-min(unfair_data), histtype='stepfilled', color='red', alpha=0.6, label='unfair')
     plt.hist(data, bins=max(data)-min(data), histtype='stepfilled', color='lightgreen', alpha=0.7, label='fair')
-    plt.xlabel('Solution Count')
+    plt.xlabel('Frequency of the solution found')
     plt.ylabel('Frequency')
     plt.yscale('symlog')
     plt.xscale('symlog')
-    plt.title('Sampling: ' + os.path.basename(args.file))
+    plt.title('Histogram of Solution Counts')
     plt.grid(True)
     plt.legend()
     plt.savefig(os.path.basename(args.file) + '.hist.svg')
