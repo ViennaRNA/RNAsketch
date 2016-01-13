@@ -71,7 +71,10 @@ def main():
             "max_solution_count",
             "mean_solution_count",
             "number_found_solutions"]))
-        
+    # store the values
+    unfair_values = []
+    values = []
+       
     # do everything twice with fair and unfair sampling
     import RNAdesign as rd
     for mode in ['fair', 'unfair']:
@@ -134,6 +137,11 @@ def main():
             result = count_sequences(dg, mode, args)
             sample_time = time.clock() - start
             
+            if mode == 'fair':
+                values = result[4]
+            else:
+                unfair_values = result[4]
+            
             print(mode,
                         len(structures[0]),
                         graph_construction,
@@ -151,7 +159,8 @@ def main():
                         result[3], sep=";")
             # now once more with unfair sampling
             import RNAunfairdesign as rd
-        
+    
+    plot_data(values, unfair_values, args);
 
 def count_sequences(dg, mode, args):
     solutions = []
@@ -169,16 +178,21 @@ def count_sequences(dg, mode, args):
         for k,v in solution_dict.items():
             print('#', k, ": ", v)
     values = solution_dict.values();
-    plot_data(values, mode, args);
-    return [ min(values), max(values), sum(values)/ float(len(values)), len(solution_dict.keys()) ]
+    return [ min(values), max(values), sum(values)/ float(len(values)), len(solution_dict.keys()), values ]
 
-def plot_data(data, mode, args):
-    plt.hist(data, normed=True, facecolor='lightblue', bins=60, histtype='step')
+def plot_data(data, unfair_data, args):
+    #plt.hist(data, normed=True, facecolor='lightblue', bins=max(data)-min(data), histtype='stepfilled', label='fair')
+    if len(unfair_data) != 0:
+        plt.hist(unfair_data, bins=max(unfair_data)-min(unfair_data), histtype='stepfilled', color='red', alpha=0.6, label='unfair')
+    plt.hist(data, bins=max(data)-min(data), histtype='stepfilled', color='lightgreen', alpha=0.7, label='fair')
     plt.xlabel('Solution Count')
     plt.ylabel('Frequency')
-    plt.title(mode + ' sampling: ' + os.path.basename(args.file))
+    plt.yscale('symlog')
+    plt.xscale('symlog')
+    plt.title('Sampling: ' + os.path.basename(args.file))
     plt.grid(True)
-    plt.savefig(os.path.basename(args.file) + '.' + mode + '.svg')
+    plt.legend()
+    plt.savefig(os.path.basename(args.file) + '.hist.svg')
     plt.clf()
     plt.close()
 
