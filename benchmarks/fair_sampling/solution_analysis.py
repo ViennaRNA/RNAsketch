@@ -53,22 +53,22 @@ def main():
     # if it is both, make a plot with both curves
     if args.mode == 'both':
         with gzip.open(args.unfairfile, 'rb') as f:
-            solutions = []
+            unfair_solutions = []
             for line in f:
                 if line.startswith("#"):
                     continue;
                 else:
-                    solutions.append(line)
+                    unfair_solutions.append(line)
             
-            solution_dict = Counter(solutions)
+            unfair_solution_dict = Counter(unfair_solutions)
             unfair_values = solution_dict.values();
             
             print('unfair',
                         len(solutions[0]),
-                        min(values),
-                        max(values),
-                        sum(values)/ float(len(values)), 
-                        len(solution_dict.keys()), sep=";")
+                        min(unfair_values),
+                        max(unfair_values),
+                        sum(unfair_values)/ float(len(unfair_values)), 
+                        len(unfair_solution_dict.keys()), sep=";")
     
     
     plot_data(values, unfair_values, args);
