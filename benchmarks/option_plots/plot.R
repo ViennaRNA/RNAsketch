@@ -38,7 +38,7 @@ opt$title = '';
 data <- read.csv(opt$file, header=TRUE, sep = ";", dec = ".", comment.char='#');
 # rename exit to x for plotting
 data <- eval(parse(text = paste0("rename(data, c(", opt$x, "='x'))")))
-#summary(data)
+head(data)
 
 all_mfe_reached <- data[,grep("^mfe_reached_", colnames(data))] # find all entries concerning mfe_reached_N
 number_structures <- ncol(all_mfe_reached)
@@ -60,10 +60,10 @@ for (i in 1:number_structures) {
     #currentcdata
     cdata <- rbind(cdata, currentcdata)
 }
-#cdata
+
 # add the coordinates for the error bars
-cdata <- ddply(cdata, c("x"),transform,ystart = cumsum(dEmean),yend = cumsum(dEmean) + dEse)
-cdata
+cdata <- ddply(cdata, c("x"),transform,ystart = cumsum(dEmean),yend = cumsum(dEmean) + dEsd)
+head(cdata)
 number_ticks <- function(n) {function(limits) pretty(limits, n)}
 
 # Standard deviation of the mean as error bar
@@ -77,9 +77,51 @@ p <- ggplot(cdata, aes(x=x, y=dEmean, fill=struct)) + geom_bar(stat="identity") 
     ggtitle(opt$title)
 
 p + geom_segment(aes(xend=x,y=ystart,yend=yend), size = 0.1) +
-    geom_point(aes(x=x,y=yend), shape = "-", show_guide = FALSE, size = 1.5) +
+    geom_point(aes(x=x,y=yend), shape = "-", show_guide = FALSE, size = 2) +
     geom_point(aes(x=x,y=-0.1, colour=mfe), shape = 15, show_guide = FALSE, size = 3) +
     labs(colour='MFE reached [%]') #+
     #geom_point(aes(x=x,y=-0.2, colour=pmean), shape = 15, show_guide = FALSE, size = 3)
 dev.off()
 # plot done!
+if (FALSE) {
+    all_diff_eos_mfe <- data[,grep("^diff_eos_mfe_", colnames(data))]
+    sort_diff_eos_mfe <- data.frame(t(apply(all_diff_eos_mfe, 1, sort, decreasing = FALSE)))
+    colnames(sort_diff_eos_mfe) <- cbind(colnames(all_diff_eos_mfe))
+    sort_diff_eos_mfe$x <- data$x
+    sdata <- data.frame()
+    head(sort_diff_eos_mfe)
+
+    cdata <- data.frame()
+    for (i in 1:number_structures) {
+        colNameDiff<- paste("diff_eos_mfe", toString(i-1), sep="_")
+        
+        eval(parse(text = paste0(
+        "currentcdata <- ddply(sort_diff_eos_mfe, c('x'),\
+        summarise, struct = \"", toString(i), "\", dEmean = mean(", colNameDiff, "),\
+        dEsd   = sd(", colNameDiff, "), dEse   = dEsd / sqrt(length(", colNameDiff, ")))")))
+        
+        #currentcdata
+        cdata <- rbind(cdata, currentcdata)
+    }
+
+    # add the coordinates for the error bars
+    cdata <- ddply(cdata, c("x"),transform,ystart = cumsum(dEmean),yend = cumsum(dEmean) + dEsd)
+    head(cdata)
+
+    # Standard deviation of the mean as error bar
+    pdf(paste(opt$file, "_sorted.pdf", sep=""))
+    p <- ggplot(cdata, aes(x=x, y=dEmean, fill=struct)) + geom_bar(stat="identity") +
+        scale_y_continuous(limits = c(-0.2, NA), breaks=number_ticks(5)) +
+        expand_limits(y=5.5) +
+        ylab(expression(paste("mean ", delta, "E [kcal]"))) +
+        xlab(opt$label) +
+        labs(fill="Target Structure") +
+        ggtitle(opt$title)
+
+    p + geom_segment(aes(xend=x,y=ystart,yend=yend), size = 0.1) +
+        geom_point(aes(x=x,y=yend), shape = "-", show_guide = FALSE, size = 2)
+    dev.off()
+    # plot done!
+}
+
+
