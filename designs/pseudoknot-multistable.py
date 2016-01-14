@@ -7,6 +7,7 @@ import sys
 import re
 import math
 import time
+import nupack
 
 # a tri-stable example target. (optional comment)
 # ((((....))))....((((....))))........
@@ -20,24 +21,32 @@ kT = ((37+273.15)*1.98717)/1000.0; # kT = (betaScale*((temperature+K0)*GASCONST)
 
 class Result:
     def __init__(self, sequence, score, structures, number_of_mutations):
-        self.sequence = sequence
+        self.sequence = [sequence] 
         self.score = score
         self.structures = structures
         self.number_of_mutations = number_of_mutations
         self.eos = []
         self.probs = []
         
-        (self.mfe_struct, self.mfe_energy) = RNA.fold(self.sequence)
-        self.part_funct = RNA.pf_fold(self.sequence)[1]
+        nupack_mfe = nupack.mfe(self.sequence, material = 'rna', pseudo = True) # if str, 0, no error
+        pattern = re.compile('(\[\(\')|(\',)|(\'\)\])')
+        temp_mfe = pattern.sub('', "%s" %nupack_mfe)
+        temp_mfe = temp_mfe.replace("'", "")
+        mfe_list = temp_mfe.split()
+
+        self.mfe_struct = mfe_list[0]
+        self.mfe_energy = float(mfe_list[1])
+        self.part_funct = nupack.pfunc(self.sequence, material = 'rna', pseudo = True)
+
         for struct in self.structures:
-            this_eos = RNA.energy_of_struct(self.sequence, struct)
+            this_eos = nupack.energy(self.sequence, struct, material = 'rna', pseudo = True)
             self.eos.append(this_eos)
             self.probs.append( math.exp((self.part_funct-this_eos) / kT ) )
     def write_out(self):
         #first clean up last line
         sys.stdout.write("\r" + " " * 60 + "\r")
         sys.stdout.flush()
-        print(self.sequence + '\t{0:9.4f}'.format(self.score))
+        print(self.sequence[0] + '\t{0:9.4f}'.format(self.score))
         for i, struct in enumerate(self.structures):
             print(struct + '\t{0:9.4f}\t{1:+9.4f}\t{2:9.4f}'.format(self.eos[i], self.eos[i]-self.mfe_energy, self.probs[i]))
         print(self.mfe_struct + '\t{0:9.4f}'.format(self.mfe_energy))
@@ -61,10 +70,10 @@ def main():
     rd.initialize_library(args.debug, args.kill)
     # define structures
     structures = []
-    constraint = ""
+    constraint = "" 
     if (args.input):
         for line in sys.stdin:
-            if re.match(re.compile("[\(\)\.]"), line, flags=0): # TODO add brackets <{([
+            if re.match(re.compile("[\(\)\.\{\}\[\]<>]"), line, flags=0): 
                 structures.append(line.rstrip('\n'))
             elif re.match(re.compile("[ACGTUWSMKRYBDHVN]"), line, flags=0):
                 constraint = line.rstrip('\n')
@@ -76,7 +85,7 @@ def main():
             data = f.read()
             lines = data.split("\n")
             for line in lines:
-                if re.match(re.compile("[\(\)\.]"), line): # TODO add brackets <{([
+                if re.match(re.compile("[\(\)\.\{\}\[\]<>]"), line): 
                     structures.append(line)
                 if re.match(re.compile("[\ AUGC]"), line):
                     elements = str(line)
@@ -89,7 +98,7 @@ def main():
             '((((((((....))))((((....))))....))))']
         constraint = 'NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN'
     
-    # try to construct dependency graph, catch errors and timeouts
+    #pfunc(dna_seqs, material = 'dna') try to construct dependency graph, catch errors and timeouts
     dg = None
     graph_construction = 0
     construction_time = 0.0
@@ -281,11 +290,14 @@ def optimization_run(dg, structures, args):
 # objective function: eos(1)+eos(2)+eos(3) - 3 * gibbs + 1 * ((eos(1)-eos(2))^2 + (eos(1)-eos(3))^2 + (eos(2)-eos(3))^2)
 def calculate_objective(sequence, structures):
     eos = []
+    current_sequence = [sequence]
+    
     for struct in structures:
-        eos.append(RNA.energy_of_struct(sequence, struct)) # TODO change do NUPACK.energy(arguments) ???
-    
-    gibbs = RNA.pf_fold(sequence) # TODO change to NUPACK.pfunc(arguments)
-    
+        eos.append(nupack.energy(current_sequence, struct, material = 'rna', pseudo = True))
+
+    pfunc = nupack.pfunc(current_sequence, material = 'rna', pseudo = True)
+    gibbs = [struct, pfunc] 
+   
     objective_difference_part = 0
     for i, value in enumerate(eos):
         for j in eos[i+1:]:
