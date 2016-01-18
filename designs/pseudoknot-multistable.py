@@ -205,7 +205,7 @@ def main():
                         r.score,
                         r.number_of_mutations, 
                         len(r.sequence),
-                        "\"" + r.sequence + "\"",
+                        "\"" + r.sequence[0] + "\"",
                         graph_construction,
                         num_cc,
                         max_specials,

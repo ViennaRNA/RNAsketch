@@ -66,11 +66,11 @@ cor.mtest <- function(mat, conf.level = 0.95) {
 }
 
 # plot correlation plot
-pdf(paste(opt$file, "_corrplot.pdf", sep=""))
-cc <- cor(data_sub[ , -which(names(data_sub) %in% c("graph_construction","sequence", "mode", "seq_length"))])
-res1 <- cor.mtest(cc, 0.95)
-corrplot(cc, method = "color", order = "hclust", diag= FALSE, p.mat = res1[[1]], insig = "p-value")
-dev.off()
+# pdf(paste(opt$file, "_corrplot.pdf", sep=""))
+# cc <- cor(data_sub[ , -which(names(data_sub) %in% c("graph_construction","sequence", "mode", "seq_length"))])
+# res1 <- cor.mtest(cc, 0.95)
+# corrplot(cc, method = "color", order = "hclust", diag= FALSE, p.mat = res1[[1]], insig = "p-value")
+# dev.off()
 
 
 number_ticks <- function(n) {function(limits) pretty(limits, n)}
