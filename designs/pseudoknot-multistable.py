@@ -204,7 +204,7 @@ def main():
                         "\"" + args.mode + "\"",
                         r.score,
                         r.number_of_mutations, 
-                        len(r.sequence),
+                        len(r.sequence[0]),
                         "\"" + r.sequence[0] + "\"",
                         graph_construction,
                         num_cc,
