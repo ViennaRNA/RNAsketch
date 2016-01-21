@@ -321,18 +321,8 @@ def calculate_objective(sequence, structures):
     for i, value in enumerate(eos):
         for j in eos[i+1:]:
             objective_difference_part += math.fabs(value - j)
-    
-    return sum(eos) - len(eos) * gibbs[1] + 1 * objective_difference_part
-    current_score = 0
-    (current_seq_struct, current_seq_mfe) = RNA.fold(current_seq) # wird jetzt zwei mal berechnet, da oben nur in schleife, wenn struct in pos_constraints
-
-    for l in range(0, len(pos_constraint)):
-        eos_pos_cons = RNA.energy_of_struct(current_seq, pos_constraint[l])
-        diff_eos_mfe = eos_pos_cons - current_seq_mfe
-        current_score += diff_eos_mfe
-
-    return current_score
-
+    number_structures = len(eos)
+    return sum(eos) - number_structures * gibbs[1] + 1 * (objective_difference_part / (math.factorial(number_structures) / (math.factorial(number_structures-2)*2)))
 
 if __name__ == "__main__":
     main()
