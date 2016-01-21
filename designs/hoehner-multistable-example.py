@@ -290,8 +290,8 @@ def calculate_objective(sequence, structures):
     for i, value in enumerate(eos):
         for j in eos[i+1:]:
             objective_difference_part += math.fabs(value - j)
-    
-    return sum(eos) - len(eos) * gibbs[1] + 1 * objective_difference_part
+    number_structures = len(eos)
+    return sum(eos) - number_structures * gibbs[1] + 1 * (objective_difference_part / (math.factorial(number_structures) / (math.factorial(number_structures-2)*2)))
 
 if __name__ == "__main__":
     main()
