@@ -50,6 +50,7 @@ def main():
     parser.add_argument("-c", "--csv", default=False, action='store_true', help='Write output as semi-colon csv file to stdout')
     parser.add_argument("-p", "--progress", default=False, action='store_true', help='Show progress of optimization')
     parser.add_argument("-d", "--debug", default=False, action='store_true', help='Show debug information of library')
+    parser.add_argument("-b", "--begin", type=str, default=None, help='set sequence to begin the optimization with')
     args = parser.parse_args()
     
     print("# Options: number={0:d}, size_constraint={1:d}, exit={2:d}, mode={3:}".format(args.number, args.size_constraint, args.exit, args.mode))
@@ -234,11 +235,12 @@ def optimization(dg, pos_constraint, neg_structures, args):
     score = float('Infinity')
     count = 0
     
-    # sample scratch sequence
-    dg.sample()
     # get the initial sequence
     current_seq = dg.get_sequence()
-
+    if(args.begin is not None)
+        dg.set_sequence("")
+    else
+        dg.sample()        
     # number of mutations
     i = 0
 
