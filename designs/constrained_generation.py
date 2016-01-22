@@ -51,7 +51,7 @@ def main():
     parser.add_argument("-c", "--csv", default=False, action='store_true', help='Write output as semi-colon csv file to stdout')
     parser.add_argument("-p", "--progress", default=False, action='store_true', help='Show progress of optimization')
     parser.add_argument("-d", "--debug", default=False, action='store_true', help='Show debug information of library')
-    parser.add_argument("-t", "--type", type = str, default=None, help='Specify shape type (1-5)') # check name
+    #parser.add_argument("-t", "--type", type = str, default=None, help='Specify shape type (1-5)') # check name
     args = parser.parse_args()
     
     print("# Options: number={0:d}, size_constraint={1:d}, exit={2:d}, mode={3:}".format(args.number, args.size_constraint, args.exit, args.mode))
@@ -248,8 +248,8 @@ def optimization(dg, pos_constraint, neg_structures, args):
         # RNAshapes -D '(((((....)))))..((...((....))))....' -t 1
         # and then string-compare shapes 
 
-        if args.type is not None:
-           current_seq_struct = RNAshapes.levels(current_seq_struct,args.type)
+        #if args.type is not None:
+        #   current_seq_struct = RNAshapes.levels(current_seq_struct,args.type)
            
            #abstract_seq_struct = RNAshapes.levels(current_seq_struct,args.type)
             #TODO: pos_constraints
