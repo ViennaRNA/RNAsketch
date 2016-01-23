@@ -36,9 +36,7 @@ class Design(object):
         :param structures:
         '''
         self.structures = structures
-        self._sequence = None
-        if sequence != '':
-            self.sequence = sequence
+        self.sequence = sequence
         self._reset_values()
     
     def _reset_values(self):
@@ -63,6 +61,9 @@ class Design(object):
                 raise TypeError('Sequence must have the same length as the structural constraints')
             self._reset_values()
             self._sequence = s
+        elif s == '':
+            self._reset_values()
+            self._sequence = None
         else:
             raise TypeError('Sequence must be a string containing a IUPAC RNA sequence')
     
@@ -174,11 +175,11 @@ class Design(object):
         :return: string containing all values of this design separated by the given separator
         '''
         result = separator.join(map(str, ['\"' + self.sequence + '\"', self.length, self.number_of_structures, self.mfe_energy, 
-            '\"'+ self.mfe_structure + '\"', self.pf_energy, '\"' + self.pf_structure + '\"']))
-        result += separator + separator.join(map(str, self.eos))
-        result += separator + separator.join(map(str, self.eos_diff_mfe))
-        result += separator + separator.join(map(str, self.eos_reached_mfe))
-        result += separator + separator.join(map(str, self.pos))
+            '\"'+ self.mfe_structure + '\"', self.pf_energy, '\"' + self.pf_structure + '\"'] + 
+            self.eos + 
+            self.eos_diff_mfe + 
+            self.eos_reached_mfe + 
+            self.pos))
         return result
     
     def write_csv_header(self, separator=';'):
@@ -199,28 +200,6 @@ class Design(object):
             pos_string += separator + "prob_" + str(s)
         result += eos_string + eos_diff_mfe_string + eos_reached_mfe_string + pos_string
         return result
-
-
-def calculate_objective(Design):
-    '''
-    Calculates the objective function given a Design object containing the designed sequence and input structures.
-    objective function (3 seqs):    eos(1)+eos(2)+eos(3) - 3 * gibbs + 
-                                    weight * ((eos(1)-eos(2))^2 + (eos(1)-eos(3))^2 + (eos(2)-eos(3))^2) / (3!/(3-2)!*2)
-    :param Design: Design object containing the sequence and structures
-    '''
-    weight = 1
-    
-    objective_difference_part = 0
-    eos = Design.eos
-    for i, eos1 in enumerate(eos):
-        for eos2 in eos[i+1:]:
-            objective_difference_part += math.fabs(eos1 - eos2)
-    
-    combination_count = 1
-    if (Design.number_of_structures != 1):
-        combination_count = math.factorial(Design.number_of_structures) / (math.factorial(Design.number_of_structures-2)*2)
-    
-    return sum(Design.eos) - Design.number_of_structures * Design.pf_energy + weight * (objective_difference_part / combination_count)
 
 def read_inp_file(filename):
     '''
@@ -275,3 +254,115 @@ def read_input(content):
             raise ValueError('Structures must all have the same length!')
     
     return structures, constraint, sequence
+
+def get_graph_properties(dg):
+    '''
+    Takes a RNAdesign DependencyGraph Object and constructs a dicionary with all the
+    calculated properties.
+    :param dg: RNAdesign DependencyGraph object
+    :return properties: Dictionary containing all the graph properties
+    '''
+    properties = {}
+    special_ratios = []
+    max_specials = 0
+    max_component_vertices = 0
+    
+    properties['num_cc'] = dg.number_of_connected_components()
+    properties['nos'] = dg.number_of_sequences()
+    
+    for cc in range(0, properties['num_cc']):
+        cv = len(dg.component_vertices(cc))
+        sv = len(dg.special_vertices(cc))
+        special_ratios.append(float(sv)/float(cv))
+        if (max_specials < sv):
+            max_specials = sv
+        if (max_component_vertices < cv):
+            max_component_vertices = cv
+    
+    properties['max_specials'] = max_specials
+    properties['max_component_vertices'] = max_component_vertices
+    properties['max_special_ratio'] = max(special_ratios)
+    properties['mean_special_ratio'] = sum(special_ratios) / len(special_ratios)
+        
+    return properties
+
+def calculate_objective(Design):
+    '''
+    Calculates the objective function given a Design object containing the designed sequence and input structures.
+    objective function (3 seqs):    eos(1)+eos(2)+eos(3) - 3 * gibbs + 
+                                    weight * ((eos(1)-eos(2))^2 + (eos(1)-eos(3))^2 + (eos(2)-eos(3))^2) / (3!/(3-2)!*2)
+    :param Design: Design object containing the sequence and structures
+    '''
+    weight = 1
+    
+    objective_difference_part = 0
+    eos = Design.eos
+    for i, eos1 in enumerate(eos):
+        for eos2 in eos[i+1:]:
+            objective_difference_part += math.fabs(eos1 - eos2)
+    
+    combination_count = 1
+    if (Design.number_of_structures != 1):
+        combination_count = math.factorial(Design.number_of_structures) / (math.factorial(Design.number_of_structures-2)*2)
+    
+    return sum(Design.eos) - Design.number_of_structures * Design.pf_energy + weight * (objective_difference_part / combination_count)
+
+def classic_optimization(dg, design, exit=1000, mode='sample', progress=False):
+    '''
+    Takes a Design object and does a classic optimization of this sequence.
+    :param dg: RNAdesign DependencyGraph object
+    :param design: Design object containing the sequence and structures
+    :param exit: Number of unsuccessful new sequences before exiting the optimization
+    :param mode: String defining the sampling mode: sample, sample_global, sample_local
+    :param progress: Whether or not to print the progress to the console
+    :param return: Optimization score reached for the final sequence
+    "param return: Number of samples neccessary to reach this result
+    '''
+    # if the design has no sequence yet, sample one from scratch
+    if not design.sequence:
+        dg.sample()
+        design.sequence = dg.get_sequence()
+    score = calculate_objective(design);
+    # count for exit condition
+    count = 0
+    # remember how may mutations were done
+    number_of_samples = 0
+    
+    # main optimization loop 
+    while 1:
+        # count up the mutations
+        number_of_samples += 1
+        # sample a new sequence
+        if mode == 'sample':
+            mut_nos = dg.sample()
+        elif mode == 'sample_global':
+            mut_nos = dg.sample_global()
+        elif mode == 'sample_local':
+            mut_nos = dg.sample_local()
+        else:
+            raise ValueError("Wrong mode argument: " + mode + "\n")
+        # write progress
+        if progress:
+            sys.stdout.write("\rMutate: {0:7.0f}/{1:5.0f} | Score: {2:7.0f} | NOS: {3:7.0f}".format(number_of_samples, count, score, mut_nos) + " " * 20)
+            sys.stdout.flush()
+        # assign sequence to design and calculate objective
+        design.sequence = dg.get_sequence()
+        this_score = calculate_objective(design)
+        # evaluate
+        if (this_score < score):
+            score = this_score
+            count = 0
+        else:
+            dg.revert_sequence()
+            design.sequence = dg.get_sequence()
+            count += 1
+            if count > exit:
+                break
+    
+    # clear the console
+    if (progress):
+        sys.stdout.write("\r" + " " * 60 + "\r")
+        sys.stdout.flush()
+    
+    # finally return the result
+    return score, number_of_samples

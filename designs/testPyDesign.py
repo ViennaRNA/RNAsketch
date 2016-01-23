@@ -13,7 +13,7 @@ from PyDesign import *
 import tempfile
 import unittest
 
-class TestDesignClass(unittest.TestCase):
+class TestPyDesign(unittest.TestCase):
 
     def test_init(self):
         a = Design(['.'], 'A')
@@ -71,11 +71,6 @@ class TestDesignClass(unittest.TestCase):
         assert a.mfe_energy != mfe_energy
         assert a.pf_energy != pf_energy
     
-    def test_calculate_objective(self):
-        a = Design(['((((....))))'], 'GGGGAAAACCCC')
-        score = calculate_objective(a)
-        self.assertEqual(score, 0.107421875)
-    
     def test_read_inp_file(self):
         fp = tempfile.NamedTemporaryFile(delete=True)
         fp.write(b'.....\n  C  \n;')
@@ -98,6 +93,17 @@ class TestDesignClass(unittest.TestCase):
         self.assertEqual(structures, ['.[].','({})'])
         self.assertEqual(constraint, 'NNAC')
         self.assertEqual(sequence, 'AGCC')
+    
+    def test_get_graph_properties(self):
+        print('TODO')
+    
+    def test_calculate_objective(self):
+        a = Design(['((((....))))'], 'GGGGAAAACCCC')
+        score = calculate_objective(a)
+        self.assertEqual(score, 0.107421875)
+    
+    def test_classic_optimization(self):
+        print('TODO')
         
 
 if __name__ == '__main__':

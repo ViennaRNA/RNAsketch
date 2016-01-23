@@ -41,39 +41,10 @@ def main():
             '........((((....((((....))))....))))',
             '((((((((....))))((((....))))....))))']
         constraint = 'NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN'
-    
-    # create the design object
-    design = Design(structures, start_sequence)
-    
     # try to construct dependency graph, catch errors and timeouts
     dg = None
-    graph_construction = 0
     construction_time = 0.0
     sample_time = 0.0
-    max_specials = 0
-    max_component_vertices = 0
-    max_special_ratio = 0
-    mean_special_ratio = 0
-    num_cc = 0
-    nos = 0
-    
-    # print header for csv file
-    if (args.csv):
-        print(";".join(["jump",
-                    "exit",
-                    "mode",
-                    "score",
-                    "num_mutations", 
-                    "graph_construction",
-                    "num_cc",
-                    "max_specials",
-                    "max_component_vertices",
-                    "max_special_ratio",
-                    "mean_special_ratio",
-                    "nos",
-                    "construction_time",
-                    "sample_time",
-                    design.write_csv_header()]))
         
     # construct dependency graph with these structures
     try:
@@ -82,10 +53,17 @@ def main():
         construction_time = time.clock() - start
     except Exception as e:
         print( "Error: %s" % e , file=sys.stderr)
+    
+    # general DG values
+    print("# " + "\n# ".join(structures) + "\n# " + constraint)
 
     if (dg is not None):
-        # general DG values
-        print("# " + "\n# ".join(structures) + "\n# " + constraint)
+        
+        # if requested write out a graphml file
+        if args.graphml is not None:
+            with open(args.graphml, 'w') as f:
+                f.write(dg.get_graphml() + "\n")
+        
         # print the amount of solutions
         print('# Maximal number of solutions: ' + str(dg.number_of_sequences()))
         # print the amount of connected components
@@ -95,35 +73,40 @@ def main():
             print('# [' + str(i) + ']' + str(dg.component_vertices(i)))
         
         # remember general DG values
-        graph_construction = 1
-        num_cc = dg.number_of_connected_components()
-        nos = dg.number_of_sequences()
-        special_ratios = []
-        for cc in range(0, num_cc):
-            cv = len(dg.component_vertices(cc))
-            sv = len(dg.special_vertices(cc))
-            special_ratios.append(float(sv)/float(cv))
-            if (max_specials < sv):
-                max_specials = sv
-            if (max_component_vertices < cv):
-                max_component_vertices = cv
-        max_special_ratio = max(special_ratios)
-        mean_special_ratio = sum(special_ratios)/len(special_ratios)
-
-        # if requested write out a graphml file
-        if args.graphml is not None:
-            with open(args.graphml, 'w') as f:
-                f.write(dg.get_graphml() + "\n")
+        graph_properties = get_graph_properties(dg)
+        # create a initial design object
+        design = Design(structures, start_sequence)
+        
+        # print header for csv file
+        if (args.csv):
+            print(";".join(["jump",
+                        "exit",
+                        "mode",
+                        "score",
+                        "num_mutations", 
+                        "graph_construction",
+                        "construction_time",
+                        "sample_time",
+                        design.write_csv_header()] +
+                        graph_properties.keys()))
 
         # main loop from zero to number of solutions
         for n in range(0, args.number):
-            start = time.clock()
-            (score, number_of_mutations) = optimization_run(dg, design, args)
-            sample_time = time.clock() - start
+            # reset the design object
+            design = Design(structures, start_sequence)
             
-            if (args.progress):
-                sys.stdout.write("\r" + " " * 60 + "\r")
-                sys.stdout.flush()
+            start = time.clock()
+            # do a complete sampling jump times
+            (score, number_of_jumps) = classic_optimization(dg, design, args.jump, 'sample', args.progress)
+            # now do the optimization based on the chose mode
+            try:
+                (score, number_of_mutations) = classic_optimization(dg, design, args.exit, args.mode, args.progress)
+            except ValueError as e:
+                print (e.value)
+                exit(1)
+            # sum up for a complete number of mutations
+            number_of_mutations += number_of_jumps
+            sample_time = time.clock() - start
             
             if (args.csv):
                 print(args.jump,
@@ -131,85 +114,14 @@ def main():
                         "\"" + args.mode + "\"",
                         score,
                         number_of_mutations,
-                        graph_construction,
-                        num_cc,
-                        max_specials,
-                        max_component_vertices,
-                        max_special_ratio,
-                        mean_special_ratio,
-                        nos,
                         construction_time,
                         sample_time,
-                        design.write_csv(), sep=";")
+                        design.write_csv(),
+                        *graph_properties.values(), sep=";")
             else:
                 print(design.write_out(score))
     else:
-        print(args.jump,
-                args.exit,
-                "\"" + args.mode + "\"",
-                0,
-                0,
-                graph_construction,
-                num_cc,
-                max_specials,
-                max_component_vertices,
-                max_special_ratio,
-                mean_special_ratio,
-                nos,
-                construction_time,
-                sample_time, sep=";")
-
-# main optimization
-def optimization_run(dg, design, args):
-    score = 0
-    count = 0
-    jumps = args.jump
-    # sample scratch sequence
-    dg.sample()
-    # print this sequence with score
-    design.sequence = dg.get_sequence()
-    score = calculate_objective(design);
-    #print dg.get_sequence() + '\t' + str(score)
-    
-    # sample globally for num_opt times and print
-    number_of_mutations = 0
-    while 1:
-        # sample sequence
-        if jumps:
-            mut_nos = dg.sample()
-            jumps -= 1
-            count = 0
-        else:
-            if args.mode == 'sample':
-                mut_nos = dg.sample()
-            elif args.mode == 'sample_global':
-                mut_nos = dg.sample_global()
-            elif args.mode == 'sample_local':
-                mut_nos = dg.sample_local()
-            else:
-                sys.stdout.write("Wrong sample argument: " + args.mode + "\n")
-                sys.exit(1)
-        # write progress
-        if (args.progress):
-            sys.stdout.write("\rMutate: {0:7.0f}/{1:5.0f} from NOS: {2:7.0f}".format(number_of_mutations, count, mut_nos) + " " * 20)
-            sys.stdout.flush()
-        
-        design.sequence = dg.get_sequence()
-        this_score = calculate_objective(design);
-        
-        if (this_score < score):
-            score = this_score
-            count = 0
-        else:
-            dg.revert_sequence();
-            design.sequence = dg.get_sequence()
-            count += 1
-            if count > args.exit:
-                break
-        number_of_mutations += 1
-    
-    # finally return the result
-    return score, number_of_mutations
+        print('# Construction time out reached!')
 
 if __name__ == "__main__":
     main()
