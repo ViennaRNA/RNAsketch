@@ -9,6 +9,7 @@ from collections import deque
 import re
 import math
 import time
+import RNAshapes
 
 kT = ((37+273.15)*1.98717)/1000.0; # kT = (betaScale*((temperature+K0)*GASCONST))/1000.0; /* in Kcal */
 
@@ -50,7 +51,7 @@ def main():
     parser.add_argument("-c", "--csv", default=False, action='store_true', help='Write output as semi-colon csv file to stdout')
     parser.add_argument("-p", "--progress", default=False, action='store_true', help='Show progress of optimization')
     parser.add_argument("-d", "--debug", default=False, action='store_true', help='Show debug information of library')
-    parser.add_argument("-b", "--begin", type=str, default=None, help='set sequence to begin the optimization with')
+    #parser.add_argument("-t", "--type", type = str, default=None, help='Specify shape type (1-5)') # check name
     args = parser.parse_args()
     
     print("# Options: number={0:d}, size_constraint={1:d}, exit={2:d}, mode={3:}".format(args.number, args.size_constraint, args.exit, args.mode))
@@ -234,13 +235,10 @@ def main():
 def optimization(dg, pos_constraint, neg_structures, args):
     score = float('Infinity')
     count = 0
-    
     # get the initial sequence
+    dg.sample()
     current_seq = dg.get_sequence()
-    if(args.begin is not None)
-        dg.set_sequence("")
-    else
-        dg.sample()        
+               
     # number of mutations
     i = 0
 
@@ -249,6 +247,12 @@ def optimization(dg, pos_constraint, neg_structures, args):
         # if shapes option on -> calculate shape:
         # RNAshapes -D '(((((....)))))..((...((....))))....' -t 1
         # and then string-compare shapes 
+
+        #if args.type is not None:
+        #   current_seq_struct = RNAshapes.levels(current_seq_struct,args.type)
+           
+           #abstract_seq_struct = RNAshapes.levels(current_seq_struct,args.type)
+            #TODO: pos_constraints
         
         # if tree-distance optin is on calculate tree-edit distance between
         # current struct and all pos constraint. if dist < args.treexxx then ok 
@@ -286,22 +290,24 @@ def optimization(dg, pos_constraint, neg_structures, args):
             if args.progress:
                 sys.stdout.write("\rMutate: {0:5.0f}/{1:5.0f} from NOS:{2:7.0f}".format(count, i, mut_nos))
                 sys.stdout.flush()
+
             #calculate eos of neg and pos constraints before, because we need it again and again
-            neg_energy_constraint = []
-            for n in range(0, len(neg_structures)):
-                neg_energy_constraint.append(RNA.energy_of_struct(current_seq, neg_structures[n]))
             pos_energy_constraint = []
             for p in range(0, len(pos_constraint)):
-                pos_energy_constraint.append(RNA.energy_of_struct(current_seq, pos_constraint[p]))
-            
-            for x in range(0, len(pos_energy_constraint)):
-                for k in range(0, len(neg_energy_constraint)):
-                    if float(neg_energy_constraint[k]) - float(pos_energy_constraint[x]) < 0:
-                        perfect = False
-                        break
+                pos_energy_constraint.append(RNA.energy_of_struct(current_seq, pos_constraint[p]))            
 
-                if perfect:
-                    break
+            for x in range(0, len(neg_structures)):
+            #check comp
+                if rd.sequence_structure_compatible(current_seq, [neg_structures[x]]):
+                    neg_energy_constraint = RNA.energy_of_struct(current_seq, neg_structures[x])
+                    
+                    for k in range(0, len(pos_energy_constraint)):
+                        if float(neg_energy_constraint) - float(pos_energy_constraint[k]) < 0:
+                            perfect = False
+                            break
+
+                    if perfect:
+                        break
 
             if perfect:
                 break
