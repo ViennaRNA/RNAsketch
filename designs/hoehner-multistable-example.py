@@ -75,7 +75,7 @@ def main():
         # remember general DG values
         graph_properties = get_graph_properties(dg)
         # create a initial design object
-        design = Design(structures, start_sequence)
+        design = vrnaDesign(structures, start_sequence)
         
         # print header for csv file
         if (args.csv):
@@ -93,7 +93,7 @@ def main():
         # main loop from zero to number of solutions
         for n in range(0, args.number):
             # reset the design object
-            design = Design(structures, start_sequence)
+            design = vrnaDesign(structures, start_sequence)
             
             start = time.clock()
             # do a complete sampling jump times

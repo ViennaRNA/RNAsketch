@@ -11,10 +11,11 @@ __maintainer__ = "Stefan Hammer"
 __email__ = "s.hammer@univie.ac.at"
 
 import sys
-import RNAdesign as rd
-import RNA
 import math
 import re
+
+import RNA
+import nupack
 
 '''
 Global variable:
@@ -86,11 +87,7 @@ class Design(object):
     
     @property
     def eos(self):
-        if not self._eos and self._sequence:
-            self._eos = []
-            for struct in self.structures:
-                self._eos.append(RNA.energy_of_struct(self.sequence, struct))
-        return self._eos
+        raise NotImplementedError
          
     @property
     def pos(self):
@@ -121,27 +118,19 @@ class Design(object):
     
     @property
     def mfe_energy(self):
-        if not self._mfe_energy and self._sequence:
-            (self._mfe_structure, self._mfe_energy) = RNA.fold(self.sequence)
-        return self._mfe_energy
+        raise NotImplementedError
     
     @property
     def mfe_structure(self):
-        if not self._mfe_structure and self._sequence:
-            (self._mfe_structure, self._mfe_energy) = RNA.fold(self.sequence)
-        return self._mfe_structure
+        raise NotImplementedError
     
     @property
     def pf_energy(self):
-        if not self._pf_energy and self._sequence:
-            (self._pf_structure, self._pf_energy) = RNA.pf_fold(self.sequence)
-        return self._pf_energy
+        raise NotImplementedError
     
     @property
     def pf_structure(self):
-        if not self._pf_structure and self._sequence:
-            (self._pf_structure, self._pf_energy) = RNA.pf_fold(self.sequence)
-        return self._pf_structure
+        raise NotImplementedError
     
     @property
     def number_of_structures(self):
@@ -200,6 +189,83 @@ class Design(object):
             pos_string += separator + "prob_" + str(s)
         result += eos_string + eos_diff_mfe_string + eos_reached_mfe_string + pos_string
         return result
+
+class vrnaDesign(Design):
+    @property
+    def eos(self):
+        if not self._eos and self._sequence:
+            self._eos = []
+            for struct in self.structures:
+                self._eos.append(RNA.energy_of_struct(self.sequence, struct))
+        return self._eos
+    
+    @property
+    def mfe_energy(self):
+        if not self._mfe_energy and self._sequence:
+            (self._mfe_structure, self._mfe_energy) = RNA.fold(self.sequence)
+        return self._mfe_energy
+    
+    @property
+    def mfe_structure(self):
+        if not self._mfe_structure and self._sequence:
+            (self._mfe_structure, self._mfe_energy) = RNA.fold(self.sequence)
+        return self._mfe_structure
+    
+    @property
+    def pf_energy(self):
+        if not self._pf_energy and self._sequence:
+            (self._pf_structure, self._pf_energy) = RNA.pf_fold(self.sequence)
+        return self._pf_energy
+    
+    @property
+    def pf_structure(self):
+        if not self._pf_structure and self._sequence:
+            (self._pf_structure, self._pf_energy) = RNA.pf_fold(self.sequence)
+        return self._pf_structure
+
+class nupackDesign(Design):
+    @property
+    def eos(self):
+        if not self._eos and self._sequence:
+            self._eos = []
+            for struct in self.structures:
+                self._eos.append(nupack.energy(self.sequence, struct, material = 'rna', pseudo = True))
+        return self._eos
+    
+    @property
+    def mfe_energy(self):
+        if not self._mfe_energy and self._sequence:
+            (self._mfe_structure, self._mfe_energy) = self._nupack_mfe()
+        return self._mfe_energy
+    
+    @property
+    def mfe_structure(self):
+        if not self._mfe_structure and self._sequence:
+            (self._mfe_structure, self._mfe_energy) = self._nupack_mfe()
+        return self._mfe_structure
+    
+    @property
+    def pf_energy(self):
+        if not self._pf_energy and self._sequence:
+            self._pf_energy = nupack.pfunc(self.sequence, material = 'rna', pseudo = True)
+        return self._pf_energy
+    
+    @property
+    def pf_structure(self):
+        if not self._pf_structure and self._sequence:
+            self._pf_structure = ''
+        return self._pf_structure
+    
+    def _nupack_mfe(self):
+        nupack_mfe = nupack.mfe(self.sequence, material = 'rna', pseudo = True) # if str, 0, no error
+        pattern = re.compile('(\[\(\')|(\',)|(\'\)\])')
+        temp_mfe = pattern.sub('', "%s" %nupack_mfe)
+        temp_mfe = temp_mfe.replace("'", "")
+        mfe_list = temp_mfe.split()
+
+        mfe_struct = mfe_list[0]
+        mfe_energy = float(mfe_list[1])
+        return mfe_struct, mfe_energy
 
 def read_inp_file(filename):
     '''

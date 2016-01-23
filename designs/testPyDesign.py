@@ -16,16 +16,16 @@ import unittest
 class TestPyDesign(unittest.TestCase):
 
     def test_init(self):
-        a = Design(['.'], 'A')
+        a = vrnaDesign(['.'], 'A')
         self.assertEqual(a.sequence, 'A')
         self.assertEqual(a.structures, ['.'])
         with self.assertRaises(TypeError):
-            b = Design('.', 'A')
-            b = Design(['.'], 'Y')
-            b = Design(['%'], 'A')
+            b = vrnaDesign('.', 'A')
+            b = vrnaDesign(['.'], 'Y')
+            b = vrnaDesign(['%'], 'A')
     
     def test_init_empty_sequence(self):
-        a = Design(['...'])
+        a = vrnaDesign(['...'])
         self.assertEqual(a.sequence, None)
         self.assertEqual(a.structures, ['...'])
         self.assertEqual(a.mfe_energy, None)
@@ -40,7 +40,7 @@ class TestPyDesign(unittest.TestCase):
       
 
     def test_calculations(self):
-        a = Design(['.'], 'A')
+        a = vrnaDesign(['.'], 'A')
         self.assertEqual(a.mfe_energy, 0.0)
         self.assertEqual(a.mfe_structure, '.')
         self.assertEqual(a.pf_energy, 0.0)
@@ -53,7 +53,7 @@ class TestPyDesign(unittest.TestCase):
         self.assertEqual(a.eos_diff_mfe, [0])
     
     def test_print(self):
-        a = Design(['((((....))))','..((....))..'], 'AAGGACGUCCUU')
+        a = vrnaDesign(['((((....))))','..((....))..'], 'AAGGACGUCCUU')
         print '\n'
         print a.write_out(1000)
         print '\n'
@@ -62,7 +62,7 @@ class TestPyDesign(unittest.TestCase):
         print '\n'
     
     def test_reassign(self):
-        a = Design(['((((....))))'], 'AAAAGGGGUUUU')
+        a = vrnaDesign(['((((....))))'], 'AAAAGGGGUUUU')
         mfe_energy = a.mfe_energy
         pf_energy = a.pf_energy
         a.sequence = 'GGGGAAAACCCC'
@@ -98,7 +98,7 @@ class TestPyDesign(unittest.TestCase):
         print('TODO')
     
     def test_calculate_objective(self):
-        a = Design(['((((....))))'], 'GGGGAAAACCCC')
+        a = vrnaDesign(['((((....))))'], 'GGGGAAAACCCC')
         score = calculate_objective(a)
         self.assertEqual(score, 0.107421875)
     
