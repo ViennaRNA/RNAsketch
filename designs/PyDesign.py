@@ -229,7 +229,7 @@ class nupackDesign(Design):
         if not self._eos and self._sequence:
             self._eos = []
             for struct in self.structures:
-                self._eos.append(nupack.energy(self.sequence, struct, material = 'rna', pseudo = True))
+                self._eos.append(nupack.energy([self.sequence], struct, material = 'rna', pseudo = True))
         return self._eos
     
     @property
@@ -247,7 +247,7 @@ class nupackDesign(Design):
     @property
     def pf_energy(self):
         if not self._pf_energy and self._sequence:
-            self._pf_energy = nupack.pfunc(self.sequence, material = 'rna', pseudo = True)
+            self._pf_energy = nupack.pfunc([self.sequence], material = 'rna', pseudo = True)
         return self._pf_energy
     
     @property
@@ -257,7 +257,7 @@ class nupackDesign(Design):
         return self._pf_structure
     
     def _nupack_mfe(self):
-        nupack_mfe = nupack.mfe(self.sequence, material = 'rna', pseudo = True) # if str, 0, no error
+        nupack_mfe = nupack.mfe([self.sequence], material = 'rna', pseudo = True) # if str, 0, no error
         pattern = re.compile('(\[\(\')|(\',)|(\'\)\])')
         temp_mfe = pattern.sub('', "%s" %nupack_mfe)
         temp_mfe = temp_mfe.replace("'", "")
@@ -352,7 +352,7 @@ def get_graph_properties(dg):
         
     return properties
 
-def calculate_objective(Design):
+def calculate_objective(design):
     '''
     Calculates the objective function given a Design object containing the designed sequence and input structures.
     objective function (3 seqs):    eos(1)+eos(2)+eos(3) - 3 * gibbs + 
@@ -362,16 +362,16 @@ def calculate_objective(Design):
     weight = 1
     
     objective_difference_part = 0
-    eos = Design.eos
+    eos = design.eos
     for i, eos1 in enumerate(eos):
         for eos2 in eos[i+1:]:
             objective_difference_part += math.fabs(eos1 - eos2)
     
     combination_count = 1
-    if (Design.number_of_structures != 1):
-        combination_count = math.factorial(Design.number_of_structures) / (math.factorial(Design.number_of_structures-2)*2)
+    if (design.number_of_structures != 1):
+        combination_count = math.factorial(design.number_of_structures) / (math.factorial(design.number_of_structures-2)*2)
     
-    return sum(Design.eos) - Design.number_of_structures * Design.pf_energy + weight * (objective_difference_part / combination_count)
+    return sum(design.eos) - design.number_of_structures * design.pf_energy + weight * (objective_difference_part / combination_count)
 
 def classic_optimization(dg, design, exit=1000, mode='sample', progress=False):
     '''

@@ -10,6 +10,7 @@ def main():
     parser = argparse.ArgumentParser(description='Design a tri-stable example same to Hoehner 2013 paper.')
     parser.add_argument("-f", "--file", type = str, default=None, help='Read file in *.inp format')
     parser.add_argument("-i", "--input", default=False, action='store_true', help='Read custom structures and sequence constraints from stdin')
+    parser.add_argument("-q", "--nupack", default=False, action='store_true', help='Use Nupack instead of the ViennaRNA package (for pseudoknots)')
     parser.add_argument("-n", "--number", type=int, default=4, help='Number of designs to generate')
     parser.add_argument("-j", "--jump", type=int, default=1000, help='Do random jumps in the solution space for the first (jump) trials.')
     parser.add_argument("-e", "--exit", type=int, default=1000, help='Exit optimization run if no better solution is aquired after (exit) trials.')
@@ -75,7 +76,10 @@ def main():
         # remember general DG values
         graph_properties = get_graph_properties(dg)
         # create a initial design object
-        design = vrnaDesign(structures, start_sequence)
+        if (args.nupack):
+            design = nupackDesign(structures, start_sequence)
+        else:
+            design = vrnaDesign(structures, start_sequence)
         
         # print header for csv file
         if (args.csv):
@@ -93,7 +97,10 @@ def main():
         # main loop from zero to number of solutions
         for n in range(0, args.number):
             # reset the design object
-            design = vrnaDesign(structures, start_sequence)
+            if (args.nupack):
+                design = nupackDesign(structures, start_sequence)
+            else:
+                design = vrnaDesign(structures, start_sequence)
             
             start = time.clock()
             # do a complete sampling jump times
