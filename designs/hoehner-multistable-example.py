@@ -1,46 +1,10 @@
 from __future__ import print_function
 
+from PyDesign import *
 import RNAdesign as rd
-import RNA
 import argparse
 import sys
-import re
-import math
 import time
-
-# a tri-stable example target. (optional comment)
-# ((((....))))....((((....))))........
-# ........((((....((((....))))....))))
-# ((((((((....))))((((....))))....))))
-# below follows a simple (and optional) sequence constraint.
-# CKNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNB
-# objective function: eos(1)+eos(2)+eos(3) - 3 * gibbs + 1 * ((eos(1)-eos(2))^2 + (eos(1)-eos(3))^2 + (eos(2)-eos(3))^2)
-
-kT = ((37+273.15)*1.98717)/1000.0; # kT = (betaScale*((temperature+K0)*GASCONST))/1000.0; /* in Kcal */
-
-class Result:
-    def __init__(self, sequence, score, structures, number_of_mutations):
-        self.sequence = sequence
-        self.score = score
-        self.structures = structures
-        self.number_of_mutations = number_of_mutations
-        self.eos = []
-        self.probs = []
-        
-        (self.mfe_struct, self.mfe_energy) = RNA.fold(self.sequence)
-        self.part_funct = RNA.pf_fold(self.sequence)[1]
-        for struct in self.structures:
-            this_eos = RNA.energy_of_struct(self.sequence, struct)
-            self.eos.append(this_eos)
-            self.probs.append( math.exp((self.part_funct-this_eos) / kT ) )
-    def write_out(self):
-        #first clean up last line
-        sys.stdout.write("\r" + " " * 60 + "\r")
-        sys.stdout.flush()
-        print(self.sequence + '\t{0:9.4f}'.format(self.score))
-        for i, struct in enumerate(self.structures):
-            print(struct + '\t{0:9.4f}\t{1:+9.4f}\t{2:9.4f}'.format(self.eos[i], self.eos[i]-self.mfe_energy, self.probs[i]))
-        print(self.mfe_struct + '\t{0:9.4f}'.format(self.mfe_energy))
 
 def main():
     parser = argparse.ArgumentParser(description='Design a tri-stable example same to Hoehner 2013 paper.')
@@ -61,33 +25,25 @@ def main():
     rd.initialize_library(args.debug, args.kill)
     # define structures
     structures = []
-    constraint = ""
+    constraint = ''
+    start_sequence = ''
+    
     if (args.input):
+        data = ''
         for line in sys.stdin:
-            if re.match(re.compile("[\(\)\.]"), line, flags=0):
-                structures.append(line.rstrip('\n'))
-            elif re.match(re.compile("[ACGTUWSMKRYBDHVN]"), line, flags=0):
-                constraint = line.rstrip('\n')
-            elif re.search(re.compile("@"), line, flags=0):
-                break;
+            data = data + '\n' + line
+        (structures, constraint, start_sequence) = read_input(data)
     elif (args.file is not None):
         print("# Input File: {0:}".format(args.file))
-        with open(args.file) as f:
-            data = f.read()
-            lines = data.split("\n")
-            for line in lines:
-                if re.match(re.compile("[\(\)\.]"), line):
-                    structures.append(line)
-                if re.match(re.compile("[\ AUGC]"), line):
-                    elements = str(line)
-                    constraint = elements.replace(" ", "N")
-                if line.startswith(";"):
-                    break
+        (structures, constraint, start_sequence) = read_inp_file(args.file)
     else:
         structures = ['((((....))))....((((....))))........',
             '........((((....((((....))))....))))',
             '((((((((....))))((((....))))....))))']
         constraint = 'NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN'
+    
+    # create the design object
+    design = Design(structures, start_sequence)
     
     # try to construct dependency graph, catch errors and timeouts
     dg = None
@@ -103,20 +59,11 @@ def main():
     
     # print header for csv file
     if (args.csv):
-        mfe_reached_str = ""
-        diff_eos_mfe_str = ""
-        prob_str = ""
-        for s in range(0, len(structures)):
-            mfe_reached_str = mfe_reached_str + "mfe_reached_" + str(s) +";"
-            diff_eos_mfe_str = diff_eos_mfe_str + "diff_eos_mfe_" + str(s) + ";"
-            prob_str = prob_str + "prob_" + str(s) + ";"
         print(";".join(["jump",
                     "exit",
                     "mode",
                     "score",
                     "num_mutations", 
-                    "seq_length",
-                    "sequence",
                     "graph_construction",
                     "num_cc",
                     "max_specials",
@@ -125,10 +72,8 @@ def main():
                     "mean_special_ratio",
                     "nos",
                     "construction_time",
-                    "sample_time"]) + ";" + 
-                    mfe_reached_str + 
-                    diff_eos_mfe_str +
-                    prob_str)
+                    "sample_time",
+                    design.write_csv_header()]))
         
     # construct dependency graph with these structures
     try:
@@ -173,30 +118,19 @@ def main():
         # main loop from zero to number of solutions
         for n in range(0, args.number):
             start = time.clock()
-            r = optimization_run(dg, structures, args)
+            (score, number_of_mutations) = optimization_run(dg, design, args)
             sample_time = time.clock() - start
+            
+            if (args.progress):
+                sys.stdout.write("\r" + " " * 60 + "\r")
+                sys.stdout.flush()
+            
             if (args.csv):
-                # process result and write result of this optimization to stdout
-                diff_eos_mfe = []
-                mfe_reached = []
-                for i in range(0, len(r.structures)):
-                    mfe_reached.append(0)
-                    eos_mfe = r.eos[i] - r.mfe_energy
-                    diff_eos_mfe.append(eos_mfe)
-                    if r.eos[i] == r.mfe_energy:
-                        mfe_reached[i] = 1
-                
-                if (args.progress):
-                    sys.stdout.write("\r" + " " * 60 + "\r")
-                    sys.stdout.flush()
-
                 print(args.jump,
                         args.exit,
                         "\"" + args.mode + "\"",
-                        r.score,
-                        r.number_of_mutations, 
-                        len(r.sequence),
-                        "\"" + r.sequence + "\"",
+                        score,
+                        number_of_mutations,
                         graph_construction,
                         num_cc,
                         max_specials,
@@ -206,18 +140,15 @@ def main():
                         nos,
                         construction_time,
                         sample_time,
-                        *(mfe_reached + diff_eos_mfe + r.probs), sep=";")
+                        design.write_csv(), sep=";")
             else:
-                r.write_out()
+                print(design.write_out(score))
     else:
-        dummylist = [0] * len(structures)
         print(args.jump,
                 args.exit,
                 "\"" + args.mode + "\"",
                 0,
-                0, 
-                len(structures[0]),
-                "\"\"",
+                0,
                 graph_construction,
                 num_cc,
                 max_specials,
@@ -226,22 +157,22 @@ def main():
                 mean_special_ratio,
                 nos,
                 construction_time,
-                sample_time,
-                *(dummylist + dummylist + dummylist), sep=";")
+                sample_time, sep=";")
 
 # main optimization
-def optimization_run(dg, structures, args):
+def optimization_run(dg, design, args):
     score = 0
     count = 0
     jumps = args.jump
     # sample scratch sequence
     dg.sample()
     # print this sequence with score
-    score = calculate_objective(dg.get_sequence(), structures);
+    design.sequence = dg.get_sequence()
+    score = calculate_objective(design);
     #print dg.get_sequence() + '\t' + str(score)
     
     # sample globally for num_opt times and print
-    i = 0
+    number_of_mutations = 0
     while 1:
         # sample sequence
         if jumps:
@@ -260,38 +191,25 @@ def optimization_run(dg, structures, args):
                 sys.exit(1)
         # write progress
         if (args.progress):
-            sys.stdout.write("\rMutate: {0:7.0f}/{1:5.0f} from NOS: {2:7.0f}".format(i, count, mut_nos) + " " * 20)
+            sys.stdout.write("\rMutate: {0:7.0f}/{1:5.0f} from NOS: {2:7.0f}".format(number_of_mutations, count, mut_nos) + " " * 20)
             sys.stdout.flush()
         
-        this_score = calculate_objective(dg.get_sequence(), structures);
+        design.sequence = dg.get_sequence()
+        this_score = calculate_objective(design);
         
         if (this_score < score):
             score = this_score
             count = 0
         else:
             dg.revert_sequence();
+            design.sequence = dg.get_sequence()
             count += 1
             if count > args.exit:
                 break
-        i += 1
+        number_of_mutations += 1
     
     # finally return the result
-    return Result(dg.get_sequence(), score, structures, i)
-
-# objective function: eos(1)+eos(2)+eos(3) - 3 * gibbs + 1 * ((eos(1)-eos(2))^2 + (eos(1)-eos(3))^2 + (eos(2)-eos(3))^2)
-def calculate_objective(sequence, structures):
-    eos = []
-    for struct in structures:
-        eos.append(RNA.energy_of_struct(sequence, struct))
-    
-    gibbs = RNA.pf_fold(sequence)
-    
-    objective_difference_part = 0
-    for i, value in enumerate(eos):
-        for j in eos[i+1:]:
-            objective_difference_part += math.fabs(value - j)
-    number_structures = len(eos)
-    return sum(eos) - number_structures * gibbs[1] + 1 * (objective_difference_part / (math.factorial(number_structures) / (math.factorial(number_structures-2)*2)))
+    return score, number_of_mutations
 
 if __name__ == "__main__":
     main()
