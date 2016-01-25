@@ -271,7 +271,7 @@ def optimization(dg, pos_constraint, neg_structures, args):
                 if count > args.exit:
                     break
 
-        if current_seq_struct not in neg_structures:
+        elif current_seq_struct not in neg_structures:
             neg_structures.append(current_seq_struct)
 
         while True:
