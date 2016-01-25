@@ -392,6 +392,9 @@ def classic_optimization(dg, design, exit=1000, mode='sample', progress=False):
     if not design.sequence:
         dg.sample()
         design.sequence = dg.get_sequence()
+    else:
+        dg.set_sequence(design.sequence)
+
     score = calculate_objective(design);
     # count for exit condition
     count = 0
@@ -413,7 +416,7 @@ def classic_optimization(dg, design, exit=1000, mode='sample', progress=False):
             raise ValueError("Wrong mode argument: " + mode + "\n")
         # write progress
         if progress:
-            sys.stdout.write("\rMutate: {0:7.0f}/{1:5.0f} | Score: {2:7.0f} | NOS: {3:7.0f}".format(number_of_samples, count, score, mut_nos) + " " * 20)
+            sys.stdout.write("\rMutate: {0:7.0f}/{1:5.0f} | Score: {2:7.4f} | NOS: {3:7.0f}".format(number_of_samples, count, score, mut_nos) + " " * 20)
             sys.stdout.flush()
         # assign sequence to design and calculate objective
         design.sequence = dg.get_sequence()
@@ -457,6 +460,9 @@ def constraint_generation_optimization(dg, design, exit=1000, mode='sample', num
     if not design.sequence:
         dg.sample()
         design.sequence = dg.get_sequence()
+    else:
+        dg.set_sequence(design.sequence)
+    
     score = calculate_objective(design);
     # count for exit condition
     count = 0
@@ -482,10 +488,10 @@ def constraint_generation_optimization(dg, design, exit=1000, mode='sample', num
             # assign sequence to design and calculate objective
             design.sequence = dg.get_sequence()
             perfect = True
-
+            
             # write progress
             if progress:
-                sys.stdout.write("\rMutate: {0:7.0f}/{1:5.0f} | Score: {2:7.0f} | NOS: {3:7.0f}".format(number_of_samples, count, score, mut_nos) + " " * 20)
+                sys.stdout.write("\rMutate: {0:7.0f}/{1:5.0f} | Score: {2:7.4f} | NOS: {3:7.0f}".format(number_of_samples, count, score, mut_nos) + " " * 20)
                 sys.stdout.flush()
             # evaluate the constraints
             for x in range(0, len(neg_constraints)):
@@ -515,8 +521,7 @@ def constraint_generation_optimization(dg, design, exit=1000, mode='sample', num
         
         # if we reached the mfe strcture, calculate a score for this solution and evaluate
         if design.mfe_structure in design.structures:
-            # assign sequence to design and calculate objective
-            design.sequence = dg.get_sequence()
+            # calculate objective
             this_score = calculate_objective(design)
             # evaluate
             if (this_score < score):
@@ -529,14 +534,16 @@ def constraint_generation_optimization(dg, design, exit=1000, mode='sample', num
                 if count > exit:
                     break
         # else if current mfe is not in negative constraints, add to it
-        elif design.mfe_structure not in neg_constraints:
-            neg_constraints.append(design.mfe_structure)
-            print("\n".join(neg_constraints))
-    
+        else:
+            if design.mfe_structure not in neg_constraints:
+                neg_constraints.append(design.mfe_structure)
+
+            dg.revert_sequence()
+            design.sequence = dg.get_sequence()
+
     # clear the console
     if (progress):
         sys.stdout.write("\r" + " " * 60 + "\r")
         sys.stdout.flush()
-    
     # finally return the result
     return score, number_of_samples
