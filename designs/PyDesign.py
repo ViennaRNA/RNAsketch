@@ -508,4 +508,10 @@ def constraint_generation_optimization(dg, design, exit=1000, mode='sample', num
         elif design.mfe_structure not in neg_constraints:
             neg_constraints.append(design.mfe_structure)
     
+    # clear the console
+    if (progress):
+        sys.stdout.write("\r" + " " * 60 + "\r")
+        sys.stdout.flush()
+    
+    # finally return the result
     return score, number_of_samples
