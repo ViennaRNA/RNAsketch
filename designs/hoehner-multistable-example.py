@@ -1,6 +1,11 @@
 from __future__ import print_function
 
-from PyDesign import *
+try:
+    from PyDesign import *
+except ImportError, e:
+    print(e.message)
+    exit(1)
+
 import RNAdesign as rd
 import argparse
 import sys

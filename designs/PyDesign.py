@@ -14,15 +14,34 @@ import sys
 import math
 import re
 
-import RNA
-import nupack
+import collections
+import RNAdesign as rd
 
 '''
 Global variable:
 '''
 # KT = (betaScale*((temperature+K0)*GASCONST))/1000.0; /* in Kcal */
 KT = ((37+273.15)*1.98717)/1000.0;
+vrna_available = True
+nupack_available = True
 
+try:
+    import RNA
+except ImportError, e:
+    vrna_available = False
+    sys.stderr.write("-" * 60 + "\nWARNING: " + e.message + "!!!\n" + "-" * 60 + "\n")
+    sys.stderr.flush()
+
+try:
+    import nupack
+except ImportError, e:
+    nupack_available = False
+    sys.stderr.write("-" * 60 + "\nWARNING: " + e.message + "!!!\n" + "-" * 60 + "\n")
+    sys.stderr.flush()
+
+if not (vrna_available or nupack_available):
+    raise ImportError("Neither ViennaRNA package nor Nupack found!")
+    
 class Design(object):
     '''
     Design contains all neccessary information to generate a RNA device
@@ -215,41 +234,44 @@ class Design(object):
         result += eos_string + eos_diff_mfe_string + eos_reached_mfe_string + pos_string
         return result
 
-class vrnaDesign(Design):
-    @property
-    def classtype(self):
-        return 'vrnaDesign'
+if vrna_available:
+    class vrnaDesign(Design):
+        @property
+        def classtype(self):
+            return 'vrnaDesign'
     
-    def _get_eos(self, sequence, structure):
-        return RNA.energy_of_struct(sequence, structure)
+        def _get_eos(self, sequence, structure):
+            return RNA.energy_of_struct(sequence, structure)
     
-    def _get_fold(self, sequence):
-        return RNA.fold(self.sequence)
+        def _get_fold(self, sequence):
+            return RNA.fold(self.sequence)
     
-    def _get_pf_fold(self, sequence):
-        return RNA.pf_fold(self.sequence)
+        def _get_pf_fold(self, sequence):
+            return RNA.pf_fold(self.sequence)
 
-class nupackDesign(Design):
-    @property
-    def classtype(self):
-        return 'nupackDesign'
+if vrna_available:
+    class nupackDesign(Design):
+        @property
+        def classtype(self):
+            return 'nupackDesign'
     
-    def _get_eos(self, sequence, structure):
-        return nupack.energy([sequence], structure, material = 'rna', pseudo = True)
+        def _get_eos(self, sequence, structure):
+            return nupack.energy([sequence], structure, material = 'rna', pseudo = True)
     
-    def _get_fold(self, sequence):
-        nupack_mfe = nupack.mfe([sequence], material = 'rna', pseudo = True) # if str, 0, no error
-        pattern = re.compile('(\[\(\')|(\',)|(\'\)\])')
-        temp_mfe = pattern.sub('', "%s" %nupack_mfe)
-        temp_mfe = temp_mfe.replace("'", "")
-        mfe_list = temp_mfe.split()
-
-        mfe_struct = mfe_list[0]
-        mfe_energy = float(mfe_list[1])
-        return mfe_struct, mfe_energy
+        def _get_fold(self, sequence):
+            nupack_mfe = nupack.mfe([sequence], material = 'rna', pseudo = True) # if str, 0, no error
+            pattern = re.compile('(\[\(\')|(\',)|(\'\)\])')
+            temp_mfe = pattern.sub('', "%s" %nupack_mfe)
+            temp_mfe = temp_mfe.replace("'", "")
+            mfe_list = temp_mfe.split()
     
-    def _get_pf_fold(self, sequence):
-        return ' ' * len(sequence), nupack.pfunc([sequence], material = 'rna', pseudo = True)
+            mfe_struct = mfe_list[0]
+            mfe_energy = float(mfe_list[1])
+            return mfe_struct, mfe_energy
+    
+        def _get_pf_fold(self, sequence):
+            # Nupack doesn't return ensemble structure
+            return '?' * len(sequence), nupack.pfunc([sequence], material = 'rna', pseudo = True)
 
 def read_inp_file(filename):
     '''
@@ -336,19 +358,17 @@ def get_graph_properties(dg):
         
     return properties
 
-def calculate_objective(design):
+def calculate_objective(design, weight=1):
     '''
     Calculates the objective function given a Design object containing the designed sequence and input structures.
     objective function (3 seqs):    eos(1)+eos(2)+eos(3) - 3 * gibbs + 
                                     weight * ((eos(1)-eos(2))^2 + (eos(1)-eos(3))^2 + (eos(2)-eos(3))^2) / (3!/(3-2)!*2)
-    :param Design: Design object containing the sequence and structures
+    :param design: Design object containing the sequence and structures
+    :param weight: To wheight the influence of the eos diffences
     '''
-    weight = 1
-    
     objective_difference_part = 0
-    eos = design.eos
-    for i, eos1 in enumerate(eos):
-        for eos2 in eos[i+1:]:
+    for i, eos1 in enumerate(design.eos):
+        for eos2 in design.eos[i+1:]:
             objective_difference_part += math.fabs(eos1 - eos2)
     
     combination_count = 1
@@ -417,7 +437,7 @@ def classic_optimization(dg, design, exit=1000, mode='sample', progress=False):
     # finally return the result
     return score, number_of_samples
 
-def constraint_generation_optimization(dg, design, exit=1000, mode='sample', num_neg_constraints=100, progress=False):
+def constraint_generation_optimization(dg, design, exit=1000, mode='sample', num_neg_constraints=100, max_eos_diff=0, progress=False):
     '''
     Takes a Design object and does a constraint generation optimization of this sequence.
     :param dg: RNAdesign DependencyGraph object
@@ -425,6 +445,7 @@ def constraint_generation_optimization(dg, design, exit=1000, mode='sample', num
     :param exit: Number of unsuccessful new sequences before exiting the optimization
     :param mode: String defining the sampling mode: sample, sample_global, sample_local
     :param num_neg_constraints: Maximal number of negative constraints to accumulate during the optimization process
+    :param max_eos_diff: Maximal difference between eos of the negative and positive constraints
     :param progress: Whether or not to print the progress to the console
     :param return: Optimization score reached for the final sequence
     "param return: Number of samples neccessary to reach this result
@@ -441,9 +462,11 @@ def constraint_generation_optimization(dg, design, exit=1000, mode='sample', num
     count = 0
     # remember how may mutations were done
     number_of_samples = 0
+
     # main optimization loop
     while True:
         # constraint generation loop
+        # TODO: exit condition if only one or a small set of solutions is possible and worse
         while True:
             # count up the mutations
             number_of_samples += 1
@@ -470,20 +493,21 @@ def constraint_generation_optimization(dg, design, exit=1000, mode='sample', num
                 if rd.sequence_structure_compatible(design.sequence, [neg_constraints[x]]):
                     if design.classtype == 'vrnaDesign':
                         neg_eos = RNA.energy_of_struct(design.sequence, neg_constraints[x])
-                    elif design.classtype == 'vrnaDesign':
+                    elif design.classtype == 'nupackDesign':
                         neg_eos = nupack.energy([design.sequence], neg_constraints[x], material = 'rna', pseudo = True)
                     else:
                         raise ValueError('Could not figure out the classtype of the Design object.')
-                    # test if the newly sampled sequence has worse eos for pos constraints than for negative constraints, if not -> Perfect!
+                    # test if the newly sampled sequence eos for pos constraints is lower than
+                    # the eos for all negative constraints, if not -> Perfect!
                     for k in range(0, design.number_of_structures):
-                        if float(neg_eos) - float(design.eos[k]) < 0:
+                        if float(neg_eos) - float(design.eos[k]) < max_eos_diff:
                             # this is no better solution, revert!
                             perfect = False
                             dg.revert_sequence()
                             design.sequence = dg.get_sequence()
                             break
                 # if this is no perfect solution, stop evaluating and sample a new one
-                if !perfect:
+                if not perfect:
                     break
             # if solution is perfect, stop the optimization and go down to score calculation
             if perfect:
@@ -507,6 +531,7 @@ def constraint_generation_optimization(dg, design, exit=1000, mode='sample', num
         # else if current mfe is not in negative constraints, add to it
         elif design.mfe_structure not in neg_constraints:
             neg_constraints.append(design.mfe_structure)
+            print("\n".join(neg_constraints))
     
     # clear the console
     if (progress):
