@@ -13,8 +13,9 @@ __email__ = "s.hammer@univie.ac.at"
 import sys
 import math
 import re
-
+import random
 import collections
+
 import RNAdesign as rd
 
 '''
@@ -188,7 +189,7 @@ class Design(object):
             self._length = len(self.structures[0])
         return self._length
     
-    def write_out(self, score=''):
+    def write_out(self, score=0):
         '''
         Generates a nice human readable version of all values of this design
         :param score: optimization score for this design
@@ -304,16 +305,16 @@ def read_input(content):
     
     lines = content.split("\n")
     for line in lines:
-        if re.match(re.compile("[\(\)\.]"), line, flags=0):
+        if re.match(re.compile("^[\(\)\.\{\}\[\]\<\>]+$"), line, flags=0):
             structures.append(line.rstrip('\n'))
-        elif re.match(re.compile("[\ ACGTUWSMKRYBDHVN]"), line, flags=0):
+        elif re.match(re.compile("^[\ ACGTUWSMKRYBDHVN]+$"), line, flags=0):
             line = line.replace(" ", "N")
-            if re.match(re.compile("[ACGTU]"), line, flags=0) and sequence == '':
+            if re.match(re.compile("^[ACGTU]+$"), line, flags=0) and sequence == '':
                 sequence = line.rstrip('\n')
             elif constraint == '':
                 constraint = line.rstrip('\n')
             else:
-                raise ValueError('Too many constraints or start sequences')
+                raise ValueError('Too many constraints or start sequences: ' + line)
     
     checklength = len(structures[0])
     if constraint != '' and len(constraint) != checklength:
@@ -416,7 +417,7 @@ def classic_optimization(dg, design, exit=1000, mode='sample', progress=False):
             raise ValueError("Wrong mode argument: " + mode + "\n")
         # write progress
         if progress:
-            sys.stdout.write("\rMutate: {0:7.0f}/{1:5.0f} | Score: {2:7.4f} | NOS: {3:7.0f}".format(number_of_samples, count, score, mut_nos) + " " * 20)
+            sys.stdout.write("\rMutate: {0:7.0f}/{1:5.0f} | Score: {2:7.4f} | NOS: {3:.5e}".format(number_of_samples, count, score, mut_nos) + " " * 20)
             sys.stdout.flush()
         # assign sequence to design and calculate objective
         design.sequence = dg.get_sequence()
@@ -468,30 +469,46 @@ def constraint_generation_optimization(dg, design, exit=1000, mode='sample', num
     count = 0
     # remember how may mutations were done
     number_of_samples = 0
-
+    # sample steps to do
+    sample_steps = 1
+    # count for unsucessful constraint generation sequences
+    cg_count = 0
+    
     # main optimization loop
     while True:
         # constraint generation loop
-        # TODO: exit condition if only one or a small set of solutions is possible and worse
         while True:
             # count up the mutations
             number_of_samples += 1
-            # sample a new sequence
-            if mode == 'sample':
-                mut_nos = dg.sample()
-            elif mode == 'sample_global':
-                mut_nos = dg.sample_global()
-            elif mode == 'sample_local':
-                mut_nos = dg.sample_local()
-            else:
-                raise ValueError("Wrong mode argument: " + mode + "\n")
+            # evaluate cg_count and make search space bigger if necessary
+            if (cg_count > 10000):
+                cg_count = 0
+                sample_steps += 1
+                dg.set_history_size(sample_steps+100)
+            # increase cg_count
+            cg_count += 1
+            mut_nos = 1
+            
+            cc_to_sample = _sample_connected_components(dg, sample_steps)
+            
+            for c in cc_to_sample:
+                # sample a new sequence
+                if mode == 'sample':
+                    mut_nos = dg.sample()
+                elif mode == 'sample_global':
+                    mut_nos *= dg.sample_global(c)
+                #elif mode == 'sample_local':
+                #    mut_nos *= dg.sample_local()
+                else:
+                    raise ValueError("Wrong mode argument: " + mode + "\n")
+            
             # assign sequence to design and calculate objective
             design.sequence = dg.get_sequence()
             perfect = True
             
             # write progress
             if progress:
-                sys.stdout.write("\rMutate: {0:7.0f}/{1:5.0f} | Score: {2:7.4f} | NOS: {3:7.0f}".format(number_of_samples, count, score, mut_nos) + " " * 20)
+                sys.stdout.write("\rMutate: {0:7.0f}/{1:5.0f} | Steps: {2:3d} | EOS-Diff: {3:4.2f} | Score: {4:7.4f} | NOS: {5:.5e}".format(number_of_samples, count, sample_steps, max_eos_diff, score, mut_nos) + " " * 20)
                 sys.stdout.flush()
             # evaluate the constraints
             for x in range(0, len(neg_constraints)):
@@ -509,7 +526,7 @@ def constraint_generation_optimization(dg, design, exit=1000, mode='sample', num
                         if float(neg_eos) - float(design.eos[k]) < max_eos_diff:
                             # this is no better solution, revert!
                             perfect = False
-                            dg.revert_sequence()
+                            dg.revert_sequence(sample_steps)
                             design.sequence = dg.get_sequence()
                             break
                 # if this is no perfect solution, stop evaluating and sample a new one
@@ -519,6 +536,8 @@ def constraint_generation_optimization(dg, design, exit=1000, mode='sample', num
             if perfect:
                 break
         
+        # count this as a solution to analyse
+        count += 1
         # if we reached the mfe strcture, calculate a score for this solution and evaluate
         if design.mfe_structure in design.structures:
             # calculate objective
@@ -526,24 +545,63 @@ def constraint_generation_optimization(dg, design, exit=1000, mode='sample', num
             # evaluate
             if (this_score < score):
                 score = this_score
+                # reset values
+                sample_steps = 1
+                cg_count = 0
                 count = 0
             else:
-                dg.revert_sequence()
+                dg.revert_sequence(sample_steps)
                 design.sequence = dg.get_sequence()
-                count += 1
-                if count > exit:
-                    break
         # else if current mfe is not in negative constraints, add to it
         else:
             if design.mfe_structure not in neg_constraints:
                 neg_constraints.append(design.mfe_structure)
+                #print('\n'+'\n'.join(neg_constraints))
 
-            dg.revert_sequence()
+            dg.revert_sequence(sample_steps)
             design.sequence = dg.get_sequence()
-
+        
+        # exit condition
+        if count > exit:
+            break
+        
     # clear the console
     if (progress):
         sys.stdout.write("\r" + " " * 60 + "\r")
         sys.stdout.flush()
     # finally return the result
     return score, number_of_samples
+
+def _sample_connected_components(dg, amount):
+    result = []
+    noslist = {}
+    
+    if amount > dg.number_of_connected_components():
+        amount = dg.number_of_connected_components()
+    
+    for c in range(0, dg.number_of_connected_components()):
+        noslist[c] = dg.number_of_sequences(c)
+    
+    for _ in range(0, amount):
+        rand = random.randint(0, sum(noslist.values())-1)
+        keys = []
+        for c in noslist.keys():
+            keys.append(c)
+            if rand < sum([noslist[key] for key in keys]):
+                result.append(c)
+                del noslist[c]
+                break
+    return result
+
+def sample_count_unique_solutions(solution_space_size, sample_size):
+    '''
+    Calculates the expectancy value of how many time it is necessary to draw a 
+    solution to gain a unique set of solutions with the given sample size
+    :param solution_space_size: The size of the complete solutions space to draw from
+    :param sample_size: The size of the requested unique set
+    :return: Expectancy value of how many times to draw from the solution space to gain this unique set
+    '''
+    sum = float(0)
+    for k in range(solution_space_size - sample_size + 1, solution_space_size + 1):
+        sum += float(solution_space_size) / float(k)
+    return float(sum)

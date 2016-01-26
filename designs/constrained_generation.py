@@ -18,8 +18,9 @@ def main():
     parser.add_argument("-q", "--nupack", default=False, action='store_true', help='Use Nupack instead of the ViennaRNA package (for pseudoknots)')
     parser.add_argument("-n", "--number", type=int, default=4, help='Number of designs to generate')
     parser.add_argument("-j", "--jump", type=int, default=1000, help='Do random jumps in the solution space for the first (jump) trials.')
-    parser.add_argument("-e", "--exit", type=int, default=1000, help='Exit optimization run if no better solution is aquired after (exit) trials.')
+    parser.add_argument("-e", "--exit", type=int, default=500, help='Exit optimization run if no better solution is aquired after (exit) trials.')
     parser.add_argument("-m", "--mode", type=str, default='sample_global', help='Mode for getting a new sequence: sample, sample_local, sample_global')
+    parser.add_argument("-x", "--max_eos_diff", type=float, default=0, help='Energy of Struct difference allowed during constrained generation')
     parser.add_argument("-s", "--size_constraint", type=int, default=100, help='Size of negative constraints container')
     parser.add_argument("-k", "--kill", type=int, default=0, help='Timeout value of graph construction in seconds. (default: infinite)')
     parser.add_argument("-g", "--graphml", type=str, default=None, help='Write a graphml file with the given filename.')
@@ -113,7 +114,7 @@ def main():
             (score, number_of_jumps) = classic_optimization(dg, design, args.jump, 'sample', args.progress)
             # now do the optimization based on the chose mode
             try:
-                (score, number_of_mutations) = constraint_generation_optimization(dg, design, args.exit, args.mode, args.size_constraint, progress=args.progress)
+                (score, number_of_mutations) = constraint_generation_optimization(dg, design, args.exit, args.mode, args.size_constraint, args.max_eos_diff, args.progress)
             except ValueError as e:
                 print (e.value)
                 exit(1)
