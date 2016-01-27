@@ -116,14 +116,6 @@ def main():
             except ValueError as e:
                 print (e.value)
                 exit(1)
-            print('-'*60)
-            print(design.write_out(score))
-            # now also do a constraint generation based on the best solution
-            try:
-                (score, number_of_mutations) = constraint_generation_optimization(dg, design, args.exit, args.mode, 100, 0, args.progress)
-            except ValueError as e:
-                print (e.value)
-                exit(1)
             # sum up for a complete number of mutations
             number_of_mutations += number_of_jumps
             sample_time = time.clock() - start
