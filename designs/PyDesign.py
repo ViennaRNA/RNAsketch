@@ -25,6 +25,12 @@ Global variable:
 KT = ((37+273.15)*1.98717)/1000.0;
 vrna_available = True
 nupack_available = True
+forgi_available = True
+
+try:
+    import forgi.graph.bulge_graph as fgb
+except ImportError, e:
+    forgi_available = False
 
 try:
     import RNA
@@ -378,11 +384,65 @@ def calculate_objective(design, weight=1):
     
     return sum(design.eos) - design.number_of_structures * design.pf_energy + weight * (objective_difference_part / combination_count)
 
-def classic_optimization(dg, design, exit=1000, mode='sample', progress=False):
+def _sample_sequence(dg, design, mode, sample_steps):
+    '''
+    This function samples a sequence with the given mode from the dependency graph object
+    and writes it into the design object
+    :param dg: RNAdesign dependency graph object
+    :param design: design object
+    :param mode: mode how to sample, this is a string
+    :param sample_steps: count how many times to do the sample operation
+    :param return: mut_nos is the solution space we drew from
+    :param return: sample_count is how many times we sampled a solution from the dependency graph object (important for revert later)
+    '''
+    # count how many samples we did to be able to revert this later
+    sample_count = 0
+    # remember the solution space we drew from
+    mut_nos = 1
+    
+    # sample a new sequence
+    if mode == 'sample':
+        mut_nos = dg.sample()
+        sample_count += 1
+    elif mode == 'sample_global':
+        for c in _sample_connected_components(dg, sample_steps):
+            mut_nos *= dg.sample_global(c)
+            sample_count += 1
+    elif mode == 'sample_local':
+        # TODO this local sampling is unfair this way and mut_nos is not calculated correctly!
+        for _ in range(0, sample_steps):
+            mut_nos *= dg.sample_local()
+            sample_count += 1
+    elif mode == 'sample_strelem':
+        if forgi_available:
+            # sample new sequences for structural elements
+            struct = random.choice(design.structures)
+            bg = fgb.BulgeGraph(dotbracket_str=struct)
+            for s in bg.random_subgraph(sample_steps):
+                try:
+                    mut_nos *= dg.sample(bg.defines[s][0]-1, bg.defines[s][1]-1)
+                    sample_count += 1
+                    if s[0] == 'i':
+                        mut_nos *= dg.sample(bg.defines[s][2]-1, bg.defines[s][3]-1)
+                        sample_count += 1
+                except IndexError:
+                    pass
+        else:
+            raise ImportError("Forgi Library not available!")
+    else:
+        raise ValueError("Wrong mode argument: " + mode + "\n")
+    
+    # assign sequence to design and return values
+    design.sequence = dg.get_sequence()
+    return (mut_nos, sample_count)
+
+def classic_optimization(dg, design, objective_function=calculate_objective, weight=1, exit=1000, mode='sample', progress=False):
     '''
     Takes a Design object and does a classic optimization of this sequence.
     :param dg: RNAdesign DependencyGraph object
     :param design: Design object containing the sequence and structures
+    :param objective_function: function which takes a design object and returns a score for evaluation
+    :param weight: float specifying the weight of the difference part of the objective function
     :param exit: Number of unsuccessful new sequences before exiting the optimization
     :param mode: String defining the sampling mode: sample, sample_global, sample_local
     :param progress: Whether or not to print the progress to the console
@@ -396,7 +456,7 @@ def classic_optimization(dg, design, exit=1000, mode='sample', progress=False):
     else:
         dg.set_sequence(design.sequence)
 
-    score = calculate_objective(design);
+    score = objective_function(design, weight)
     # count for exit condition
     count = 0
     # remember how may mutations were done
@@ -407,27 +467,20 @@ def classic_optimization(dg, design, exit=1000, mode='sample', progress=False):
         # count up the mutations
         number_of_samples += 1
         # sample a new sequence
-        if mode == 'sample':
-            mut_nos = dg.sample()
-        elif mode == 'sample_global':
-            mut_nos = dg.sample_global()
-        elif mode == 'sample_local':
-            mut_nos = dg.sample_local()
-        else:
-            raise ValueError("Wrong mode argument: " + mode + "\n")
+        (mut_nos, sample_count) = _sample_sequence(dg, design, mode, 1)
+        
         # write progress
         if progress:
             sys.stdout.write("\rMutate: {0:7.0f}/{1:5.0f} | Score: {2:7.4f} | NOS: {3:.5e}".format(number_of_samples, count, score, mut_nos) + " " * 20)
             sys.stdout.flush()
-        # assign sequence to design and calculate objective
-        design.sequence = dg.get_sequence()
-        this_score = calculate_objective(design)
+        
+        this_score = objective_function(design, weight)
         # evaluate
         if (this_score < score):
             score = this_score
             count = 0
         else:
-            dg.revert_sequence()
+            dg.revert_sequence(sample_count)
             design.sequence = dg.get_sequence()
             count += 1
             if count > exit:
@@ -441,11 +494,13 @@ def classic_optimization(dg, design, exit=1000, mode='sample', progress=False):
     # finally return the result
     return score, number_of_samples
 
-def constraint_generation_optimization(dg, design, exit=1000, mode='sample', num_neg_constraints=100, max_eos_diff=0, progress=False):
+def constraint_generation_optimization(dg, design, objective_function=calculate_objective, weight=1, exit=1000, mode='sample', num_neg_constraints=100, max_eos_diff=0, progress=False):
     '''
     Takes a Design object and does a constraint generation optimization of this sequence.
     :param dg: RNAdesign DependencyGraph object
     :param design: Design object containing the sequence and structures
+    :param objective_function: function which takes a design object and returns a score for evaluation
+    :param weight: float specifying the weight of the difference part of the objective function
     :param exit: Number of unsuccessful new sequences before exiting the optimization
     :param mode: String defining the sampling mode: sample, sample_global, sample_local
     :param num_neg_constraints: Maximal number of negative constraints to accumulate during the optimization process
@@ -464,7 +519,7 @@ def constraint_generation_optimization(dg, design, exit=1000, mode='sample', num
     else:
         dg.set_sequence(design.sequence)
     
-    score = calculate_objective(design);
+    score = objective_function(design, weight);
     # count for exit condition
     count = 0
     # remember how may mutations were done
@@ -487,29 +542,16 @@ def constraint_generation_optimization(dg, design, exit=1000, mode='sample', num
                 dg.set_history_size(sample_steps+100)
             # increase cg_count
             cg_count += 1
-            mut_nos = 1
             
-            cc_to_sample = _sample_connected_components(dg, sample_steps)
-            
-            for c in cc_to_sample:
-                # sample a new sequence
-                if mode == 'sample':
-                    mut_nos = dg.sample()
-                elif mode == 'sample_global':
-                    mut_nos *= dg.sample_global(c)
-                #elif mode == 'sample_local':
-                #    mut_nos *= dg.sample_local()
-                else:
-                    raise ValueError("Wrong mode argument: " + mode + "\n")
-            
-            # assign sequence to design and calculate objective
-            design.sequence = dg.get_sequence()
-            perfect = True
+            # sample a new sequence
+            (mut_nos, sample_count) = _sample_sequence(dg, design, mode, sample_steps)
             
             # write progress
             if progress:
                 sys.stdout.write("\rMutate: {0:7.0f}/{1:5.0f} | Steps: {2:3d} | EOS-Diff: {3:4.2f} | Score: {4:7.4f} | NOS: {5:.5e}".format(number_of_samples, count, sample_steps, max_eos_diff, score, mut_nos) + " " * 20)
                 sys.stdout.flush()
+            # boolean if it is perfect already
+            perfect = True
             # evaluate the constraints
             for x in range(0, len(neg_constraints)):
                 # test if the newly sampled sequence is compatible to the neg constraint, if not -> Perfect!
@@ -526,7 +568,7 @@ def constraint_generation_optimization(dg, design, exit=1000, mode='sample', num
                         if float(neg_eos) - float(design.eos[k]) < max_eos_diff:
                             # this is no better solution, revert!
                             perfect = False
-                            dg.revert_sequence(sample_steps)
+                            dg.revert_sequence(sample_count)
                             design.sequence = dg.get_sequence()
                             break
                 # if this is no perfect solution, stop evaluating and sample a new one
@@ -541,7 +583,7 @@ def constraint_generation_optimization(dg, design, exit=1000, mode='sample', num
         # if we reached the mfe strcture, calculate a score for this solution and evaluate
         if design.mfe_structure in design.structures:
             # calculate objective
-            this_score = calculate_objective(design)
+            this_score = objective_function(design, weight)
             # evaluate
             if (this_score < score):
                 score = this_score
@@ -550,7 +592,7 @@ def constraint_generation_optimization(dg, design, exit=1000, mode='sample', num
                 cg_count = 0
                 count = 0
             else:
-                dg.revert_sequence(sample_steps)
+                dg.revert_sequence(sample_count)
                 design.sequence = dg.get_sequence()
         # else if current mfe is not in negative constraints, add to it
         else:
@@ -558,7 +600,7 @@ def constraint_generation_optimization(dg, design, exit=1000, mode='sample', num
                 neg_constraints.append(design.mfe_structure)
                 #print('\n'+'\n'.join(neg_constraints))
 
-            dg.revert_sequence(sample_steps)
+            dg.revert_sequence(sample_count)
             design.sequence = dg.get_sequence()
         
         # exit condition
@@ -573,6 +615,15 @@ def constraint_generation_optimization(dg, design, exit=1000, mode='sample', num
     return score, number_of_samples
 
 def _sample_connected_components(dg, amount):
+    '''
+    This function samples several connected component weighted by their number of solutions.
+    We need this function to draw from the set of CCs without getting the same CC twice.
+    Therefore the complete number of solutions if we sample these CCs new, is the product of the
+    number of solutions for each CC.
+    :param dg: Dependency Graph object from the RNAdesig library
+    :param amount: number of connected components to sample
+    :return: list of connected component IDs which can be used for example for: dg.sample_global(ID)
+    '''
     result = []
     noslist = {}
     
@@ -605,3 +656,4 @@ def sample_count_unique_solutions(solution_space_size, sample_size):
     for k in range(solution_space_size - sample_size + 1, solution_space_size + 1):
         sum += float(solution_space_size) / float(k)
     return float(sum)
+
