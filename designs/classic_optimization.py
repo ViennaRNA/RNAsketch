@@ -118,7 +118,12 @@ def main():
                 print (e.value)
                 exit(1)
             # now do the optimization with mode strelem where we take structural elements and replace them a little
-            (score, number_of_strelem) = classic_optimization(dg, design, exit=args.strelem, mode='sample_strelem', progress=args.progress)
+            number_of_strelem = 0
+            if forgi_available:
+                (score, number_of_strelem) = classic_optimization(dg, design, exit=args.strelem, mode='sample_strelem', progress=args.progress)
+            else:
+                sys.stderr.write("-" * 60 + "\nWARNING: Strelem sampling not available!!!\nPlease install forgi https://github.com/pkerpedjiev/forgi\n" + "-" * 60 + "\n")
+                sys.stderr.flush() 
             # sum up for a complete number of mutations
             number_of_mutations += number_of_jumps + number_of_strelem
             sample_time = time.clock() - start
