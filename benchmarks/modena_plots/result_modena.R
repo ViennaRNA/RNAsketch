@@ -81,16 +81,9 @@ evaluate <- function(file) {
   num_of_structs <- length(mfe_reached)
 
   prob <- data[grep("^prob_", colnames(data))] # find all entries concerning probabilities
-  all_prob <- numeric() # empty numeric vector 
- 
-  for (i in 1:num_of_structs) {
-    all_prob <- c(all_prob, prob[,i])
-}
-
- mean_prob <- mean(all_prob)
- median_prob <- median(all_prob)
- 
-  
+  sum_prob <- c(rowSums(prob))
+  mean_prob <- mean(sum_prob)
+  median_prob <- median(sum_prob)
   
   result <-data.frame(RNA, l, sum_n, d1, d2, mean_d1, median_d1, mean_d2, median_d2, mean_nom, median_nom, mean_prob, median_prob, num_of_structs)
   #print(result)
