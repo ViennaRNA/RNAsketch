@@ -48,16 +48,22 @@ evaluate <- function(file) {
   median_nom <- median(data$num_mutations)
 
   all_deltas <- data[,grep("^diff_eos_mfe_", colnames(data))] # find all entries concerning diff_eos
-
+ 
   d1_min_row<- apply(all_deltas, 1, min) # find min delta of each row
   d2_min_row <- apply(all_deltas, 1, max) # find max delta of each row
+
+  probs <- data[,grep("^prob_", colnames(data))]
+  row_sum_prob <- c(rowSums(probs))
   
   # find min d2 and min d1, if there are more than one min d2
-  deltas <- data.frame(d1_min_row, d2_min_row) 
-  min_d2 <-  deltas[deltas$d2_min_row == min(deltas$d2_min_row),] # rows where column d2 is minimum
-  min_d1 <- min(min_d2$d1_min_row) # since min_d2 contains all entries where d2 is min, it is sufficient to find one minimum (does not matter if there are more than one)
+  deltas <- data.frame(d1_min_row, d2_min_row, row_sum_prob) 
+
+  min_d2 <-  deltas[deltas$d2_min_row == min(deltas$d2_min_row),] # rows where column d2 is minimum 
+  min_d1 <- min_d2[min_d2$d1_min_row == min(min_d2$d1_min_row),] # find all minima of d1, then compare probs
+  min_d1 <- min_d1[min_d1$row_sum_prob == min(min_d1$row_sum_prob),] # find minimal probs
+  min_prob <- min(min_d1$row_sum_prob) # find one min prob
   
-  d1 <- min_d1 # not necessary
+  d1 <- min_d1[1,1] # all entries in this column mimima, therefore take first entry
   d2 <- min_d2[1,2] # all entries in this column mimima, therefore take first entry
   
   # mean, median, standard deviation and standard error of d1 and d2 
@@ -80,13 +86,12 @@ evaluate <- function(file) {
   RNA <- file
   num_of_structs <- length(mfe_reached)
 
-  prob <- data[grep("^prob_", colnames(data))] # find all entries concerning probabilities
-  sum_prob <- c(rowSums(prob))
-  mean_prob <- mean(sum_prob)
-  median_prob <- median(sum_prob)
+  #prob <- data[grep("^prob_", colnames(data))] # find all entries concerning probabilities
+  #sum_prob <- c(rowSums(prob))
+  #mean_prob <- mean(sum_prob)
+  #median_prob <- median(sum_prob)
   
-  result <-data.frame(RNA, l, sum_n, d1, d2, mean_d1, median_d1, mean_d2, median_d2, mean_nom, median_nom, mean_prob, median_prob, num_of_structs)
-  #print(result)
+  result <-data.frame(RNA, l, sum_n, d1, d2, mean_d1, median_d1, mean_d2, median_d2, mean_nom, median_nom, min_prob, num_of_structs)
   return(result)
 }
 
@@ -116,27 +121,33 @@ median_all_d1 <- median(all_infiles$d1)
 mean_all_d2 <- mean(all_infiles$d2)
 median_all_d2 <- median(all_infiles$d2)
 
-# generate row for mean of d1 and d2 for latex table
-mean_all_ds <- c(rep(NA,last_element-1))
-mean_all_ds <- t(mean_all_ds)
-mean_all_ds <- as.data.frame(mean_all_ds)
-colnames(mean_all_ds) <- names_infiles
-mean_all_ds$RNA <- "$\\mu$"
-mean_all_ds$d1 <- mean_all_d1
-mean_all_ds$d2 <- mean_all_d2
+# calculate mean and median from all_infiles row wise sum of probs
+mean_all_probs <- mean(all_infiles$min_prob)
+median_all_probs <- median(all_infiles$min_prob)
 
-# generate row for median of d1 and d2 for latex table
-median_all_ds <- c(rep(NA,last_element-1))
-median_all_ds <- t(median_all_ds)
-median_all_ds <- as.data.frame(median_all_ds)
-colnames(median_all_ds) <- names_infiles
-median_all_ds$RNA <- "$\\tilde x$"
-median_all_ds$d1 <- median_all_d1
-median_all_ds$d2 <- median_all_d2
+# generate row for mean of d1 and d2 and probs for latex table
+means_best_designs <- c(rep(NA,last_element-1))
+means_best_designs <- t(means_best_designs)
+means_best_designs <- as.data.frame(means_best_designs)
+colnames(means_best_designs) <- names_infiles
+means_best_designs$RNA <- "$\\mu$"
+means_best_designs$d1 <- mean_all_d1
+means_best_designs$d2 <- mean_all_d2
+means_best_designs$min_prob <- mean_all_probs
+
+# generate row for median of d1 and d2 and probs for latex table
+medians_best_designs <- c(rep(NA,last_element-1))
+medians_best_designs <- t(medians_best_designs)
+medians_best_designs <- as.data.frame(medians_best_designs)
+colnames(medians_best_designs) <- names_infiles
+medians_best_designs$RNA <- "$\\tilde x$"
+medians_best_designs$d1 <- median_all_d1
+medians_best_designs$d2 <- median_all_d2
+medians_best_designs$min_prob <- median_all_probs
 
 # add mean and median d1/d2 to existing data.frame
-all_infiles <- rbind(all_infiles, mean_all_ds)
-all_infiles <- rbind(all_infiles, median_all_ds)
+all_infiles <- rbind(all_infiles, means_best_designs)
+all_infiles <- rbind(all_infiles, medians_best_designs)
 
 # format names for latex table
 new_names <- colnames(all_infiles)
