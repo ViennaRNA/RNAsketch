@@ -121,7 +121,7 @@ mean_all_ds <- c(rep(NA,last_element-1))
 mean_all_ds <- t(mean_all_ds)
 mean_all_ds <- as.data.frame(mean_all_ds)
 colnames(mean_all_ds) <- names_infiles
-mean_all_ds$RNA <- "mean"
+mean_all_ds$RNA <- "$\\mu$"
 mean_all_ds$d1 <- mean_all_d1
 mean_all_ds$d2 <- mean_all_d2
 
@@ -130,7 +130,7 @@ median_all_ds <- c(rep(NA,last_element-1))
 median_all_ds <- t(median_all_ds)
 median_all_ds <- as.data.frame(median_all_ds)
 colnames(median_all_ds) <- names_infiles
-median_all_ds$RNA <- "median"
+median_all_ds$RNA <- "$\\tilde x$"
 median_all_ds$d1 <- median_all_d1
 median_all_ds$d2 <- median_all_d2
 
@@ -142,7 +142,9 @@ all_infiles <- rbind(all_infiles, median_all_ds)
 new_names <- colnames(all_infiles)
 new_names <- gsub(pattern="_", replacement = " ", new_names, ignore.case = T)
 new_names <- sapply(new_names, function(x) {
-  gsub(pattern="_", replacement = " ", x)
+  x <- gsub(pattern="_", replacement = " ", x)
+  x <- gsub(pattern="median", replacement = "$\\\\tilde x$", x)
+  x <- gsub(pattern="mean", replacement = "$\\\\mu$", x)
 })
 
 colnames(all_infiles) <- new_names
@@ -153,5 +155,3 @@ format_numbers[c(1: (2 + num_of_structs))] <- 0
 
 # generate latex table
 latex.default(all_infiles, cdec=format_numbers, rowname=NULL, n.rgroup=c(NROW(all_infiles) - 2, 2), na.blank=TRUE, booktabs=FALSE, table.env=FALSE, center="none", file="", title="") 
-
-
