@@ -256,7 +256,7 @@ if vrna_available:
         def _get_pf_fold(self, sequence):
             return RNA.pf_fold(self.sequence)
 
-if vrna_available:
+if nupack_available:
     class nupackDesign(Design):
         @property
         def classtype(self):
