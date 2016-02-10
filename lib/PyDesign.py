@@ -384,7 +384,7 @@ def calculate_objective(design, weight=1):
     
     return sum(design.eos) - design.number_of_structures * design.pf_energy + weight * (objective_difference_part / combination_count)
 
-def _sample_sequence(dg, design, mode, sample_steps):
+def _sample_sequence(dg, design, mode, sample_steps=1):
     '''
     This function samples a sequence with the given mode from the dependency graph object
     and writes it into the design object
@@ -401,6 +401,13 @@ def _sample_sequence(dg, design, mode, sample_steps):
     mut_nos = 1
     
     # sample a new sequence
+    # if random choice is requested pick something new
+    if mode == "random":
+        modes = ['sample','sample_global','sample_local', 'sample_strelem']
+        mode = random.choice(modes)
+    if sample_steps == 0:
+        sample_steps = random.randrange(1, 5)
+
     if mode == 'sample':
         mut_nos = dg.sample()
         sample_count += 1
