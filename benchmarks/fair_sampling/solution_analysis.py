@@ -61,7 +61,7 @@ def main():
                     unfair_solutions.append(line)
             
             unfair_solution_dict = Counter(unfair_solutions)
-            unfair_values = solution_dict.values();
+            unfair_values = unfair_solution_dict.values();
             
             print('unfair',
                         len(solutions[0]),
@@ -74,21 +74,22 @@ def main():
     plot_data(values, unfair_values, args);
 
 def plot_data(data, unfair_data, args):
-    #plt.hist(data, normed=True, facecolor='lightblue', bins=max(data)-min(data), histtype='stepfilled', label='fair')
+    fig = plt.figure()
+    fig.set_size_inches(14, 7)
+    plt.rc('font', family='Liberation Sans', size='18')
     if len(unfair_data) != 0:
-        plt.hist(unfair_data, bins=max(unfair_data)-min(unfair_data), histtype='stepfilled', color='red', alpha=0.6, label='unfair')
-    plt.hist(data, bins=max(data)-min(data), histtype='stepfilled', color='lightgreen', alpha=0.7, label='fair')
+        plt.hist(unfair_data, bins=max(unfair_data)-min(unfair_data), histtype='stepfilled', color='#FF8000', alpha=0.6, label='Unfair Sampling')
+    plt.hist(data, bins=max(data)-min(data), histtype='stepfilled', color='#006DDB', alpha=0.7, label='Fair Sampling')
     plt.xlabel('Frequency of the solution found')
     plt.ylabel('Frequency')
     plt.yscale('symlog')
     plt.xscale('symlog')
-    plt.title('Histogram of Solution Counts')
+    #plt.set_title('Histogram of Solution Counts')
     plt.grid(True)
-    plt.legend()
+    plt.legend(fontsize=18)
     plt.savefig(os.path.basename(args.file) + '.hist.svg')
     plt.clf()
     plt.close()
-
 if __name__ == "__main__":
     main()
 

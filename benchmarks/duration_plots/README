@@ -1,0 +1,3 @@
+for i in g l r s z; do for j in 3 4 5; do echo $i$j; cat ${i}${j}str*.out > ../${i}${j}str.out; done; done
+
+for f in *.out; do echo $f; sed -ne '/^mode/p' $f | head -n 1 > tmp; sed '/^mode/d' $f >> tmp; mv tmp $f; done
