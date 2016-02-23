@@ -64,9 +64,9 @@ class Design(object):
         '''
         self.structures = structures
         self.sequence = sequence
-        self._reset_values()
+        self._reset_all()
     
-    def _reset_values(self):
+    def _reset_seq_dependent(self):
         self._eos = None
         self._pos = None
         self._eos_diff_mfe = None
@@ -75,8 +75,13 @@ class Design(object):
         self._mfe_energy = None
         self._pf_structure = None
         self._pf_energy = None
+    
+    def _reset_all(self):
+        self._reset_seq_dependent()
         self._number_of_structures = None
         self._length = None
+        self._cut_points = None
+        self._multifold = None
     
     @property
     def classtype(self):
@@ -87,13 +92,13 @@ class Design(object):
         return self._sequence
     @sequence.setter
     def sequence(self, s):
-        if isinstance(s, basestring) and re.match(re.compile("[AUGC]"), s):
+        if isinstance(s, basestring) and re.match(re.compile("[AUGC\+\&]"), s):
             if len(s) != self.length:
                 raise TypeError('Sequence must have the same length as the structural constraints')
-            self._reset_values()
+            self._reset_sequence_dependent()
             self._sequence = s
         elif s == '':
-            self._reset_values()
+            self._reset_seq_dependent()
             self._sequence = None
         else:
             raise TypeError('Sequence must be a string containing a IUPAC RNA sequence')
@@ -106,11 +111,11 @@ class Design(object):
         if isinstance(s, list):
             length = len(s[0])
             for struct in s:
-                if not (isinstance(struct, basestring) and re.match(re.compile("[\(\)\.]"), struct)):
+                if not (isinstance(struct, basestring) and re.match(re.compile("[\(\)\.\+\&]"), struct)):
                     raise TypeError('Structure be a string in dot-bracket notation')
                 if length != len(struct):
                     raise TypeError('Structures must have equal length')
-            self._reset_values()
+            self._reset_all()
             self._structures = s
         else:
             raise TypeError('Structures must be a list of dot-bracket strings')
@@ -195,6 +200,21 @@ class Design(object):
             self._length = len(self.structures[0])
         return self._length
     
+    @property
+    def cut_points(self):
+        if not self._cut_points:
+            self._cut_points = []
+            iterator = re.finditer(re.compile('\&|\+'), self.structures[0])
+            for count, match in enumerate(iterator):
+                self._cut_points.append(match.start()-count+1)
+        return self._cut_points
+    
+    @property
+    def multifold(self):
+        if not self._multifold:
+            self._multifold = len(self.cut_points)
+        return self._multifold
+    
     def write_out(self, score=0):
         '''
         Generates a nice human readable version of all values of this design
@@ -246,27 +266,49 @@ if vrna_available:
         @property
         def classtype(self):
             return 'vrnaDesign'
-    
+        
+        def _remove_cuts(self, input):
+            return re.sub('[+&]', '', input)
+        
         def _get_eos(self, sequence, structure):
-            return RNA.energy_of_struct(sequence, structure)
+            if self.multifold == 1:
+                RNA.cut_point(self.cut_points[0])
+            elif self.multifold > 1:
+                raise NotImplementedError
+            return RNA.energy_of_struct(self._remove_cuts(sequence), self._remove_cuts(structure))
     
         def _get_fold(self, sequence):
-            return RNA.fold(self.sequence)
+            if self.multifold == 0:
+                return RNA.fold(self.sequence)
+            if self.multifold == 1:
+                RNA.cut_point(self.cut_points[0])
+                return RNA.cofold(self._remove_cuts(self.sequence))
+            elif self.multifold > 1:
+                raise NotImplementedError
     
         def _get_pf_fold(self, sequence):
-            return RNA.pf_fold(self.sequence)
+            if self.multifold == 0:
+                return RNA.pf_fold(self.sequence)
+            if self.multifold == 1:
+                RNA.cut_point(self.cut_points[0])
+                return RNA.pf_cofold(self._remove_cuts(self.sequence))
+            elif self.multifold > 1:
+                raise NotImplementedError
 
 if nupack_available:
     class nupackDesign(Design):
         @property
         def classtype(self):
             return 'nupackDesign'
+        
+        def _change_cuts(self, input):
+            return re.sub('[&]', '+', input)
     
         def _get_eos(self, sequence, structure):
-            return nupack.energy([sequence], structure, material = 'rna', pseudo = True)
+            return nupack.energy([self._change_cuts(sequence)], self._change_cuts(structure), material = 'rna', pseudo = True)
     
         def _get_fold(self, sequence):
-            nupack_mfe = nupack.mfe([sequence], material = 'rna', pseudo = True) # if str, 0, no error
+            nupack_mfe = nupack.mfe([self._change_cuts(sequence)], material = 'rna', pseudo = True) # if str, 0, no error
             pattern = re.compile('(\[\(\')|(\',)|(\'\)\])')
             temp_mfe = pattern.sub('', "%s" %nupack_mfe)
             temp_mfe = temp_mfe.replace("'", "")
@@ -278,7 +320,7 @@ if nupack_available:
     
         def _get_pf_fold(self, sequence):
             # Nupack doesn't return ensemble structure
-            return '?' * len(sequence), nupack.pfunc([sequence], material = 'rna', pseudo = True)
+            return re.sub('[^\+]', '?', self._change_cuts(sequence)), nupack.pfunc([sequence], material = 'rna', pseudo = True)
 
 def read_inp_file(filename):
     '''
