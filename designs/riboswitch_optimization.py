@@ -26,28 +26,47 @@ def main():
     parser.add_argument("-c", "--csv", default=False, action='store_true', help='Write output as semi-colon csv file to stdout')
     parser.add_argument("-p", "--progress", default=False, action='store_true', help='Show progress of optimization')
     parser.add_argument("-d", "--debug", default=False, action='store_true', help='Show debug information of library')
+    parser.add_argument("-r", "--range", type=str, default='6,20', help='Range of which a random number is generated to determine a spacer length')
+    parser.add_argument("-t", "--three", type=int, default=10, help='Minimum length of the terminator stem, i.e. the number of nucleotides of the aptamer used to form a stem.')
+    parser.add_argument("-u", "--ustretch", type=int, default=8, help='Length of the U stretch down stream of the terminator.')
+    parser.add_argument("-xi", "--xi", type=int, default=15, help='Energy that is added to the binding competent state to simulate ligand binding.')
     args = parser.parse_args()
 
     print("# Options: number={0:d}, jump={1:d}, exit={2:d}, strelem={3:d}, mode={4:}, nupack={5:}".format(args.number, args.jump, args.exit, args.strelem, args.mode, str(args.nupack)))
     rd.initialize_library(args.debug, args.kill)
-    # define structures
-    structures = []
-    constraint = ''
-    start_sequence = ''
+
+    aptseq = ''
+    aptstr = []
+    spacersize = map(int, args.range.split(",")) #convert region to array of integers
     
     if (args.input):
         data = ''
         for line in sys.stdin:
             data = data + '\n' + line
-        (structures, constraint, start_sequence) = read_input(data)
+        (aptstr, aptseq) = read_input(data)
     elif (args.file is not None):
         print("# Input File: {0:}".format(args.file))
-        (structures, constraint, start_sequence) = read_inp_file(args.file)
+        (aptstr, aptseq) = read_inp_file(args.file)
     else:
-        structures = ['((((....))))....((((....))))........',
-            '........((((....((((....))))....))))',
-            '((((((((....))))((((....))))....))))']
-        constraint = 'NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN'
+        aptstr = ['(((((...((((((((.....)))))...)))...)))))..']
+        aptseq = 'AAGUGAUACCAGCAUCGUCUUGAUGCCCUUGGCAGCACUUCA'
+
+    
+    rand = random.randint(spacersize[0],spacersize[1])
+    comp = len(aptseq) - random.randint(int(len(aptseq)/2),len(aptseq)-args.three+1) + 1
+
+    # define structures
+    structures = []
+    constraint = ''
+    start_sequence = ''
+    print(str(rand) + "\t" + str(comp))
+    ON = aptstr[0] + ("."*rand) + ("."*comp) + ("."*args.ustretch)
+    OFF = ("."*(len(aptseq)-comp)) + ("("*comp) + ("."*rand) + (")"*comp)  + ("."*args.ustretch)
+    SEQ = aptseq + ("N"*(rand+comp))  + ("U"*args.ustretch)
+    print("Used input:" + ON + "\n" + OFF + "\n" + SEQ)
+    structures = [ON, OFF]
+    constraint = SEQ
+    
     # try to construct dependency graph, catch errors and timeouts
     dg = None
     construction_time = 0.0
@@ -107,27 +126,32 @@ def main():
                 design = nupackDesign(structures, start_sequence)
             else:
                 design = vrnaDesign(structures, start_sequence)
+
+            #add variable
+            design.aptstr=aptstr
+            design.diff=args.xi
             
             start = time.clock()
             # do a complete sampling jump times
-            (score, number_of_jumps) = classic_optimization(dg, design, exit=args.jump, mode='sample', progress=args.progress)
-            # now do the optimization based on the chose mode
+            
+            (score, number_of_jumps) = classic_optimization(dg, design, objective_function=calculate_switch_objective, exit=args.jump, mode='sample', progress=args.progress)
+            # now do the optimization based on the chosen mode
             try:
-                (score, number_of_mutations) = classic_optimization(dg, design, exit=args.exit, mode=args.mode, progress=args.progress)
+                (score, number_of_mutations) = classic_optimization(dg, design, objective_function=calculate_switch_objective, exit=args.exit, mode=args.mode, progress=args.progress)
             except ValueError as e:
                 print (e.value)
                 exit(1)
             # now do the optimization with mode strelem where we take structural elements and replace them a little
             number_of_strelem = 0
             if forgi_available:
-                (score, number_of_strelem) = classic_optimization(dg, design, exit=args.strelem, mode='sample_strelem', progress=args.progress)
+                (score, number_of_strelem) = classic_optimization(dg, design, objective_function=calculate_switch_objective, exit=args.strelem, mode='sample_strelem', progress=args.progress)
             else:
                 sys.stderr.write("-" * 60 + "\nWARNING: Strelem sampling not available!!!\nPlease install forgi https://github.com/pkerpedjiev/forgi\n" + "-" * 60 + "\n")
                 sys.stderr.flush() 
             # sum up for a complete number of mutations
             number_of_mutations += number_of_jumps + number_of_strelem
             sample_time = time.clock() - start
-            
+
             if (args.csv):
                 print(args.jump,
                         args.exit,
@@ -144,7 +168,59 @@ def main():
     else:
         print('# Construction time out reached!')
 
+def calculate_switch_objective(design, weight=1):
+    '''
+    Calculates the objective function given a Design object containing the designed sequence and input structures.
+    objective function (3 seqs):    eos(1)+eos(2) - 2 * gibbs + 
+                                    weight * abs((eos(1) - xi - eos(2)) / (2!/(2-2)!*2) +
+                                    bpd(1,mfe_str)
+    :param design: Design object containing the sequence and structures
+    :param weight: To wheight the influence of the eos diffences
+    '''
+    objective_difference_part = 0
+    for i, eos1 in enumerate(design.eos):
+        for eos2 in design.eos[i+1:]:
+            objective_difference_part += math.fabs(eos1-design.diff - eos2)
+    
+    combination_count = 1
+    if (design.number_of_structures != 1):
+        combination_count = math.factorial(design.number_of_structures) / (math.factorial(design.number_of_structures-2)*2)
+    return sum(design.eos) - design.number_of_structures * design.pf_energy + weight * (objective_difference_part / combination_count) + calculate_bp_distance(design.aptstr[0], design.mfe_structure)
+
+def calculate_bp_distance(s1, s2):
+    '''
+    Compare two structures and determine the base pair distance d_BP(P_a,P_b) = |BP_a| + |BP_b| - 2|BP_a \cap  BP_b|
+    :param s1: First structure to be compared
+    :param s2: Second structure to be compared
+    '''
+
+    #re-order and make s1 the shorter string
+    if(len(s1)>len(s2)):
+        t=s1
+        s1=s2
+        s2=s1
+        
+    bpt1=create_bp_table(s1)
+    bpt2=create_bp_table(s2)
+    inboth=0
+    for i, val in enumerate(bpt1):
+        if(val!=-1 and bpt1[i]==bpt2[i]):
+            inboth+=1
+    dist = s1.count(")") + s2[0:len(s1)].count(")") - 2 * inboth
+    return dist
+    
+def create_bp_table(structure):
+    bpo=[]
+    bpt=[-1]*len(structure)
+    for i, substr in enumerate(structure):
+        if(substr=="("):
+            bpo.append(i)
+        elif(substr==")"):
+            bpt[bpo.pop()] = i
+    return bpt
+
 if __name__ == "__main__":
     main()
+
 
 
