@@ -21,8 +21,6 @@ import RNAdesign as rd
 '''
 Global variable:
 '''
-# KT = (betaScale*((temperature+K0)*GASCONST))/1000.0; /* in Kcal */
-KT = ((37+273.15)*1.98717)/1000.0;
 vrna_available = True
 nupack_available = True
 forgi_available = True
@@ -65,6 +63,7 @@ class Design(object):
         self.structures = structures
         self.sequence = sequence
         self._reset_all()
+        self._temperatures = [37.0] * len(structures)
     
     def _reset_seq_dependent(self):
         self._eos = None
@@ -82,6 +81,23 @@ class Design(object):
         self._length = None
         self._cut_points = None
         self._multifold = None
+    
+    @property
+    def temperatures(self):
+        return self._temperatures
+    @temperatures.setter
+    def temperatures(self, t):
+        if isinstance(t, int):
+            self._reset_values()
+            self._temperatures = [t] * self.number_of_structures
+        elif isinstance(t, list):
+            if len(t) == self.number_of_structures:
+                self._reset_values()
+                self._temperatures = t
+            else:
+                raise TypeError('Temperature must be a list of doubles specifying the temperature for each structure')
+        else:
+            raise TypeError('Temperature must either be a list of doubles containing the temperature for every structure, or one integer.')
     
     @property
     def classtype(self):
@@ -125,15 +141,15 @@ class Design(object):
         if not self._eos and self._sequence:
             self._eos = []
             for struct in self.structures:
-                self._eos.append(self._get_eos(self.sequence, struct))
+                self._eos.append(self._get_eos(index))
         return self._eos
          
     @property
     def pos(self):
         if not self._pos and self._sequence:
             self._pos = []
-            for eos in self.eos:
-                self._pos.append(math.exp((self.pf_energy-eos) / KT ))
+            for i, eos in enumerate(self.eos):
+                self._pos.append(math.exp((self.pf_energy-eos) / KT(self.temperature[i]) ))
         return self._pos
          
     @property
@@ -158,34 +174,60 @@ class Design(object):
     @property
     def mfe_energy(self):
         if not self._mfe_energy and self._sequence:
-            (self._mfe_structure, self._mfe_energy) = self._get_fold(self.sequence)
+            self._calculate_mfe_energy_structure()
         return self._mfe_energy
     
     @property
     def mfe_structure(self):
         if not self._mfe_structure and self._sequence:
-            (self._mfe_structure, self._mfe_energy) = self._get_fold(self.sequence)
+            self._calculate_mfe_energy_structure()
         return self._mfe_structure
+    
+    def _calculate_mfe_energy_structure(self):
+        if self.temperatures[1:] == self.temperatures[:-1]:
+            (self._mfe_structure, self._mfe_energy) = self._get_fold(self.sequence, self.temperatures[0])
+        else:
+            self._mfe_energy = []
+            self._mfe_structure = []
+            for temperature in self.temperatures:
+                (structure, energie) = self._get_fold(self.sequence, temperature)
+                self._mfe_energy.append(energie)
+                self._mfe_structure.append(structure)
     
     @property
     def pf_energy(self):
         if not self._pf_energy and self._sequence:
-            (self._pf_structure, self._pf_energy) = self._get_pf_fold(self.sequence)
+            self._calculate_pf_energy_structure()
         return self._pf_energy
     
     @property
     def pf_structure(self):
         if not self._pf_structure and self._sequence:
-            (self._pf_structure, self._pf_energy) = self._get_pf_fold(self.sequence)
+            self._calculate_pf_energy_structure()
         return self._pf_structure
     
-    def _get_eos(self, sequence, structure):
+    def _calculate_pf_energy_structure(self):
+        if self.temperatures[1:] == self.temperatures[:-1]:
+            (self._pf_structure, self._pf_energy) = self._get_pf_fold(self.sequence, self.temperatures[0])
+        else:
+            self._pf_energy = []
+            self._pf_structure = []
+            for temperature in self.temperatures:
+                (structure, energie) = self._get_pf_fold(self.sequence, temperature)
+                self._pf_energy.append(energie)
+                self._pf_structure.append(structure)
+    
+    def KT(self, temperature):
+        # KT = (betaScale*((temperature+K0)*GASCONST))/1000.0; /* in Kcal */
+        return ((temperature + 273.15)*1.98717)/1000.0;
+    
+    def _get_eos(self, sequence, structure, temperature):
         raise NotImplementedError
     
-    def _get_fold(self, sequence):
+    def _get_fold(self, sequence, temperature):
         raise NotImplementedError
     
-    def _get_pf_fold(self):
+    def _get_pf_fold(self, sequence, temperature):
         raise NotImplementedError
     
     @property
@@ -270,28 +312,31 @@ if vrna_available:
         def _remove_cuts(self, input):
             return re.sub('[+&]', '', input)
         
-        def _get_eos(self, sequence, structure):
+        def _get_eos(self, sequence, structure, temerature):
+            RNA.temperature = temperature
             if self.multifold == 1:
                 RNA.cut_point(self.cut_points[0])
             elif self.multifold > 1:
                 raise NotImplementedError
             return RNA.energy_of_struct(self._remove_cuts(sequence), self._remove_cuts(structure))
     
-        def _get_fold(self, sequence):
+        def _get_fold(self, sequence, temperature):
+            RNA.temperature = temperature
             if self.multifold == 0:
-                return RNA.fold(self.sequence)
+                return RNA.fold(sequence)
             if self.multifold == 1:
                 RNA.cut_point(self.cut_points[0])
-                return RNA.cofold(self._remove_cuts(self.sequence))
+                return RNA.cofold(self._remove_cuts(sequence))
             elif self.multifold > 1:
                 raise NotImplementedError
     
-        def _get_pf_fold(self, sequence):
+        def _get_pf_fold(self, sequence, temperature):
+            RNA.temperature = temperature
             if self.multifold == 0:
-                return RNA.pf_fold(self.sequence)
+                return RNA.pf_fold(sequence)
             if self.multifold == 1:
                 RNA.cut_point(self.cut_points[0])
-                return RNA.pf_cofold(self._remove_cuts(self.sequence))
+                return RNA.pf_cofold(self._remove_cuts(ssequence))
             elif self.multifold > 1:
                 raise NotImplementedError
 
@@ -304,11 +349,12 @@ if nupack_available:
         def _change_cuts(self, input):
             return re.sub('[&]', '+', input)
     
-        def _get_eos(self, sequence, structure):
-            return nupack.energy([self._change_cuts(sequence)], self._change_cuts(structure), material = 'rna', pseudo = True)
+        def _get_eos(self, sequence, structure, temperature):
+            return nupack.energy([self._change_cuts(sequence)], self._change_cuts(structure), material = 'rna', pseudo = True, T = temperature)
     
-        def _get_fold(self, sequence):
-            nupack_mfe = nupack.mfe([self._change_cuts(sequence)], material = 'rna', pseudo = True) # if str, 0, no error
+        def _get_fold(self, sequence, temperature):
+            nupack_mfe = nupack.mfe([self._change_cuts(sequence)], material = 'rna', pseudo = True, T = temperature) # if str, 0, no error
+
             pattern = re.compile('(\[\(\')|(\',)|(\'\)\])')
             temp_mfe = pattern.sub('', "%s" %nupack_mfe)
             temp_mfe = temp_mfe.replace("'", "")
@@ -318,9 +364,9 @@ if nupack_available:
             mfe_energy = float(mfe_list[1])
             return mfe_struct, mfe_energy
     
-        def _get_pf_fold(self, sequence):
+        def _get_pf_fold(self, sequence, temperature):
             # Nupack doesn't return ensemble structure
-            return re.sub('[^\+]', '?', self._change_cuts(sequence)), nupack.pfunc([sequence], material = 'rna', pseudo = True)
+            return re.sub('[^\+]', '?', self._change_cuts(sequence)), nupack.pfunc([sequence], material = 'rna', pseudo = True, T = temperature)
 
 def read_inp_file(filename):
     '''
