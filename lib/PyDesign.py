@@ -251,6 +251,9 @@ class Design(object):
                 self._cut_points.append(match.start()-count+1)
         return self._cut_points
     
+    def _remove_cuts(self, input):
+        return re.sub('[+&]', '', input)
+    
     @property
     def multifold(self):
         if not self._multifold:
@@ -309,13 +312,14 @@ if vrna_available:
         def classtype(self):
             return 'vrnaDesign'
         
-        def _remove_cuts(self, input):
-            return re.sub('[+&]', '', input)
+        def _change_cuts(self, input):
+            return re.sub('[+]', '&', input)
         
         def _get_eos(self, sequence, structure, temperature):
             RNA.temperature = temperature
             if self.multifold == 1:
-                RNA.cut_point(self.cut_points[0])
+                #TODO cut_point does not work
+                RNA.cut_point = self._cut_points[0]
             elif self.multifold > 1:
                 raise NotImplementedError
             return RNA.energy_of_struct(self._remove_cuts(sequence), self._remove_cuts(structure))
@@ -325,9 +329,10 @@ if vrna_available:
             if self.multifold == 0:
                 return RNA.fold(sequence)
             if self.multifold == 1:
-                RNA.cut_point(self.cut_points[0])
+                #TODO cut_point does not work
+                RNA.cut_point = self._cut_points[0]
                 return RNA.cofold(self._remove_cuts(sequence))
-            elif self.multifold > 1:
+            if self.multifold > 1:
                 raise NotImplementedError
     
         def _get_pf_fold(self, sequence, temperature):
@@ -335,8 +340,11 @@ if vrna_available:
             if self.multifold == 0:
                 return RNA.pf_fold(sequence)
             if self.multifold == 1:
-                RNA.cut_point(self.cut_points[0])
-                return RNA.pf_cofold(self._remove_cuts(ssequence))
+                #TODO cut_point does not work
+                RNA.cut_point = self._cut_points[0]
+                result = RNA.co_pf_fold(self._remove_cuts(sequence))
+                # result contains: structure, gibbs str1, gibbs str2, gibbs intra-str, gibbs ensemble
+                return result[0], result[4] # just return structure and gibbs ensenble
             elif self.multifold > 1:
                 raise NotImplementedError
 
@@ -350,6 +358,7 @@ if nupack_available:
             return re.sub('[&]', '+', input)
     
         def _get_eos(self, sequence, structure, temperature):
+            #TODO nupack.energy can not handle unconnected cofold structures
             return nupack.energy([self._change_cuts(sequence)], self._change_cuts(structure), material = 'rna', pseudo = True, T = temperature)
     
         def _get_fold(self, sequence, temperature):
@@ -399,11 +408,11 @@ def read_input(content):
     
     lines = content.split("\n")
     for line in lines:
-        if re.match(re.compile("^[\(\)\.\{\}\[\]\<\>]+$"), line, flags=0):
+        if re.match(re.compile("^[\(\)\.\{\}\[\]\<\>\+\&]+$"), line, flags=0):
             structures.append(line.rstrip('\n'))
-        elif re.match(re.compile("^[\ ACGTUWSMKRYBDHVN]+$"), line, flags=0):
+        elif re.match(re.compile("^[\ ACGTUWSMKRYBDHVN\&\+]+$"), line, flags=0):
             line = line.replace(" ", "N")
-            if re.match(re.compile("^[ACGTU]+$"), line, flags=0) and sequence == '':
+            if re.match(re.compile("^[ACGTU\&\+]+$"), line, flags=0) and sequence == '':
                 sequence = line.rstrip('\n')
             elif constraint == '':
                 constraint = line.rstrip('\n')
@@ -511,7 +520,7 @@ def _sample_sequence(dg, design, mode, sample_steps=1):
     elif mode == 'sample_strelem':
         if forgi_available:
             # sample new sequences for structural elements
-            struct = random.choice(design.structures)
+            struct = design._remove_cuts(random.choice(design.structures))
             bg = fgb.BulgeGraph(dotbracket_str=struct)
             for s in bg.random_subgraph(sample_steps):
                 try:
