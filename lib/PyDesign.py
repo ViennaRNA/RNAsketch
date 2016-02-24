@@ -65,7 +65,7 @@ class Design(object):
         self._reset_all()
         self._temperatures = [37.0] * len(structures)
     
-    def _reset_seq_dependent(self):
+    def _reset_sequence_dependent(self):
         self._eos = None
         self._pos = None
         self._eos_diff_mfe = None
@@ -76,7 +76,7 @@ class Design(object):
         self._pf_energy = None
     
     def _reset_all(self):
-        self._reset_seq_dependent()
+        self._reset_sequence_dependent()
         self._number_of_structures = None
         self._length = None
         self._cut_points = None
@@ -114,7 +114,7 @@ class Design(object):
             self._reset_sequence_dependent()
             self._sequence = s
         elif s == '':
-            self._reset_seq_dependent()
+            self._reset_sequence_dependent()
             self._sequence = None
         else:
             raise TypeError('Sequence must be a string containing a IUPAC RNA sequence')
@@ -140,8 +140,8 @@ class Design(object):
     def eos(self):
         if not self._eos and self._sequence:
             self._eos = []
-            for struct in self.structures:
-                self._eos.append(self._get_eos(index))
+            for i, struct in enumerate(self.structures):
+                self._eos.append(self._get_eos(self.sequence, struct, self.temperatures[i]))
         return self._eos
          
     @property
@@ -149,7 +149,7 @@ class Design(object):
         if not self._pos and self._sequence:
             self._pos = []
             for i, eos in enumerate(self.eos):
-                self._pos.append(math.exp((self.pf_energy-eos) / KT(self.temperature[i]) ))
+                self._pos.append(math.exp((self.pf_energy-eos) / self._get_KT(self.temperatures[i]) ))
         return self._pos
          
     @property
@@ -217,7 +217,7 @@ class Design(object):
                 self._pf_energy.append(energie)
                 self._pf_structure.append(structure)
     
-    def KT(self, temperature):
+    def _get_KT(self, temperature):
         # KT = (betaScale*((temperature+K0)*GASCONST))/1000.0; /* in Kcal */
         return ((temperature + 273.15)*1.98717)/1000.0;
     
@@ -312,7 +312,7 @@ if vrna_available:
         def _remove_cuts(self, input):
             return re.sub('[+&]', '', input)
         
-        def _get_eos(self, sequence, structure, temerature):
+        def _get_eos(self, sequence, structure, temperature):
             RNA.temperature = temperature
             if self.multifold == 1:
                 RNA.cut_point(self.cut_points[0])
