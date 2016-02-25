@@ -21,8 +21,6 @@ import RNAdesign as rd
 '''
 Global variable:
 '''
-# KT = (betaScale*((temperature+K0)*GASCONST))/1000.0; /* in Kcal */
-KT = ((37+273.15)*1.98717)/1000.0;
 vrna_available = True
 nupack_available = True
 forgi_available = True
@@ -64,9 +62,10 @@ class Design(object):
         '''
         self.structures = structures
         self.sequence = sequence
-        self._reset_values()
+        self._reset_all()
+        self._temperatures = [37.0] * len(structures)
     
-    def _reset_values(self):
+    def _reset_sequence_dependent(self):
         self._eos = None
         self._pos = None
         self._eos_diff_mfe = None
@@ -75,8 +74,30 @@ class Design(object):
         self._mfe_energy = None
         self._pf_structure = None
         self._pf_energy = None
+    
+    def _reset_all(self):
+        self._reset_sequence_dependent()
         self._number_of_structures = None
         self._length = None
+        self._cut_points = None
+        self._multifold = None
+    
+    @property
+    def temperatures(self):
+        return self._temperatures
+    @temperatures.setter
+    def temperatures(self, t):
+        if isinstance(t, int):
+            self._reset_values()
+            self._temperatures = [t] * self.number_of_structures
+        elif isinstance(t, list):
+            if len(t) == self.number_of_structures:
+                self._reset_values()
+                self._temperatures = t
+            else:
+                raise TypeError('Temperature must be a list of doubles specifying the temperature for each structure')
+        else:
+            raise TypeError('Temperature must either be a list of doubles containing the temperature for every structure, or one integer.')
     
     @property
     def classtype(self):
@@ -87,13 +108,13 @@ class Design(object):
         return self._sequence
     @sequence.setter
     def sequence(self, s):
-        if isinstance(s, basestring) and re.match(re.compile("[AUGC]"), s):
+        if isinstance(s, basestring) and re.match(re.compile("[AUGC\+\&]"), s):
             if len(s) != self.length:
                 raise TypeError('Sequence must have the same length as the structural constraints')
-            self._reset_values()
+            self._reset_sequence_dependent()
             self._sequence = s
         elif s == '':
-            self._reset_values()
+            self._reset_sequence_dependent()
             self._sequence = None
         else:
             raise TypeError('Sequence must be a string containing a IUPAC RNA sequence')
@@ -106,11 +127,11 @@ class Design(object):
         if isinstance(s, list):
             length = len(s[0])
             for struct in s:
-                if not (isinstance(struct, basestring) and re.match(re.compile("[\(\)\.]"), struct)):
+                if not (isinstance(struct, basestring) and re.match(re.compile("[\(\)\.\+\&]"), struct)):
                     raise TypeError('Structure be a string in dot-bracket notation')
                 if length != len(struct):
                     raise TypeError('Structures must have equal length')
-            self._reset_values()
+            self._reset_all()
             self._structures = s
         else:
             raise TypeError('Structures must be a list of dot-bracket strings')
@@ -119,16 +140,16 @@ class Design(object):
     def eos(self):
         if not self._eos and self._sequence:
             self._eos = []
-            for struct in self.structures:
-                self._eos.append(self._get_eos(self.sequence, struct))
+            for i, struct in enumerate(self.structures):
+                self._eos.append(self._get_eos(self.sequence, struct, self.temperatures[i]))
         return self._eos
          
     @property
     def pos(self):
         if not self._pos and self._sequence:
             self._pos = []
-            for eos in self.eos:
-                self._pos.append(math.exp((self.pf_energy-eos) / KT ))
+            for i, eos in enumerate(self.eos):
+                self._pos.append(math.exp((self.pf_energy-eos) / self._get_KT(self.temperatures[i]) ))
         return self._pos
          
     @property
@@ -153,34 +174,60 @@ class Design(object):
     @property
     def mfe_energy(self):
         if not self._mfe_energy and self._sequence:
-            (self._mfe_structure, self._mfe_energy) = self._get_fold(self.sequence)
+            self._calculate_mfe_energy_structure()
         return self._mfe_energy
     
     @property
     def mfe_structure(self):
         if not self._mfe_structure and self._sequence:
-            (self._mfe_structure, self._mfe_energy) = self._get_fold(self.sequence)
+            self._calculate_mfe_energy_structure()
         return self._mfe_structure
+    
+    def _calculate_mfe_energy_structure(self):
+        if self.temperatures[1:] == self.temperatures[:-1]:
+            (self._mfe_structure, self._mfe_energy) = self._get_fold(self.sequence, self.temperatures[0])
+        else:
+            self._mfe_energy = []
+            self._mfe_structure = []
+            for temperature in self.temperatures:
+                (structure, energie) = self._get_fold(self.sequence, temperature)
+                self._mfe_energy.append(energie)
+                self._mfe_structure.append(structure)
     
     @property
     def pf_energy(self):
         if not self._pf_energy and self._sequence:
-            (self._pf_structure, self._pf_energy) = self._get_pf_fold(self.sequence)
+            self._calculate_pf_energy_structure()
         return self._pf_energy
     
     @property
     def pf_structure(self):
         if not self._pf_structure and self._sequence:
-            (self._pf_structure, self._pf_energy) = self._get_pf_fold(self.sequence)
+            self._calculate_pf_energy_structure()
         return self._pf_structure
     
-    def _get_eos(self, sequence, structure):
+    def _calculate_pf_energy_structure(self):
+        if self.temperatures[1:] == self.temperatures[:-1]:
+            (self._pf_structure, self._pf_energy) = self._get_pf_fold(self.sequence, self.temperatures[0])
+        else:
+            self._pf_energy = []
+            self._pf_structure = []
+            for temperature in self.temperatures:
+                (structure, energie) = self._get_pf_fold(self.sequence, temperature)
+                self._pf_energy.append(energie)
+                self._pf_structure.append(structure)
+    
+    def _get_KT(self, temperature):
+        # KT = (betaScale*((temperature+K0)*GASCONST))/1000.0; /* in Kcal */
+        return ((temperature + 273.15)*1.98717)/1000.0;
+    
+    def _get_eos(self, sequence, structure, temperature):
         raise NotImplementedError
     
-    def _get_fold(self, sequence):
+    def _get_fold(self, sequence, temperature):
         raise NotImplementedError
     
-    def _get_pf_fold(self):
+    def _get_pf_fold(self, sequence, temperature):
         raise NotImplementedError
     
     @property
@@ -194,6 +241,24 @@ class Design(object):
         if not self._length:
             self._length = len(self.structures[0])
         return self._length
+    
+    @property
+    def cut_points(self):
+        if not self._cut_points:
+            self._cut_points = []
+            iterator = re.finditer(re.compile('\&|\+'), self.structures[0])
+            for count, match in enumerate(iterator):
+                self._cut_points.append(match.start()-count+1)
+        return self._cut_points
+    
+    def _remove_cuts(self, input):
+        return re.sub('[+&]', '', input)
+    
+    @property
+    def multifold(self):
+        if not self._multifold:
+            self._multifold = len(self.cut_points)
+        return self._multifold
     
     def write_out(self, score=0):
         '''
@@ -246,27 +311,59 @@ if vrna_available:
         @property
         def classtype(self):
             return 'vrnaDesign'
+        
+        def _change_cuts(self, input):
+            return re.sub('[+]', '&', input)
+        
+        def _get_eos(self, sequence, structure, temperature):
+            RNA.temperature = temperature
+            if self.multifold == 1:
+                #TODO cut_point does not work
+                RNA.cut_point = self._cut_points[0]
+            elif self.multifold > 1:
+                raise NotImplementedError
+            return RNA.energy_of_struct(self._remove_cuts(sequence), self._remove_cuts(structure))
     
-        def _get_eos(self, sequence, structure):
-            return RNA.energy_of_struct(sequence, structure)
+        def _get_fold(self, sequence, temperature):
+            RNA.temperature = temperature
+            if self.multifold == 0:
+                return RNA.fold(sequence)
+            if self.multifold == 1:
+                #TODO cut_point does not work
+                RNA.cut_point = self._cut_points[0]
+                return RNA.cofold(self._remove_cuts(sequence))
+            if self.multifold > 1:
+                raise NotImplementedError
     
-        def _get_fold(self, sequence):
-            return RNA.fold(self.sequence)
-    
-        def _get_pf_fold(self, sequence):
-            return RNA.pf_fold(self.sequence)
+        def _get_pf_fold(self, sequence, temperature):
+            RNA.temperature = temperature
+            if self.multifold == 0:
+                return RNA.pf_fold(sequence)
+            if self.multifold == 1:
+                #TODO cut_point does not work
+                RNA.cut_point = self._cut_points[0]
+                result = RNA.co_pf_fold(self._remove_cuts(sequence))
+                # result contains: structure, gibbs str1, gibbs str2, gibbs intra-str, gibbs ensemble
+                return result[0], result[4] # just return structure and gibbs ensenble
+            elif self.multifold > 1:
+                raise NotImplementedError
 
 if nupack_available:
     class nupackDesign(Design):
         @property
         def classtype(self):
             return 'nupackDesign'
+        
+        def _change_cuts(self, input):
+            return re.sub('[&]', '+', input)
     
-        def _get_eos(self, sequence, structure):
-            return nupack.energy([sequence], structure, material = 'rna', pseudo = True)
+        def _get_eos(self, sequence, structure, temperature):
+            #TODO nupack.energy can not handle unconnected cofold structures
+            return nupack.energy([self._change_cuts(sequence)], self._change_cuts(structure), material = 'rna', pseudo = True, T = temperature)
     
-        def _get_fold(self, sequence):
-            nupack_mfe = nupack.mfe([sequence], material = 'rna', pseudo = True) # if str, 0, no error
+        def _get_fold(self, sequence, temperature):
+            nupack_mfe = nupack.mfe([self._change_cuts(sequence)], material = 'rna', pseudo = True, T = temperature) # if str, 0, no error
+
             pattern = re.compile('(\[\(\')|(\',)|(\'\)\])')
             temp_mfe = pattern.sub('', "%s" %nupack_mfe)
             temp_mfe = temp_mfe.replace("'", "")
@@ -276,9 +373,9 @@ if nupack_available:
             mfe_energy = float(mfe_list[1])
             return mfe_struct, mfe_energy
     
-        def _get_pf_fold(self, sequence):
+        def _get_pf_fold(self, sequence, temperature):
             # Nupack doesn't return ensemble structure
-            return '?' * len(sequence), nupack.pfunc([sequence], material = 'rna', pseudo = True)
+            return re.sub('[^\+]', '?', self._change_cuts(sequence)), nupack.pfunc([sequence], material = 'rna', pseudo = True, T = temperature)
 
 def read_inp_file(filename):
     '''
@@ -311,11 +408,11 @@ def read_input(content):
     
     lines = content.split("\n")
     for line in lines:
-        if re.match(re.compile("^[\(\)\.\{\}\[\]\<\>]+$"), line, flags=0):
+        if re.match(re.compile("^[\(\)\.\{\}\[\]\<\>\+\&]+$"), line, flags=0):
             structures.append(line.rstrip('\n'))
-        elif re.match(re.compile("^[\ ACGTUWSMKRYBDHVN]+$"), line, flags=0):
+        elif re.match(re.compile("^[\ ACGTUWSMKRYBDHVN\&\+]+$"), line, flags=0):
             line = line.replace(" ", "N")
-            if re.match(re.compile("^[ACGTU]+$"), line, flags=0) and sequence == '':
+            if re.match(re.compile("^[ACGTU\&\+]+$"), line, flags=0) and sequence == '':
                 sequence = line.rstrip('\n')
             elif constraint == '':
                 constraint = line.rstrip('\n')
@@ -423,7 +520,7 @@ def _sample_sequence(dg, design, mode, sample_steps=1):
     elif mode == 'sample_strelem':
         if forgi_available:
             # sample new sequences for structural elements
-            struct = random.choice(design.structures)
+            struct = design._remove_cuts(random.choice(design.structures))
             bg = fgb.BulgeGraph(dotbracket_str=struct)
             for s in bg.random_subgraph(sample_steps):
                 try:

@@ -104,6 +104,11 @@ class TestPyDesign(unittest.TestCase):
     
     def test_classic_optimization(self):
         print('TODO')
+    
+    def test_cut_points(self):
+        a = vrnaDesign(['..&..+..'], 'AA&AA+AA')
+        self.assertEqual(a.cut_points, [3,6])
+        a = vrnaDesign(['..&..+..'], 'AA&AA+AA')
         
 
 if __name__ == '__main__':
