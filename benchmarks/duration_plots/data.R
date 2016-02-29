@@ -25,6 +25,9 @@ cat(getopt(spec, usage=TRUE));
 q(status=1);
 }
 
+if (!is.null(opt$directory)) {
+setwd(opt$directory)
+}
 infiles <- mixedsort(list.files(pattern = '*.out'))
 
 evaluate <- function(file) {
@@ -56,29 +59,43 @@ cdata <- ddply(all_infiles, c("num_mutations", "mode", "number_of_structures"), 
                sd   = sd(score),
                se   = sd / sqrt(N)
 )
+
+max_score <- max(cdata$mean_score)
+min_score <- min(cdata$mean_score)
+cdata$rel_score <- with(cdata, (mean_score - min_score) / (max_score-min_score))
+
 head(cdata)
 
-pdf("score.pdf")
-qplot(num_mutations, mean_score, colour = number_of_structures, shape=mode, data = cdata) +
-scale_x_log10() + geom_line() +
-ylab("mean Score") +
-xlab("Number of Mutations") +
-labs(colour="Number of Structures", shape="Sample Mode")
+svg(paste(opt$directory, ".score.svg", sep=""), width=5, height=3)
+qplot(num_mutations, rel_score, colour = mode, shape=mode, data = cdata) +
+scale_x_log10() +
+coord_trans(x="log10") +
+#scale_x_continuous() +
+geom_line() +
+ylab("relative mean Score") +
+xlab("Number of Sampled Sequences") +
+labs(colour="Sample Mode", shape="Sample Mode")
 dev.off()
 
-pdf("diff.pdf")
-qplot(num_mutations, mean_diff, colour = number_of_structures, shape=mode, data = cdata) +
-scale_x_log10() + geom_line() +
+svg(paste(opt$directory, ".diff.svg", sep=""), width=5, height=3)
+qplot(num_mutations, mean_diff, colour = mode, shape=mode, data = cdata) +
+scale_x_log10() +
+coord_trans(x="log10") +
+#scale_x_continuous() +
+geom_line() +
 ylab("mean Diff EOS MFE") +
-xlab("Number of Mutations") +
-labs(colour="Number of Structures", shape="Sample Mode")
+xlab("Number of Sampled Sequences") +
+labs(colour="Sample Mode", shape="Sample Mode")
 dev.off()
 
-pdf("prob.pdf")
-qplot(num_mutations, mean_prob, colour = number_of_structures, shape=mode, data = cdata) +
-scale_x_log10() + geom_line() +
+svg(paste(opt$directory, ".prob.svg", sep=""), width=5, height=3)
+qplot(num_mutations, mean_prob, colour = mode, shape=mode, data = cdata) +
+scale_x_log10() +
+coord_trans(x="log10") +
+#scale_x_continuous() +
+geom_line() +
 ylab("mean Probability in Ensemble") +
-xlab("Number of Mutations") +
-labs(colour="Number of Structures", shape="Sample Mode")
+xlab("Number of Sampled Sequences") +
+labs(colour="Sample Mode", shape="Sample Mode")
 dev.off()
 

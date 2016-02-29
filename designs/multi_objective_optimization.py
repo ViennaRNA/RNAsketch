@@ -12,16 +12,15 @@ import sys
 import time
 
 def main():
-    parser = argparse.ArgumentParser(description='Design a tri-stable example same to Hoehner 2013 paper.')
+    parser = argparse.ArgumentParser(description='Multi-objective optimization for a multi-stable RNA design.')
     parser.add_argument("-f", "--file", type = str, default=None, help='Read file in *.inp format')
     parser.add_argument("-i", "--input", default=False, action='store_true', help='Read custom structures and sequence constraints from stdin')
     parser.add_argument("-q", "--nupack", default=False, action='store_true', help='Use Nupack instead of the ViennaRNA package (for pseudoknots)')
     parser.add_argument("-n", "--number", type=int, default=4, help='Number of designs to generate')
     parser.add_argument("-j", "--jump", type=int, default=300, help='Do random jumps in the solution space for the first (jump) trials.')
     parser.add_argument("-e", "--exit", type=int, default=500, help='Exit optimization run if no better solution is aquired after (exit) trials.')
+    parser.add_argument("-s", "--strelem", type=int, default=1800, help='Optimize structural elements and exit after (strelem) unsucessful trials.')
     parser.add_argument("-m", "--mode", type=str, default='sample_global', help='Mode for getting a new sequence: sample, sample_local, sample_global, sample_strelem')
-    parser.add_argument("-x", "--max_eos_diff", type=float, default=0, help='Energy of Struct difference allowed during constrained generation')
-    parser.add_argument("-s", "--size_constraint", type=int, default=100, help='Size of negative constraints container')
     parser.add_argument("-k", "--kill", type=int, default=0, help='Timeout value of graph construction in seconds. (default: infinite)')
     parser.add_argument("-g", "--graphml", type=str, default=None, help='Write a graphml file with the given filename.')
     parser.add_argument("-c", "--csv", default=False, action='store_true', help='Write output as semi-colon csv file to stdout')
@@ -29,7 +28,7 @@ def main():
     parser.add_argument("-d", "--debug", default=False, action='store_true', help='Show debug information of library')
     args = parser.parse_args()
 
-    print("# Options: number={0:d}, jump={1:d}, exit={2:d}, size_constraint={3:d}, mode={4:}, nupack={5:}".format(args.number, args.jump, args.exit, args.size_constraint, args.mode, str(args.nupack)))
+    print("# Options: number={0:d}, jump={1:d}, exit={2:d}, strelem={3:d}, mode={4:}, nupack={5:}".format(args.number, args.jump, args.exit, args.strelem, args.mode, str(args.nupack)))
     rd.initialize_library(args.debug, args.kill)
     # define structures
     structures = []
@@ -92,8 +91,10 @@ def main():
         if (args.csv):
             print(";".join(["jump",
                         "exit",
+                        "strelem",
                         "mode",
-                        "score",
+                        "score_1",
+                        "score_2",
                         "num_mutations",
                         "construction_time",
                         "sample_time",
@@ -109,24 +110,33 @@ def main():
                 design = vrnaDesign(structures, start_sequence)
             
             start = time.clock()
+            obj_fun=[calculate_objective_1, calculate_objective_2]
             # do a complete sampling jump times
-            (scores, number_of_jumps) = classic_optimization(dg, design, exit=args.jump, mode='sample', progress=args.progress)
+            (scores, number_of_jumps) = classic_optimization(dg, design, exit=args.jump, mode='sample', progress=args.progress, objective_functions=obj_fun)
             # now do the optimization based on the chose mode
             try:
-                (scores, number_of_mutations) = constraint_generation_optimization(dg, design, exit=args.exit, mode=args.mode, 
-                            num_neg_constraints=args.size_constraint, max_eos_diff=args.max_eos_diff, progress=args.progress)
+                (scores, number_of_mutations) = classic_optimization(dg, design, exit=args.exit, mode=args.mode, progress=args.progress, objective_functions=obj_fun)
             except ValueError as e:
                 print (e.value)
                 exit(1)
+            # now do the optimization with mode strelem where we take structural elements and replace them a little
+            number_of_strelem = 0
+            if forgi_available:
+                (scores, number_of_strelem) = classic_optimization(dg, design, exit=args.strelem, mode='sample_strelem', progress=args.progress, objective_functions=obj_fun)
+            else:
+                sys.stderr.write("-" * 60 + "\nWARNING: Strelem sampling not available!!!\nPlease install forgi https://github.com/pkerpedjiev/forgi\n" + "-" * 60 + "\n")
+                sys.stderr.flush() 
             # sum up for a complete number of mutations
-            number_of_mutations += number_of_jumps
+            number_of_mutations += number_of_jumps + number_of_strelem
             sample_time = time.clock() - start
             
             if (args.csv):
                 print(args.jump,
                         args.exit,
+                        args.strelem,
                         "\"" + args.mode + "\"",
                         scores[0],
+                        scores[1],
                         number_of_mutations,
                         construction_time,
                         sample_time,
