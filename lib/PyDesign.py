@@ -459,7 +459,7 @@ def get_graph_properties(dg):
         
     return properties
 
-def calculate_objective(design, weight=1):
+def calculate_objective(design, weight=0.5):
     '''
     Calculates the objective function given a Design object containing the designed sequence and input structures.
     objective function (3 seqs):    eos(1)+eos(2)+eos(3) - 3 * gibbs + 
