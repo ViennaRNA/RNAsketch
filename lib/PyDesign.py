@@ -344,7 +344,7 @@ if vrna_available:
             RNA.cvar.temperature = temperature
             fc = RNA.fold_compound(self._change_cuts(sequence))
             if ligand:
-                fc.sc_add_hi_motif(ligand[0], ligand[1], ligand[2])
+                fc.sc_add_hi_motif(ligand[0], ligand[1], ligand[2], 1)
             if self.multifold == 0:
                 return fc.mfe()
             if self.multifold == 1:
@@ -356,7 +356,7 @@ if vrna_available:
             RNA.cvar.temperature = temperature
             fc = RNA.fold_compound(self._change_cuts(sequence), None, 2)
             if ligand:
-                fc.sc_add_hi_motif(ligand[0], ligand[1], ligand[2])
+                fc.sc_add_hi_motif(ligand[0], ligand[1], ligand[2], 2)
             if self.multifold == 0:
                 return fc.pf()
             if self.multifold == 1:
