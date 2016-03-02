@@ -65,6 +65,7 @@ class Design(object):
         self._reset_all()
         self._temperatures = [37.0] * self.number_of_structures
         self._ligands = [None] * self.number_of_structures
+        self._constraints = [None] * self.number_of_structures
     
     def _reset_sequence_dependent(self):
         self._eos = None
@@ -114,6 +115,21 @@ class Design(object):
                     TypeError('A ligand list must either be None or must contain three values: sequence motif, struture motif and binding energy.')
         else:
             raise TypeError('Ligands must be a list of ligand lists for each structure.')
+    
+    @property
+    def constraints(self):
+        return self._constraints
+    @constraints.setter
+    def constraints(self, const):
+        if isinstance(const, list) and len(const) == self.number_of_structures:
+            for const in const:
+                if isinstance(const, basestring) or not const:
+                    self._reset_sequence_dependent()
+                    self._constraints = const
+                else:
+                    TypeError('A hard constraint must be a string containting only this characters: ().|x')
+        else:
+            raise TypeError('Constraints is a hard constraint string for each structure wraped in a list.')
     
     @property
     def classtype(self):
@@ -200,13 +216,13 @@ class Design(object):
         return self._mfe_structure
     
     def _calculate_mfe_energy_structure(self):
-        if self.temperatures[1:] == self.temperatures[:-1] and all(l is None for l in self.ligands):
+        if self.temperatures[1:] == self.temperatures[:-1] and all(l is None for l in self.ligands) and all(c is None for c in self.constraints):
             (self._mfe_structure, self._mfe_energy) = self._get_fold(self.sequence, self.temperatures[0])
         else:
             self._mfe_energy = []
             self._mfe_structure = []
             for i, temperature in enumerate(self.temperatures):
-                (structure, energie) = self._get_fold(self.sequence, temperature, self.ligands[i])
+                (structure, energie) = self._get_fold(self.sequence, temperature, self.ligands[i], self.constraints[i])
                 self._mfe_energy.append(energie)
                 self._mfe_structure.append(structure)
     
@@ -223,13 +239,13 @@ class Design(object):
         return self._pf_structure
     
     def _calculate_pf_energy_structure(self):
-        if self.temperatures[1:] == self.temperatures[:-1] and all(l is None for l in self.ligands):
+        if self.temperatures[1:] == self.temperatures[:-1] and all(l is None for l in self.ligands) and all(c is None for c in self.constraints):
             (self._pf_structure, self._pf_energy) = self._get_pf_fold(self.sequence, self.temperatures[0])
         else:
             self._pf_energy = []
             self._pf_structure = []
             for i, temperature in enumerate(self.temperatures):
-                (structure, energie) = self._get_pf_fold(self.sequence, temperature, self.ligands[i])
+                (structure, energie) = self._get_pf_fold(self.sequence, temperature, self.ligands[i], self.constraints[i])
                 self._pf_energy.append(energie)
                 self._pf_structure.append(structure)
     
@@ -240,10 +256,10 @@ class Design(object):
     def _get_eos(self, sequence, structure, temperature, ligand):
         raise NotImplementedError
     
-    def _get_fold(self, sequence, temperature, ligand):
+    def _get_fold(self, sequence, temperature, ligand, constraint):
         raise NotImplementedError
     
-    def _get_pf_fold(self, sequence, temperature, ligand):
+    def _get_pf_fold(self, sequence, temperature, ligand, constraint):
         raise NotImplementedError
     
     @property
@@ -269,6 +285,12 @@ class Design(object):
     
     def _remove_cuts(self, input):
         return re.sub('[+&]', '', input)
+    
+    def _add_cuts(self, input):
+        result = input
+        for cut in self.cut_points:
+            result = result[:cut-1] + '&' + result[cut-1:]
+        return result
     
     @property
     def multifold(self):
@@ -338,31 +360,37 @@ if vrna_available:
             fc = RNA.fold_compound(self._change_cuts(sequence))
             if ligand:
                 fc.sc_add_hi_motif(ligand[0], ligand[1], ligand[2])
-            return fc.eos(_remove_cuts(structure))
+            return fc.eos(self._remove_cuts(structure))
     
-        def _get_fold(self, sequence, temperature, ligand=None):
+        def _get_fold(self, sequence, temperature, ligand=None, constraint=None):
+            # TODO get hard constraints working in addition to soft constraints
             RNA.cvar.temperature = temperature
             fc = RNA.fold_compound(self._change_cuts(sequence))
             if ligand:
                 fc.sc_add_hi_motif(ligand[0], ligand[1], ligand[2], 1)
             if self.multifold == 0:
-                return fc.mfe()
+                (structure, energie) = fc.mfe()
             if self.multifold == 1:
-                return fc.mfe_dimer()
+                (structure, energie) = fc.mfe_dimer()
+                structure = self._add_cuts(structure)
             if self.multifold > 1:
                 raise NotImplementedError
+            return (structure, energie)
     
-        def _get_pf_fold(self, sequence, temperature, ligand=None):
+        def _get_pf_fold(self, sequence, temperature, ligand=None, constraint=None):
+            # TODO get hard constraints working in addition to soft constraints
             RNA.cvar.temperature = temperature
             fc = RNA.fold_compound(self._change_cuts(sequence), None, 2)
             if ligand:
                 fc.sc_add_hi_motif(ligand[0], ligand[1], ligand[2], 2)
             if self.multifold == 0:
-                return fc.pf()
+                (structure, energie) = fc.pf()
             if self.multifold == 1:
-                return fc.pf_dimer()
+                (structure, energie) = fc.pf_dimer()
+                structure = self._add_cuts(structure)
             elif self.multifold > 1:
                 raise NotImplementedError
+            return (structure, energie)
 
 if nupack_available:
     class nupackDesign(Design):
@@ -377,7 +405,7 @@ if nupack_available:
             #TODO nupack.energy can not handle unconnected cofold structures
             return nupack.energy([self._change_cuts(sequence)], self._change_cuts(structure), material = 'rna', pseudo = True, T = temperature)
     
-        def _get_fold(self, sequence, temperature, ligand=None):
+        def _get_fold(self, sequence, temperature, ligand=None, constraint=None):
             nupack_mfe = nupack.mfe([self._change_cuts(sequence)], material = 'rna', pseudo = True, T = temperature) # if str, 0, no error
 
             pattern = re.compile('(\[\(\')|(\',)|(\'\)\])')
@@ -389,7 +417,7 @@ if nupack_available:
             mfe_energy = float(mfe_list[1])
             return mfe_struct, mfe_energy
     
-        def _get_pf_fold(self, sequence, temperature, ligand=None):
+        def _get_pf_fold(self, sequence, temperature, ligand=None, constraint=None):
             # Nupack doesn't return ensemble structure
             return re.sub('[^\+]', '?', self._change_cuts(sequence)), nupack.pfunc([sequence], material = 'rna', pseudo = True, T = temperature)
 
