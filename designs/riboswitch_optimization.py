@@ -217,16 +217,6 @@ def calculate_bp_distance(s1, s2):
             inboth+=1
     dist = s1.count(")") + s2[0:len(s1)].count(")") - 2 * inboth
     return (inboth, dist)
-    
-def create_bp_table(structure):
-    bpo=[]
-    bpt=[-1]*len(structure)
-    for i, substr in enumerate(structure):
-        if(substr=="("):
-            bpo.append(i)
-        elif(substr==")"):
-            bpt[bpo.pop()] = i
-    return bpt
 
 if __name__ == "__main__":
     main()

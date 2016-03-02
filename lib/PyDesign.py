@@ -63,7 +63,8 @@ class Design(object):
         self.structures = structures
         self.sequence = sequence
         self._reset_all()
-        self._temperatures = [37.0] * len(structures)
+        self._temperatures = [37.0] * self.number_of_structures
+        self._ligands = [None] * self.number_of_structures
     
     def _reset_sequence_dependent(self):
         self._eos = None
@@ -88,16 +89,31 @@ class Design(object):
     @temperatures.setter
     def temperatures(self, t):
         if isinstance(t, int):
-            self._reset_values()
+            self._reset_sequence_dependent()
             self._temperatures = [t] * self.number_of_structures
         elif isinstance(t, list):
             if len(t) == self.number_of_structures:
-                self._reset_values()
+                self._reset_sequence_dependent()
                 self._temperatures = t
             else:
                 raise TypeError('Temperature must be a list of doubles specifying the temperature for each structure')
         else:
             raise TypeError('Temperature must either be a list of doubles containing the temperature for every structure, or one integer.')
+    
+    @property
+    def ligands(self):
+        return self._ligands
+    @ligands.setter
+    def ligands(self, ligs):
+        if isinstance(ligs, list) and len(ligs) == self.number_of_structures:
+            for lig in ligs:
+                if isinstance(lig, list) or not lig:
+                    self._reset_sequence_dependent()
+                    self._ligands = ligs
+                else:
+                    TypeError('A ligand list must either be None or must contain three values: sequence motif, struture motif and binding energy.')
+        else:
+            raise TypeError('Ligands must be a list of ligand lists for each structure.')
     
     @property
     def classtype(self):
@@ -141,7 +157,7 @@ class Design(object):
         if not self._eos and self._sequence:
             self._eos = []
             for i, struct in enumerate(self.structures):
-                self._eos.append(self._get_eos(self.sequence, struct, self.temperatures[i]))
+                self._eos.append(self._get_eos(self.sequence, struct, self.temperatures[i], self.ligands[i]))
         return self._eos
          
     @property
@@ -184,13 +200,13 @@ class Design(object):
         return self._mfe_structure
     
     def _calculate_mfe_energy_structure(self):
-        if self.temperatures[1:] == self.temperatures[:-1]:
+        if self.temperatures[1:] == self.temperatures[:-1] and all(l is None for l in self.ligands):
             (self._mfe_structure, self._mfe_energy) = self._get_fold(self.sequence, self.temperatures[0])
         else:
             self._mfe_energy = []
             self._mfe_structure = []
-            for temperature in self.temperatures:
-                (structure, energie) = self._get_fold(self.sequence, temperature)
+            for i, temperature in enumerate(self.temperatures):
+                (structure, energie) = self._get_fold(self.sequence, temperature, self.ligands[i])
                 self._mfe_energy.append(energie)
                 self._mfe_structure.append(structure)
     
@@ -207,13 +223,13 @@ class Design(object):
         return self._pf_structure
     
     def _calculate_pf_energy_structure(self):
-        if self.temperatures[1:] == self.temperatures[:-1]:
+        if self.temperatures[1:] == self.temperatures[:-1] and all(l is None for l in self.ligands):
             (self._pf_structure, self._pf_energy) = self._get_pf_fold(self.sequence, self.temperatures[0])
         else:
             self._pf_energy = []
             self._pf_structure = []
-            for temperature in self.temperatures:
-                (structure, energie) = self._get_pf_fold(self.sequence, temperature)
+            for i, temperature in enumerate(self.temperatures):
+                (structure, energie) = self._get_pf_fold(self.sequence, temperature, self.ligands[i])
                 self._pf_energy.append(energie)
                 self._pf_structure.append(structure)
     
@@ -221,13 +237,13 @@ class Design(object):
         # KT = (betaScale*((temperature+K0)*GASCONST))/1000.0; /* in Kcal */
         return ((temperature + 273.15)*1.98717)/1000.0;
     
-    def _get_eos(self, sequence, structure, temperature):
+    def _get_eos(self, sequence, structure, temperature, ligand):
         raise NotImplementedError
     
-    def _get_fold(self, sequence, temperature):
+    def _get_fold(self, sequence, temperature, ligand):
         raise NotImplementedError
     
-    def _get_pf_fold(self, sequence, temperature):
+    def _get_pf_fold(self, sequence, temperature, ligand):
         raise NotImplementedError
     
     @property
@@ -315,33 +331,36 @@ if vrna_available:
         def _change_cuts(self, input):
             return re.sub('[+]', '&', input)
         
-        def _get_eos(self, sequence, structure, temperature):
-            RNA.cvar.temperature = temperature
-            if self.multifold == 1:
-                RNA.cvar.cut_point = self._cut_points[0]
-            elif self.multifold > 1:
+        def _get_eos(self, sequence, structure, temperature, ligand=None):
+            if self.multifold > 1:
                 raise NotImplementedError
-            return RNA.energy_of_struct(self._remove_cuts(sequence), self._remove_cuts(structure))
-    
-        def _get_fold(self, sequence, temperature):
             RNA.cvar.temperature = temperature
+            fc = RNA.fold_compound(self._change_cuts(sequence))
+            if ligand:
+                fc.sc_add_hi_motif(ligand[0], ligand[1], ligand[2])
+            return fc.eos(_remove_cuts(structure))
+    
+        def _get_fold(self, sequence, temperature, ligand=None):
+            RNA.cvar.temperature = temperature
+            fc = RNA.fold_compound(self._change_cuts(sequence))
+            if ligand:
+                fc.sc_add_hi_motif(ligand[0], ligand[1], ligand[2])
             if self.multifold == 0:
-                return RNA.fold(sequence)
+                return fc.mfe()
             if self.multifold == 1:
-                RNA.cvar.cut_point = self._cut_points[0]
-                return RNA.cofold(self._remove_cuts(sequence))
+                return fc.mfe_dimer()
             if self.multifold > 1:
                 raise NotImplementedError
     
-        def _get_pf_fold(self, sequence, temperature):
+        def _get_pf_fold(self, sequence, temperature, ligand=None):
             RNA.cvar.temperature = temperature
+            fc = RNA.fold_compound(self._change_cuts(sequence), None, 2)
+            if ligand:
+                fc.sc_add_hi_motif(ligand[0], ligand[1], ligand[2])
             if self.multifold == 0:
-                return RNA.pf_fold(sequence)
+                return fc.pf()
             if self.multifold == 1:
-                RNA.cvar.cut_point = self._cut_points[0]
-                result = RNA.co_pf_fold(self._remove_cuts(sequence))
-                # result contains: structure, gibbs str1, gibbs str2, gibbs intra-str, gibbs ensemble
-                return result[0], result[4] # just return structure and gibbs ensenble
+                return fc.pf_dimer()
             elif self.multifold > 1:
                 raise NotImplementedError
 
@@ -354,11 +373,11 @@ if nupack_available:
         def _change_cuts(self, input):
             return re.sub('[&]', '+', input)
     
-        def _get_eos(self, sequence, structure, temperature):
+        def _get_eos(self, sequence, structure, temperature, ligand=None):            
             #TODO nupack.energy can not handle unconnected cofold structures
             return nupack.energy([self._change_cuts(sequence)], self._change_cuts(structure), material = 'rna', pseudo = True, T = temperature)
     
-        def _get_fold(self, sequence, temperature):
+        def _get_fold(self, sequence, temperature, ligand=None):
             nupack_mfe = nupack.mfe([self._change_cuts(sequence)], material = 'rna', pseudo = True, T = temperature) # if str, 0, no error
 
             pattern = re.compile('(\[\(\')|(\',)|(\'\)\])')
@@ -370,7 +389,7 @@ if nupack_available:
             mfe_energy = float(mfe_list[1])
             return mfe_struct, mfe_energy
     
-        def _get_pf_fold(self, sequence, temperature):
+        def _get_pf_fold(self, sequence, temperature, ligand=None):
             # Nupack doesn't return ensemble structure
             return re.sub('[^\+]', '?', self._change_cuts(sequence)), nupack.pfunc([sequence], material = 'rna', pseudo = True, T = temperature)
 
@@ -428,6 +447,22 @@ def read_input(content):
     
     return structures, constraint, sequence
 
+def create_bp_table(structure):
+    '''
+    Takes a structure in dot bracket notation and returns a base pair table.
+    Unpaired positions are -1, otherwise the index of the adjacent bracket is listed
+    :param structure: string with dot-bracket notation of the strcture
+    :return bpt: base pair table
+    '''
+    bpo=[]
+    bpt=[-1]*len(structure)
+    for i, substr in enumerate(structure):
+        if(substr=="("):
+            bpo.append(i)
+        elif(substr==")"):
+            bpt[bpo.pop()] = i
+    return bpt
+
 def get_graph_properties(dg):
     '''
     Takes a RNAdesign DependencyGraph Object and constructs a dicionary with all the
@@ -462,8 +497,8 @@ def get_graph_properties(dg):
 def calculate_objective(design, weight=0.5):
     '''
     Calculates the objective function given a Design object containing the designed sequence and input structures.
-    objective function (3 seqs):    eos(1)+eos(2)+eos(3) - 3 * gibbs + 
-                                    weight * ((eos(1)-eos(2))^2 + (eos(1)-eos(3))^2 + (eos(2)-eos(3))^2) / (3!/(3-2)!*2)
+    objective function (3 seqs):    (eos(1)+eos(2)+eos(3) - 3 * gibbs) / number_of_structures +
+        weight * (eos(1)-eos(2))^2 + (eos(1)-eos(3))^2 + (eos(2)-eos(3))^2) * 2 / (number_of_structures * (number_of_structures-1))
     :param design: Design object containing the sequence and structures
     :param weight: To wheight the influence of the eos diffences
     '''
@@ -680,13 +715,13 @@ def constraint_generation_optimization(dg, design, objective_functions=[calculat
             # boolean if it is perfect already
             perfect = True
             # evaluate the constraints
-            for x in range(0, len(neg_constraints)):
+            for negc in neg_constraints:
                 # test if the newly sampled sequence is compatible to the neg constraint, if not -> Perfect!
-                if rd.sequence_structure_compatible(design.sequence, [neg_constraints[x]]):
+                if rd.sequence_structure_compatible(design.sequence, [negc]):
                     if design.classtype == 'vrnaDesign':
-                        neg_eos = RNA.energy_of_struct(design.sequence, neg_constraints[x])
+                        neg_eos = RNA.energy_of_struct(design.sequence, negc)
                     elif design.classtype == 'nupackDesign':
-                        neg_eos = nupack.energy([design.sequence], neg_constraints[x], material = 'rna', pseudo = True)
+                        neg_eos = nupack.energy([design.sequence], negc, material = 'rna', pseudo = True)
                     else:
                         raise ValueError('Could not figure out the classtype of the Design object.')
                     # test if the newly sampled sequence eos for pos constraints is lower than
