@@ -60,6 +60,8 @@ class Design(object):
         :param sequence:
         :param structures:
         '''
+        for struct in structures:
+            create_bp_table(struct) #check for balanced brackets
         self.structures = structures
         self.sequence = sequence
         self._reset_all()
@@ -120,12 +122,14 @@ class Design(object):
     def constraints(self):
         return self._constraints
     @constraints.setter
-    def constraints(self, const):
-        if isinstance(const, list) and len(const) == self.number_of_structures:
-            for const in const:
+    def constraints(self, constraints):
+        if isinstance(constraints, list) and len(constraints) == self.number_of_structures:
+            for const in constraints:
                 if isinstance(const, basestring) or not const:
+                    if const:
+                        create_bp_table(const) #check for balanced brackets
                     self._reset_sequence_dependent()
-                    self._constraints = const
+                    self._constraints = constraints
                 else:
                     TypeError('A hard constraint must be a string containting only this characters: ().|x')
         else:
@@ -363,11 +367,12 @@ if vrna_available:
             return fc.eos(self._remove_cuts(structure))
     
         def _get_fold(self, sequence, temperature, ligand=None, constraint=None):
-            # TODO get hard constraints working in addition to soft constraints
             RNA.cvar.temperature = temperature
             fc = RNA.fold_compound(self._change_cuts(sequence))
             if ligand:
-                fc.sc_add_hi_motif(ligand[0], ligand[1], ligand[2], 1)
+                fc.sc_add_hi_motif(ligand[0], ligand[1], ligand[2])
+            if constraint:
+                fc.hc_add_db(constraint)
             if self.multifold == 0:
                 (structure, energie) = fc.mfe()
             if self.multifold == 1:
@@ -380,9 +385,11 @@ if vrna_available:
         def _get_pf_fold(self, sequence, temperature, ligand=None, constraint=None):
             # TODO get hard constraints working in addition to soft constraints
             RNA.cvar.temperature = temperature
-            fc = RNA.fold_compound(self._change_cuts(sequence), None, 2)
+            fc = RNA.fold_compound(self._change_cuts(sequence))
             if ligand:
-                fc.sc_add_hi_motif(ligand[0], ligand[1], ligand[2], 2)
+                fc.sc_add_hi_motif(ligand[0], ligand[1], ligand[2])
+            if constraint:
+                fc.hc_add_db(constraint)
             if self.multifold == 0:
                 (structure, energie) = fc.pf()
             if self.multifold == 1:
@@ -488,7 +495,12 @@ def create_bp_table(structure):
         if(substr=="("):
             bpo.append(i)
         elif(substr==")"):
-            bpt[bpo.pop()] = i
+            try:
+                bpt[bpo.pop()] = i
+            except:
+                raise ValueError('Unbalanced brackets: too few opening brackets')
+    if len(bpo) > 0:
+        raise LogicError('Unbalanced brackets: too few closing brackets')
     return bpt
 
 def get_graph_properties(dg):
@@ -743,7 +755,7 @@ def constraint_generation_optimization(dg, design, objective_functions=[calculat
             # boolean if it is perfect already
             perfect = True
             # evaluate the constraints
-            for negc in neg_constraints:
+            for negc in reversed(neg_constraints):
                 # test if the newly sampled sequence is compatible to the neg constraint, if not -> Perfect!
                 if rd.sequence_structure_compatible(design.sequence, [negc]):
                     if design.classtype == 'vrnaDesign':
