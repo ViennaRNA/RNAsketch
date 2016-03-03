@@ -1,0 +1,88 @@
+diff --git a/interfaces/fold_compound.i b/interfaces/fold_compound.i
+index 9d3cdd4..a730750 100644
+--- a/interfaces/fold_compound.i
++++ b/interfaces/fold_compound.i
+@@ -31,14 +31,17 @@
+ /* hide all attributes in vrna_fold_compound_t */
+ typedef struct {} vrna_fold_compound_t;
+ 
+-/* scripting language takes ownership of objects returned by mfe() method */
++/* scripting language takes ownership of objects returned by mfe(),... methods */
+ %newobject vrna_fold_compound_t::mfe;
++%newobject vrna_fold_compound_t::mfe_dimer;
++%newobject vrna_fold_compound_t::pf;
++%newobject vrna_fold_compound_t::pf_dimer;
+ 
+ /* create object oriented interface for vrna_fold_compount_t */
+ %extend vrna_fold_compound_t {
+ 
+   /* the default constructor */
+-  vrna_fold_compound_t(char *sequence, vrna_md_t *md=NULL, unsigned int options=VRNA_OPTION_MFE){
++  vrna_fold_compound_t(char *sequence, vrna_md_t *md=NULL, unsigned int options=VRNA_OPTION_MFE | VRNA_OPTION_PF){
+     return vrna_fold_compound(sequence, md, options);
+   }
+   ~vrna_fold_compound_t(){
+@@ -55,22 +58,54 @@ typedef struct {} vrna_fold_compound_t;
+     return structure;
+   }
+ 
++  char *mfe_dimer(float *OUTPUT){
++    char *structure = vrna_alloc(sizeof(char) * ($self->length + 1));
++    *OUTPUT = vrna_mfe_dimer($self, structure);
++    return structure;
++  }
++  
++  char *pf(float *OUTPUT){
++    char *structure = vrna_alloc(sizeof(char) * ($self->length + 1));
++    *OUTPUT = vrna_pf($self, structure);
++    return structure;
++  }
++  
++  char *pf_dimer(float *OUTPUT){
++    char *structure = vrna_alloc(sizeof(char) * ($self->length + 1));
++    vrna_dimer_pf_t temp = vrna_pf_dimer($self, structure);
++    *OUTPUT = temp.FcAB;
++    return structure;
++  }
++  
++  void eos(float *OUTPUT, char *structure){
++    *OUTPUT = vrna_eval_structure($self, structure);
++  }
++  
+   void sc_remove(){
+     vrna_sc_remove($self);
+   }
+ 
+-  void sc_add_up(const double *constraints, unsigned int options=VRNA_OPTION_MFE){
++  void hc_add_db(char *constraints, unsigned int options=VRNA_OPTION_MFE | VRNA_OPTION_PF){
++    vrna_constraints_add($self, constraints, options | VRNA_CONSTRAINT_DB
++                                  | VRNA_CONSTRAINT_DB_PIPE
++                                  | VRNA_CONSTRAINT_DB_DOT
++                                  | VRNA_CONSTRAINT_DB_X
++                                  | VRNA_CONSTRAINT_DB_ANG_BRACK
++                                  | VRNA_CONSTRAINT_DB_RND_BRACK);
++  }
++
++  void sc_add_up(const double *constraints, unsigned int options=VRNA_OPTION_MFE | VRNA_OPTION_PF){
+     vrna_sc_add_up($self, constraints, options);
+   }
+ 
+-  void sc_add_bp(const double **constraints, unsigned int options=VRNA_OPTION_MFE){
++  void sc_add_bp(const double **constraints, unsigned int options=VRNA_OPTION_MFE | VRNA_OPTION_PF){
+     vrna_sc_add_bp($self, constraints, options);
+   }
+ 
+   int sc_add_hi_motif(const char *seq,
+                       const char *structure,
+                       double energy,
+-                      unsigned int options=VRNA_OPTION_MFE){
++                      unsigned int options=VRNA_OPTION_MFE | VRNA_OPTION_PF){
+ 
+     return vrna_sc_add_hi_motif($self, seq, structure, energy, options);
+   }
+@@ -78,4 +113,5 @@ typedef struct {} vrna_fold_compound_t;
+ }
+ 
+ %include <ViennaRNA/data_structures.h>
++%include <ViennaRNA/part_func_co.h>
+ %include <ViennaRNA/ligand.h>
