@@ -26,6 +26,7 @@ def main():
     parser.add_argument("-c", "--csv", default=False, action='store_true', help='Write output as semi-colon csv file to stdout')
     parser.add_argument("-p", "--progress", default=False, action='store_true', help='Show progress of optimization')
     parser.add_argument("-d", "--debug", default=False, action='store_true', help='Show debug information of library')
+    #### new
     parser.add_argument("-r", "--range", type=str, default='6,20', help='Range of which a random number is generated to determine a spacer length')
     parser.add_argument("-t", "--three", type=int, default=10, help='Minimum length of the terminator stem, i.e. the number of nucleotides of the aptamer used to form a stem.')
     parser.add_argument("-u", "--ustretch", type=int, default=8, help='Length of the U stretch down stream of the terminator.')
@@ -37,7 +38,7 @@ def main():
 
     aptseq = ''
     aptstr = []
-    spacersize = map(int, args.range.split(",")) #convert region to array of integers
+    spacerrange = map(int, args.range.split(",")) #convert region to array of integers
     
     if (args.input):
         data = ''
@@ -52,146 +53,183 @@ def main():
         aptseq = 'AAGUGAUACCAGCAUCGUCUUGAUGCCCUUGGCAGCACUUCA'
 
 
-    
+    total_optimizations = ((len(aptseq)-args.three+1)-int(len(aptseq)/2)) * (spacerrange[1]-spacerrange[0]+1)
+
     # main loop from zero to number of solutions
     for n in range(0, args.number):
+        global_score = float("inf")
+        global_design = None
 
-        spacer = random.randint(spacersize[0],spacersize[1])
-        spbp = int((spacer-4)/2)
-        spss = (spacer-spbp*2)
-        comp = len(aptseq) - random.randint(int(len(aptseq)/2),len(aptseq)-args.three+1) + 1
-        
-        # define structures
-        structures = []
-        constraint = ''
-        start_sequence = ''
-        print("# spacer length: " + str(spacer) + "\tlength of the complementary region: " + str(comp))
-        ON = aptstr[0] + ("."*spacer) + ("."*comp) + ("."*args.ustretch)
-        OFF=("."*(len(aptseq)-comp)) + ("("*comp) + ("("*spbp) + ("."*spss) + (")"*spbp) + (")"*comp)  + ("."*args.ustretch)
-        if(spbp>3):
-            OFF = ("."*(len(aptseq)-comp)) + ("("*comp) + ("."*(spbp-3)) + "(((" + ("."*spss) + ")))" + ("."*(spbp-3)) + (")"*comp)  + ("."*args.ustretch)
-        
-        SEQ = aptseq + ("N"*(spacer+comp))  + ("U"*args.ustretch)
-        print("# Used input:\n# " + ON + "\n# " + OFF + "\n# " + SEQ)
-        structures = [ON, OFF]
-        constraint = SEQ
-        
-        # try to construct dependency graph, catch errors and timeouts
-        dg = None
-        construction_time = 0.0
-        sample_time = 0.0
-        
-        # construct dependency graph with these structures
-        try:
-            start = time.clock()
-            dg = rd.DependencyGraphMT(structures, constraint)
-            construction_time = time.clock() - start
-        except Exception as e:
-            print( "Error: %s" % e , file=sys.stderr)
+        counter = 0
+        for aptpos in range(int(len(aptseq)/2), len(aptseq)-args.three+2):
+            for spacer in range(spacerrange[0], (spacerrange[1]+1)):
+                counter+=1
+                print("# PROGRESS: " + str(counter) + "/" + str(total_optimizations))
+                # number of possibly base paired positions of the spacer
+                spbp = int((spacer-4)/2)
+                # number of single stranded bases in the termiantor loop
+                spss = (spacer-spbp*2)
             
-        # general DG values
-        print("# " + "\n# ".join(structures) + "\n# " + constraint)
-    
-        if (dg is not None):
+                # select a random position in the aptamers 3' half that is used to form the perfect terminator stem
+                comp = len(aptseq) - aptpos + 1
             
-            # if requested write out a graphml file
-            if args.graphml is not None:
-                with open(args.graphml, 'w') as f:
-                    f.write(dg.get_graphml() + "\n")
+                # Build input structures and sequence constraints
+                # TODO: create hard constraint for structures
+                structures = []
+                constraint = ''
+                start_sequence = ''
+                print("# spacer length: " + str(spacer) + "\tlength of the complementary region: " + str(comp))
+
+                ONS = aptstr[0] + ("."*spacer) + ("."*comp) + ("."*args.ustretch)
+                ONH = "." * len(aptstr[0]) + ("."*spacer) + ("."*(comp-4)) + ("x"*4) + ("."*args.ustretch)
+                                
+                OFFS = ("."*(len(aptseq)-comp)) + ("("*comp) + ("("*spbp) + ("."*spss) + (")"*spbp) + (")"*comp)  + ("."*args.ustretch)
+                OFFH = ("."*(len(aptseq)-comp)) + ("("*comp) + ("("*spbp) + ("x"*spss) + (")"*spbp) + (")"*comp)  + ("x"*args.ustretch)
+                if(spbp>3):
+                    OFFS = ("."*(len(aptseq)-comp)) + ("("*comp) + ("."*(spbp-3)) + "(((" + ("."*spss) + ")))" + ("."*(spbp-3)) + (")"*comp)  + ("."*args.ustretch)
+                    OFFH = ("."*(len(aptseq)-comp)) + ("("*comp) + ("."*(spbp-3)) + "(((" + ("x"*spss) + ")))" + ("."*(spbp-3)) + (")"*comp)  + ("x"*args.ustretch)
                     
-            # print the amount of solutions
-            print('# Maximal number of solutions: ' + str(dg.number_of_sequences()))
-            # print the amount of connected components
-            number_of_components = dg.number_of_connected_components()
-            print('# Number of Connected Components: ' + str(number_of_components))
-            for i in range(0, number_of_components):
-                print('# [' + str(i) + ']' + str(dg.component_vertices(i)))
+                SEQ = aptseq + ("N"*(spacer+comp))  + ("U"*args.ustretch)
+                print("# Used input:\n# " + ONS + "\n# " + ONH + "\n# " + OFFS + "\n# " + OFFH + "\n# " + SEQ)
+                structures = [ONS, OFFS]
+                constraint = SEQ
                 
-            # remember general DG values
-            graph_properties = get_graph_properties(dg)
-            # create a initial design object
-            if (args.nupack):
-                design = nupackDesign(structures, start_sequence)
-            else:
-                design = vrnaDesign(structures, start_sequence)
+                # try to construct dependency graph, catch errors and timeouts
+                dg = None
+                construction_time = 0.0
+                sample_time = 0.0
                 
-            # print header for csv file
-            if (args.csv):
-                print(";".join(["jump",
-                                "exit",
-                                "strelem",
-                                "mode",
-                                "score",
-                                "num_mutations",
-                                "construction_time",
-                                "sample_time",
-                                design.write_csv_header()] +
-                               graph_properties.keys()))
-    
-            # reset the design object
-            if (args.nupack):
-                design = nupackDesign(structures, start_sequence)
-            else:
-                design = vrnaDesign(structures, start_sequence)
-    
-            #add variable
-            design.aptstr=aptstr
-            design.diff=args.xi
-            design.aptsp_length=len(aptseq)+spacer
+                # construct dependency graph with these structures
+                try:
+                    start = time.clock()
+                    dg = rd.DependencyGraphMT(structures, constraint)
+                    construction_time = time.clock() - start
+                except Exception as e:
+                    print( "Error: %s" % e , file=sys.stderr)
+                    
+                # general DG values
+                print("# " + "\n# ".join(structures) + "\n# " + constraint)
             
-            start = time.clock()
-            # do a complete sampling jump times
-            (score, number_of_jumps) = classic_optimization(dg, design, objective_function=calculate_switch_objective, exit=args.jump, mode='sample', progress=args.progress)
-            # now do the optimization based on the chosen mode
-            try:
-                (score, number_of_mutations) = classic_optimization(dg, design, objective_function=calculate_switch_objective, exit=args.exit, mode=args.mode, progress=args.progress)
-            except ValueError as e:
-                print (e.value)
-                exit(1)
-                # now do the optimization with mode strelem where we take structural elements and replace them a little
-            number_of_strelem = 0
-            if forgi_available:
-                (score, number_of_strelem) = classic_optimization(dg, design, objective_function=calculate_switch_objective, exit=args.strelem, mode='sample_strelem', progress=args.progress)
-            else:
-                sys.stderr.write("-" * 60 + "\nWARNING: Strelem sampling not available!!!\nPlease install forgi https://github.com/pkerpedjiev/forgi\n" + "-" * 60 + "\n")
-                sys.stderr.flush() 
-                # sum up for a complete number of mutations
-            number_of_mutations += number_of_jumps + number_of_strelem
-            sample_time = time.clock() - start
-    
-            if (args.csv):
-                print(args.jump,
-                      args.exit,
-                      args.strelem,
-                      "\"" + args.mode + "\"",
-                      score,
-                      number_of_mutations,
-                      construction_time,
-                      sample_time,
-                      design.write_csv(),
-                      *graph_properties.values(), sep=";")
-            else:
-                print(design.write_out(score))
-        else:
-            print('# Construction time out reached!')
+                if (dg is not None):
+                    
+                    # if requested write out a graphml file
+                    if args.graphml is not None:
+                        with open(args.graphml, 'w') as f:
+                            f.write(dg.get_graphml() + "\n")
+                            
+                    # print the amount of solutions
+                    print('# Maximal number of solutions: ' + str(dg.number_of_sequences()))
+                    # print the amount of connected components
+                    number_of_components = dg.number_of_connected_components()
+                    print('# Number of Connected Components: ' + str(number_of_components))
+                    for i in range(0, number_of_components):
+                        print('# [' + str(i) + ']' + str(dg.component_vertices(i)))
+                        
+                    # remember general DG values
+                    graph_properties = get_graph_properties(dg)
 
+                    if (args.nupack):
+                        design = nupackDesign(structures+structures, start_sequence)
+                    else:
+                        design = vrnaDesign(structures+structures, start_sequence)                  
+                    # print header for csv file
+                    if (args.csv):
+                        print(";".join(["jump",
+                                        "exit",
+                                        "strelem",
+                                        "mode",
+                                        "score",
+                                        "num_mutations",
+                                        "construction_time",
+                                        "sample_time",
+                                        design.write_csv_header()] +
+                                       graph_properties.keys()))
+            
+                    # reset the design object
+                    if (args.nupack):
+                        design = nupackDesign(structures+structures, start_sequence)
+                    else:
+                        design = vrnaDesign(structures+structures, start_sequence)
+                    # create a initial design object
+                    # [0]: on + ligand + hardconstr1
+                    # [1]: off + hardconstr2
+                    # [2]: on + ligand
+                    # [3]: off
+                    design.constraints=[ONH,OFFH, None, None]
+                    design.ligands=[["GAUACCAG&CCCUUGGCAGC", "(...((((&)...)))...)", -9.22], None, ["GAUACCAG&CCCUUGGCAGC", "(...((((&)...)))...)", -9.22], None]
+                    
+                    #add variable
+                    design.aptstr=aptstr
+                    design.diff=args.xi
+                    design.aptsp_length=len(aptseq)+spacer
+                    
+                    start = time.clock()
+                    # do a complete sampling jump times
+                    (score, number_of_jumps) = classic_optimization(dg, design, objective_functions=[calculate_switch_objective], exit=args.jump, mode='sample', progress=args.progress)
+                    # now do the optimization based on the chosen mode
+                    try:
+                        (score, number_of_mutations) = classic_optimization(dg, design, objective_functions=[calculate_switch_objective], exit=args.exit, mode=args.mode, progress=args.progress)
+                    except ValueError as e:
+                        print (e.value)
+                        exit(1)
+                    # now do the optimization with mode strelem where we take structural elements and replace them a little
+                    number_of_strelem = 0
+                    if forgi_available:
+                        (score, number_of_strelem) = classic_optimization(dg, design, objective_functions=[calculate_switch_objective], exit=args.strelem, mode='sample_strelem', progress=args.progress)
+                    else:
+                        sys.stderr.write("-" * 60 + "\nWARNING: Strelem sampling not available!!!\nPlease install forgi https://github.com/pkerpedjiev/forgi\n" + "-" * 60 + "\n")
+                        sys.stderr.flush() 
+                    # sum up for a complete number of mutations
+                    number_of_mutations += number_of_jumps + number_of_strelem
+                    sample_time = time.clock() - start
+            
+                    if (args.csv):
+                        print(args.jump,
+                              args.exit,
+                              args.strelem,
+                              "\"" + args.mode + "\"",
+                              score,
+                              number_of_mutations,
+                              construction_time,
+                              sample_time,
+                              design.write_csv(),
+                              *graph_properties.values(), sep=";")
+                    else:
+                        print(design.write_out(score))
+            
+                    if(score<global_score):
+                        global_score = score
+                        global_design = design
+                else:
+                    print('# Construction time out reached!')
+                
+        print("\n\n" + "Best desgin:\n" + global_design.write_out(global_score))
+    
 def calculate_switch_objective(design, weight=1):
     '''
-    Calculates the objective function given a Design object containing the designed sequence and input structures.
-    objective function (3 seqs):    ((eos(1) - gibbs)+(aptsp_eos 0 gibbs_aptsp)/#structures) + 
-                                    weight * abs((eos(1) - (eos(2)+xi)) +
+    Calculates the objective function given a Design object containing the designed sequence,
+    input structures and the length of the aptamer + spacer.
+    
+    Objective function:    ((eos(1) - gibbs) + (aptsp_eos - gibbs_aptsp)/2)
+                         + weight * abs((eos(1) - (eos(2) + xi))
+                         + number of aptamer bp in ON and OFF state
     :param design: Design object containing the sequence and structures
     :param weight: To wheight the influence of the eos diffences
     '''
+    # [0]: on + ligand + hardconstr1
+    # [1]: off + hardconstr2
+    # [2]: on + ligand
+    # [3]: off
+    return design.pf_energy[0]-design.pf_energy[2] + design.pf_energy[1] - design.pf_energy[3]
 
-    aptsp_eos = RNA.energy_of_struct(design.sequence[:design.aptsp_length], design.structures[0][:design.aptsp_length])
-    (aptsp_pf_str, aptsp_pf_energy) = RNA.pf_fold(design.sequence[:design.aptsp_length])
-    
-    objective_difference_part = abs(design.eos[0] - (design.eos[1]+design.diff))
-    objective_ensemble = 0.5 * ((design.eos[1] - design.pf_energy) + (aptsp_eos - aptsp_pf_energy))
-    (objective_bp_inboth, objective_bp_distance) = calculate_bp_distance(design.aptstr[0], design.mfe_structure)
-    
-    return (objective_ensemble + weight * (objective_difference_part) + objective_bp_inboth)
+    #aptsp_eos = RNA.energy_of_struct(design.sequence[:design.aptsp_length], design.structures[0][:design.aptsp_length])
+    #(aptsp_pf_str, aptsp_pf_energy) = RNA.pf_fold(design.sequence[:design.aptsp_length])
+    #
+    #objective_difference_part = abs(design.eos[0] - (design.eos[1]+design.diff))
+    #objective_ensemble = 0.5 * ((design.eos[1] - design.pf_energy) + (aptsp_eos - aptsp_pf_energy))
+    #(objective_bp_inboth, objective_bp_distance) = calculate_bp_distance(design.aptstr[0], design.mfe_structure)
+    #
+    #return (objective_ensemble + weight * (objective_difference_part) + objective_bp_inboth)
 
 
 def calculate_bp_distance(s1, s2):
