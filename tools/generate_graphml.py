@@ -16,7 +16,7 @@ def main():
     structures = []
     constraint = ""
     
-    if (args.input and (args.graphml is None)):
+    if (args.input):
         for line in sys.stdin:
             if re.match(re.compile("[\(\)\.]"), line, flags=0):
                 structures.append(line.rstrip('\n'))
