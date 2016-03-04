@@ -782,39 +782,34 @@ def constraint_generation_optimization(dg, design, objective_functions=[calculat
         
         # count this as a solution to analyse
         count += 1
-        # if we reached the mfe strcture, calculate a score for this solution and evaluate
-        if design.mfe_structure in design.structures:
-            # calculate objective
-            this_scores = []
-            for obj_fun in objective_functions:
-                this_scores.append(obj_fun(design))
-            # evaluate
-            better = False
-            for i, score in enumerate(scores):
-                if (this_scores[i] > score):
-                    better = False
-                    break
-                elif (this_scores[i] < score):
-                    better = True
+        # calculate objective
+        this_scores = []
+        for obj_fun in objective_functions:
+            this_scores.append(obj_fun(design))
+        # evaluate
+        better = False
+        for i, score in enumerate(scores):
+            if (this_scores[i] > score):
+                better = False
+                break
+            elif (this_scores[i] < score):
+                better = True
 
-            if (better):
-                scores = this_scores
-                # reset values
-                sample_steps = 1
-                cg_count = 0
-                count = 0
-            else:
-                dg.revert_sequence(sample_count)
-                design.sequence = dg.get_sequence()
-        # else if current mfe is not in negative constraints, add to it
+        if (better):
+            scores = this_scores
+            # reset values
+            sample_steps = 1
+            cg_count = 0
+            count = 0
         else:
+            dg.revert_sequence(sample_count)
+            design.sequence = dg.get_sequence()
+        # else if current mfe is not in negative constraints, add to it
+        if design.mfe_structure not in design.structures:
             if design.mfe_structure not in neg_constraints:
                 neg_constraints.append(design.mfe_structure)
                 #print('\n'+'\n'.join(neg_constraints))
 
-            dg.revert_sequence(sample_count)
-            design.sequence = dg.get_sequence()
-        
         # exit condition
         if count > exit:
             break
