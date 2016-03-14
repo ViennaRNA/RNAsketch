@@ -185,7 +185,7 @@ class Design(object):
         if not self._pos and self._sequence:
             self._pos = []
             for i, eos in enumerate(self.eos):
-                self._pos.append(math.exp((self.pf_energy-eos) / self._get_KT(self.temperatures[i]) ))
+                self._pos.append(math.exp((self.pf_energy[i]-eos) / self._get_KT(self.temperatures[i]) ))
         return self._pos
          
     @property
@@ -310,9 +310,9 @@ class Design(object):
         '''
         result = self.sequence + "\t" + "; ".join(["%5.2f" % score for score in scores])
         for i, struct in enumerate(self.structures):
-            result += '\n{0:}\t{1:9.4f}\t{2:+9.4f}\t{3:9.4f}'.format(struct, self.eos[i], self.eos[i]-self.mfe_energy, self.pos[i])
-        result += '\n{0:}\t{1:9.4f}'.format(self.mfe_structure, self.mfe_energy)
-        result += '\n{0:}\t{1:9.4f}'.format(self.pf_structure, self.pf_energy)
+            result += '\n{0:}\t{1:9.4f}\t{2:+9.4f}\t{3:9.4f}'.format(struct, self.eos[i], self.eos[i]-self.mfe_energy[i], self.pos[i])
+            result += '\n{0:}\t{1:9.4f}'.format(self.mfe_structure[i], self.mfe_energy[i])
+            result += '\n{0:}\t{1:9.4f}'.format(self.pf_structure[i], self.pf_energy[i])
         return result
     
     def write_csv(self, separator=';'):
