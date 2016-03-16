@@ -583,7 +583,7 @@ def _sample_sequence(dg, design, mode, sample_steps=1):
         modes = ['sample','sample_global','sample_local', 'sample_strelem']
         mode = random.choice(modes)
     if sample_steps == 0:
-        sample_steps = random.randrange(1, 5)
+        sample_steps = random.randrange(1, dg.number_of_connected_components())
 
     if mode == 'sample':
         mut_nos = dg.sample()
@@ -650,7 +650,7 @@ def classic_optimization(dg, design, objective_function=calculate_objective, exi
         # count up the mutations
         number_of_samples += 1
         # sample a new sequence
-        (mut_nos, sample_count) = _sample_sequence(dg, design, mode, 1)
+        (mut_nos, sample_count) = _sample_sequence(dg, design, mode)
         
         # write progress
         if progress:
@@ -718,7 +718,8 @@ def constraint_generation_optimization(dg, design, objective_function=calculate_
             # count up the mutations
             number_of_samples += 1
             # evaluate cg_count and make search space bigger if necessary
-            if (cg_count > 10000):
+            #TODO fix hardcoded value!
+            if (cg_count > 1000):
                 cg_count = 0
                 sample_steps += 1
                 dg.set_history_size(sample_steps+100)
@@ -792,7 +793,7 @@ def constraint_generation_optimization(dg, design, objective_function=calculate_
     # finally return the result
     return score, number_of_samples
 
-def _sample_connected_components(dg, amount):
+def _sample_connected_components(dg, amount=1):
     '''
     This function samples several connected component weighted by their number of solutions.
     We need this function to draw from the set of CCs without getting the same CC twice.

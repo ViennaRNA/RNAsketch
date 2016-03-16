@@ -198,7 +198,8 @@ def constraint_generation_optimization_eval(dg, design, objective_function=calcu
             number_of_samples += 1
             number_samples += 1
             # evaluate cg_count and make search space bigger if necessary
-            if (cg_count > 10000):
+            #TODO fix hardcoded value
+            if (cg_count > 1000):
                 cg_count = 0
                 sample_steps += 1
                 dg.set_history_size(sample_steps+100)
