@@ -117,10 +117,10 @@ def main():
             
             start = time.clock()
             # do a complete sampling jump times
-            (scores, number_of_jumps) = classic_optimization(dg, design, exit=args.jump, mode='sample', progress=args.progress)
+            (score, number_of_jumps) = classic_optimization(dg, design, exit=args.jump, mode='sample', progress=args.progress)
             # now do the optimization based on the chose mode
             try:
-                (scores, number_of_mutations,number_mfes, number_objectives, number_eos, number_samples) = constraint_generation_optimization_eval(dg, design, exit=args.exit, mode=args.mode, 
+                (score, number_of_mutations,number_mfes, number_objectives, number_eos, number_samples) = constraint_generation_optimization_eval(dg, design, exit=args.exit, mode=args.mode, 
                             num_neg_constraints=args.size_constraint, max_eos_diff=args.max_eos_diff, progress=args.progress)
             except ValueError as e:
                 print (e.value)
@@ -133,7 +133,7 @@ def main():
                 print(args.jump,
                         args.exit,
                         "\"" + args.mode + "\"",
-                        scores[0],
+                        score,
                         number_of_mutations,
                         construction_time,
                         sample_time,
@@ -144,11 +144,11 @@ def main():
                         design.write_csv(),
                         *graph_properties.values(), sep=";")
             else:
-                print(design.write_out(scores))
+                print(design.write_out(score))
     else:
         print('# Construction time out reached!')
 
-def constraint_generation_optimization_eval(dg, design, objective_functions=[calculate_objective], exit=1000, mode='sample', num_neg_constraints=100, max_eos_diff=0, progress=False):
+def constraint_generation_optimization_eval(dg, design, objective_function=calculate_objective, exit=1000, mode='sample', num_neg_constraints=100, max_eos_diff=0, progress=False):
     '''
     Takes a Design object and does a constraint generation optimization of this sequence.
     :param dg: RNAdesign DependencyGraph object
@@ -175,10 +175,7 @@ def constraint_generation_optimization_eval(dg, design, objective_functions=[cal
     else:
         dg.set_sequence(design.sequence)
     
-    scores = []
-    for obj_fun in objective_functions:
-        scores.append(obj_fun(design))
-        number_objectives += 1
+    score = objective_function(design)
     # count for exit condition
     count = 0
     # remember how many mutations were done
@@ -213,8 +210,7 @@ def constraint_generation_optimization_eval(dg, design, objective_functions=[cal
             
             # write progress
             if progress:
-                formatted_scores = "; ".join(["%5.2f" % score for score in scores])
-                sys.stdout.write("\rMutate: {0:7.0f}/{1:5.0f} | Steps: {2:3d} | EOS-Diff: {3:4.2f} | Scores: {4:} | NOS: {5:.5e}".format(number_of_samples, count, sample_steps, max_eos_diff, formatted_scores, mut_nos) + " " * 20)
+                sys.stdout.write("\rMutate: {0:7.0f}/{1:5.0f} | Steps: {2:3d} | EOS-Diff: {3:4.2f} | Scores: {4:5.2f} | NOS: {5:.5e}".format(number_of_samples, count, sample_steps, max_eos_diff, score, mut_nos))
                 sys.stdout.flush()
             # boolean if it is perfect already
             perfect = True
@@ -253,42 +249,26 @@ def constraint_generation_optimization_eval(dg, design, objective_functions=[cal
         count += 1
         # count calculated mfes 
         number_mfes += 1
-        # if we reached the mfe strcture, calculate a score for this solution and evaluate
-        if design.mfe_structure in design.structures:
-            # calculate objective
-            this_scores = []
-            
-            for obj_fun in objective_functions:
-                this_scores.append(obj_fun(design))
-                # count up number of objectives
-                number_objectives += 1
-            # evaluate
-            better = False
-            for i, score in enumerate(scores):
-                if (this_scores[i] > score):
-                    better = False
-                    break
-                elif (this_scores[i] < score):
-                    better = True
-
-            if (better):
-                scores = this_scores
-                # reset values
-                sample_steps = 1
-                cg_count = 0
-                count = 0
-            else:
-                dg.revert_sequence(sample_count)
-                design.sequence = dg.get_sequence()
-        # else if current mfe is not in negative constraints, add to it
+        
+        this_score = objective_function(design)
+        number_objectives += 1
+        
+        if (this_score < score):
+            score = this_score
+            # reset values
+            sample_steps = 1
+            cg_count = 0
+            count = 0
         else:
-            if design.mfe_structure not in neg_constraints:
-                neg_constraints.append(design.mfe_structure)
-                #print('\n'+'\n'.join(neg_constraints))
-
             dg.revert_sequence(sample_count)
             design.sequence = dg.get_sequence()
-        
+        # else if current mfe is not in negative constraints, add to it
+        for mfe_str in design.mfe_structure:
+            if mfe_str not in design.structures:
+                if mfe_str not in neg_constraints:
+                    neg_constraints.append(mfe_str)
+                    #print('\n'+'\n'.join(neg_constraints))
+
         # exit condition
         if count > exit:
             break
@@ -298,7 +278,7 @@ def constraint_generation_optimization_eval(dg, design, objective_functions=[cal
         sys.stdout.write("\r" + " " * 60 + "\r")
         sys.stdout.flush()
     # finally return the result
-    return scores, number_of_samples, number_mfes, number_objectives, number_eos, number_samples
+    return score, number_of_samples, number_mfes, number_objectives, number_eos, number_samples
 
 if __name__ == "__main__":
     main()

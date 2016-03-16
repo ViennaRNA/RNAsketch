@@ -192,16 +192,16 @@ class Design(object):
     def eos_diff_mfe(self):
         if not self._eos_diff_mfe and self._sequence:
             self._eos_diff_mfe = []
-            for eos in self.eos:
-                self._eos_diff_mfe.append(eos - self.mfe_energy)
+            for i, eos in enumerate(self.eos):
+                self._eos_diff_mfe.append(eos - self.mfe_energy[i])
         return self._eos_diff_mfe
     
     @property
     def eos_reached_mfe(self):
         if not self._eos_reached_mfe and self._sequence:
             self._eos_reached_mfe = []
-            for eos in self.eos:
-                if (eos == self.mfe_energy):
+            for i, eos in enumerate(self.eos):
+                if (eos == self.mfe_energy[i]):
                     self._eos_reached_mfe.append(1)
                 else:
                     self._eos_reached_mfe.append(0)
@@ -220,15 +220,12 @@ class Design(object):
         return self._mfe_structure
     
     def _calculate_mfe_energy_structure(self):
-        if self.temperatures[1:] == self.temperatures[:-1] and all(l is None for l in self.ligands) and all(c is None for c in self.constraints):
-            (self._mfe_structure, self._mfe_energy) = self._get_fold(self.sequence, self.temperatures[0])
-        else:
-            self._mfe_energy = []
-            self._mfe_structure = []
-            for i, temperature in enumerate(self.temperatures):
-                (structure, energie) = self._get_fold(self.sequence, temperature, self.ligands[i], self.constraints[i])
-                self._mfe_energy.append(energie)
-                self._mfe_structure.append(structure)
+        self._mfe_energy = []
+        self._mfe_structure = []
+        for i, temperature in enumerate(self.temperatures):
+            (structure, energie) = self._get_fold(self.sequence, temperature, self.ligands[i], self.constraints[i])
+            self._mfe_energy.append(energie)
+            self._mfe_structure.append(structure)
     
     @property
     def pf_energy(self):
@@ -243,15 +240,12 @@ class Design(object):
         return self._pf_structure
     
     def _calculate_pf_energy_structure(self):
-        if self.temperatures[1:] == self.temperatures[:-1] and all(l is None for l in self.ligands) and all(c is None for c in self.constraints):
-            (self._pf_structure, self._pf_energy) = self._get_pf_fold(self.sequence, self.temperatures[0])
-        else:
-            self._pf_energy = []
-            self._pf_structure = []
-            for i, temperature in enumerate(self.temperatures):
-                (structure, energie) = self._get_pf_fold(self.sequence, temperature, self.ligands[i], self.constraints[i])
-                self._pf_energy.append(energie)
-                self._pf_structure.append(structure)
+        self._pf_energy = []
+        self._pf_structure = []
+        for i, temperature in enumerate(self.temperatures):
+            (structure, energie) = self._get_pf_fold(self.sequence, temperature, self.ligands[i], self.constraints[i])
+            self._pf_energy.append(energie)
+            self._pf_structure.append(structure)
     
     def _get_KT(self, temperature):
         # KT = (betaScale*((temperature+K0)*GASCONST))/1000.0; /* in Kcal */
@@ -302,13 +296,13 @@ class Design(object):
             self._multifold = len(self.cut_points)
         return self._multifold
     
-    def write_out(self, scores=[0]):
+    def write_out(self, score=0):
         '''
         Generates a nice human readable version of all values of this design
         :param score: optimization score for this design
         :return: string containing a nicely formatted version of all design values
         '''
-        result = self.sequence + "\t" + "; ".join(["%5.2f" % score for score in scores])
+        result = '{0:}\t {1:5.2f}'.format(self.sequence, score)
         for i, struct in enumerate(self.structures):
             result += '\n{0:}\t{1:9.4f}\t{2:+9.4f}\t{3:9.4f}'.format(struct, self.eos[i], self.eos[i]-self.mfe_energy[i], self.pos[i])
             result += '\n{0:}\t{1:9.4f}'.format(self.mfe_structure[i], self.mfe_energy[i])
@@ -321,8 +315,11 @@ class Design(object):
         :param separator: separator for the values
         :return: string containing all values of this design separated by the given separator
         '''
-        result = separator.join(map(str, ['\"' + self.sequence + '\"', self.length, self.number_of_structures, self.mfe_energy, 
-            '\"'+ self.mfe_structure + '\"', self.pf_energy, '\"' + self.pf_structure + '\"'] + 
+        result = separator.join(map(str, ['\"' + self.sequence + '\"', self.length, self.number_of_structures ] + 
+            self.mfe_energy +
+            self.mfe_structure +
+            self.pf_energy +
+            self.pf_structure +
             self.eos + 
             self.eos_diff_mfe + 
             self.eos_reached_mfe + 
@@ -335,17 +332,16 @@ class Design(object):
         :param separator: separator for the values
         :return: string containing a csv header for this design separated by the given separator
         '''
-        result = separator.join(['sequence', 'seq_length', 'number_of_structures', 'mfe_energy', 'mfe_structure', 'pf_energy', 'pf_structure'])
-        eos_string = ''
-        pos_string = ''
-        eos_diff_mfe_string = ''
-        eos_reached_mfe_string = ''
-        for s in range(0, self.number_of_structures):
-            eos_string += separator + "eos_" + str(s)
-            eos_diff_mfe_string += separator + "diff_eos_mfe_" + str(s)
-            eos_reached_mfe_string += separator + "mfe_reached_" + str(s)
-            pos_string += separator + "prob_" + str(s)
-        result += eos_string + eos_diff_mfe_string + eos_reached_mfe_string + pos_string
+        result = separator.join(['sequence', 'seq_length', 'number_of_structures'])
+        strings = ['mfe_energy_', 'mfe_structure_', 'pf_energy_', 'pf_structure_', 'eos_', 'diff_eos_mfe_', 'mfe_reached_', 'prob_']
+        for s in strings:
+            for i in range(0, self.number_of_structures):
+                result += separator + s + str(i)
+        return result
+    
+    def _create_header(self, separator, strings):
+        result = ''
+        
         return result
 
 if vrna_available:
@@ -550,7 +546,7 @@ def calculate_objective_1(design):
     objective function (3 seqs):    (eos(1)+eos(2)+eos(3) - 3 * gibbs) / number_of_structures
     :param design: Design object containing the sequence and structures
     '''
-    return (sum(design.eos) - design.number_of_structures * design.pf_energy) / design.number_of_structures
+    return (sum(design.eos) - sum(design.pf_energy)) / design.number_of_structures
 
 def calculate_objective_2(design):
     '''
@@ -624,7 +620,7 @@ def _sample_sequence(dg, design, mode, sample_steps=1):
     design.sequence = dg.get_sequence()
     return (mut_nos, sample_count)
 
-def classic_optimization(dg, design, objective_functions=[calculate_objective], exit=1000, mode='sample', progress=False):
+def classic_optimization(dg, design, objective_function=calculate_objective, exit=1000, mode='sample', progress=False):
     '''
     Takes a Design object and does a classic optimization of this sequence.
     :param dg: RNAdesign DependencyGraph object
@@ -643,9 +639,7 @@ def classic_optimization(dg, design, objective_functions=[calculate_objective], 
     else:
         dg.set_sequence(design.sequence)
     
-    scores = []
-    for obj_fun in objective_functions:
-        scores.append(obj_fun(design))
+    score = objective_function(design)
     # count for exit condition
     count = 0
     # remember how may mutations were done
@@ -660,24 +654,13 @@ def classic_optimization(dg, design, objective_functions=[calculate_objective], 
         
         # write progress
         if progress:
-            formatted_scores = "; ".join(["%5.2f" % score for score in scores])
-            sys.stdout.write("\rMutate: {0:7.0f}/{1:5.0f} | Scores: {2:} | NOS: {3:.5e}".format(number_of_samples, count, formatted_scores, mut_nos) + " " * 20)
+            sys.stdout.write("\rMutate: {0:7.0f}/{1:5.0f} | Score: {2:5.2f} | NOS: {3:.5e}".format(number_of_samples, count, score, mut_nos) + " " * 20)
             sys.stdout.flush()
         
-        this_scores = []
-        for obj_fun in objective_functions:
-            this_scores.append(obj_fun(design))
+        this_score = objective_function(design)
         # evaluate
-        better = False
-        for i, score in enumerate(scores):
-            if (this_scores[i] > score):
-                better = False
-                break
-            elif (this_scores[i] < score):
-                better = True
-        
-        if (better):
-            scores = this_scores
+        if (this_score < score):
+            score = this_score
             count = 0
         else:
             dg.revert_sequence(sample_count)
@@ -692,9 +675,9 @@ def classic_optimization(dg, design, objective_functions=[calculate_objective], 
         sys.stdout.flush()
     
     # finally return the result
-    return scores, number_of_samples
+    return score, number_of_samples
 
-def constraint_generation_optimization(dg, design, objective_functions=[calculate_objective], exit=1000, mode='sample', num_neg_constraints=100, max_eos_diff=0, progress=False):
+def constraint_generation_optimization(dg, design, objective_function=calculate_objective, exit=1000, mode='sample', num_neg_constraints=100, max_eos_diff=0, progress=False):
     '''
     Takes a Design object and does a constraint generation optimization of this sequence.
     :param dg: RNAdesign DependencyGraph object
@@ -718,9 +701,7 @@ def constraint_generation_optimization(dg, design, objective_functions=[calculat
     else:
         dg.set_sequence(design.sequence)
     
-    scores = []
-    for obj_fun in objective_functions:
-        scores.append(obj_fun(design))
+    score = calculate_objective(design)
     # count for exit condition
     count = 0
     # remember how may mutations were done
@@ -749,8 +730,7 @@ def constraint_generation_optimization(dg, design, objective_functions=[calculat
             
             # write progress
             if progress:
-                formatted_scores = "; ".join(["%5.2f" % score for score in scores])
-                sys.stdout.write("\rMutate: {0:7.0f}/{1:5.0f} | Steps: {2:3d} | EOS-Diff: {3:4.2f} | Scores: {4:} | NOS: {5:.5e}".format(number_of_samples, count, sample_steps, max_eos_diff, formatted_scores, mut_nos) + " " * 20)
+                sys.stdout.write("\rMutate: {0:7.0f}/{1:5.0f} | Steps: {2:3d} | EOS-Diff: {3:4.2f} | Score: {4:5.2f} | NOS: {5:.5e}".format(number_of_samples, count, sample_steps, max_eos_diff, score, mut_nos))
                 sys.stdout.flush()
             # boolean if it is perfect already
             perfect = True
@@ -783,20 +763,10 @@ def constraint_generation_optimization(dg, design, objective_functions=[calculat
         # count this as a solution to analyse
         count += 1
         # calculate objective
-        this_scores = []
-        for obj_fun in objective_functions:
-            this_scores.append(obj_fun(design))
-        # evaluate
-        better = False
-        for i, score in enumerate(scores):
-            if (this_scores[i] > score):
-                better = False
-                break
-            elif (this_scores[i] < score):
-                better = True
+        this_score = objective_function(design)
 
-        if (better):
-            scores = this_scores
+        if (this_score < score):
+            score = this_score
             # reset values
             sample_steps = 1
             cg_count = 0
@@ -805,10 +775,11 @@ def constraint_generation_optimization(dg, design, objective_functions=[calculat
             dg.revert_sequence(sample_count)
             design.sequence = dg.get_sequence()
         # else if current mfe is not in negative constraints, add to it
-        if design.mfe_structure not in design.structures:
-            if design.mfe_structure not in neg_constraints:
-                neg_constraints.append(design.mfe_structure)
-                #print('\n'+'\n'.join(neg_constraints))
+        for mfe_str in design.mfe_structure:
+            if mfe_str not in design.structures:
+                if mfe_str not in neg_constraints:
+                    neg_constraints.append(mfe_str)
+                    #print('\n'+'\n'.join(neg_constraints))
 
         # exit condition
         if count > exit:
@@ -819,7 +790,7 @@ def constraint_generation_optimization(dg, design, objective_functions=[calculat
         sys.stdout.write("\r" + " " * 60 + "\r")
         sys.stdout.flush()
     # finally return the result
-    return scores, number_of_samples
+    return score, number_of_samples
 
 def _sample_connected_components(dg, amount):
     '''

@@ -165,17 +165,17 @@ def main():
                     
                     start = time.clock()
                     # do a complete sampling jump times
-                    (score, number_of_jumps) = classic_optimization(dg, design, objective_functions=[calculate_switch_objective], exit=args.jump, mode='sample', progress=args.progress)
+                    (score, number_of_jumps) = classic_optimization(dg, design, objective_function=calculate_switch_objective, exit=args.jump, mode='sample', progress=args.progress)
                     # now do the optimization based on the chosen mode
                     try:
-                        (score, number_of_mutations) = classic_optimization(dg, design, objective_functions=[calculate_switch_objective], exit=args.exit, mode=args.mode, progress=args.progress)
+                        (score, number_of_mutations) = classic_optimization(dg, design, objective_function=calculate_switch_objective, exit=args.exit, mode=args.mode, progress=args.progress)
                     except ValueError as e:
                         print (e.value)
                         exit(1)
                     # now do the optimization with mode strelem where we take structural elements and replace them a little
                     number_of_strelem = 0
                     if forgi_available:
-                        (score, number_of_strelem) = classic_optimization(dg, design, objective_functions=[calculate_switch_objective], exit=args.strelem, mode='sample_strelem', progress=args.progress)
+                        (score, number_of_strelem) = classic_optimization(dg, design, objective_function=calculate_switch_objective, exit=args.strelem, mode='sample_strelem', progress=args.progress)
                     else:
                         sys.stderr.write("-" * 60 + "\nWARNING: Strelem sampling not available!!!\nPlease install forgi https://github.com/pkerpedjiev/forgi\n" + "-" * 60 + "\n")
                         sys.stderr.flush() 

@@ -110,10 +110,10 @@ def main():
             
             start = time.clock()
             # do a complete sampling jump times
-            (scores, number_of_jumps) = classic_optimization(dg, design, exit=args.jump, mode='sample', progress=args.progress)
+            (score, number_of_jumps) = classic_optimization(dg, design, exit=args.jump, mode='sample', progress=args.progress)
             # now do the optimization based on the chose mode
             try:
-                (scores, number_of_mutations) = constraint_generation_optimization(dg, design, exit=args.exit, mode=args.mode, 
+                (score, number_of_mutations) = constraint_generation_optimization(dg, design, exit=args.exit, mode=args.mode, 
                             num_neg_constraints=args.size_constraint, max_eos_diff=args.max_eos_diff, progress=args.progress)
             except ValueError as e:
                 print (e.value)
@@ -126,14 +126,14 @@ def main():
                 print(args.jump,
                         args.exit,
                         "\"" + args.mode + "\"",
-                        scores[0],
+                        score,
                         number_of_mutations,
                         construction_time,
                         sample_time,
                         design.write_csv(),
                         *graph_properties.values(), sep=";")
             else:
-                print(design.write_out(scores))
+                print(design.write_out(score))
     else:
         print('# Construction time out reached!')
 
