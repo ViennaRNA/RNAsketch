@@ -12,6 +12,7 @@ import argparse
 import sys
 import time
 
+# This script logs everything during the optimization
 
 
 def main():
@@ -20,7 +21,6 @@ def main():
     parser.add_argument("-i", "--input", default=False, action='store_true', help='Read custom structures and sequence constraints from stdin')
     parser.add_argument("-q", "--nupack", default=False, action='store_true', help='Use Nupack instead of the ViennaRNA package (for pseudoknots)')
     parser.add_argument("-n", "--number", type=int, default=4, help='Number of designs to generate')
-    parser.add_argument("-j", "--jump", type=int, default=300, help='Do random jumps in the solution space for the first (jump) trials.')
     parser.add_argument("-e", "--exit", type=int, default=500, help='Exit optimization run if no better solution is aquired after (exit) trials.')
     parser.add_argument("-m", "--mode", type=str, default='sample_global', help='Mode for getting a new sequence: sample, sample_local, sample_global, sample_strelem')
     parser.add_argument("-x", "--max_eos_diff", type=float, default=0, help='Energy of Struct difference allowed during constrained generation')
@@ -32,7 +32,7 @@ def main():
     parser.add_argument("-d", "--debug", default=False, action='store_true', help='Show debug information of library')
     args = parser.parse_args()
     
-    print("# Options: number={0:d}, jump={1:d}, exit={2:d}, size_constraint={3:d}, mode={4:}, nupack={5:}".format(args.number, args.jump, args.exit, args.size_constraint, args.mode, str(args.nupack)))
+    print("# Options: number={0:d}, exit={1:d}, size_constraint={2:d}, mode={3:}, nupack={4:}".format(args.number, args.exit, args.size_constraint, args.mode, str(args.nupack)))
     rd.initialize_library(args.debug, args.kill)
     # define structures
     structures = []
@@ -54,14 +54,14 @@ def main():
         constraint = 'NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN'
     # try to construct dependency graph, catch errors and timeouts
     dg = None
-    construction_time = 0.0
-    sample_time = 0.0
+    # remember values in a dict
+    values = { "score":float('inf'), "num_mutations":0, "num_mfes":0, "num_objectives":0, "num_eos":0, "num_samples":0, "construction_time":0, "sample_time":0 }
         
     # construct dependency graph with these structures
     try:
         start = time.clock()
         dg = rd.DependencyGraphMT(structures, constraint)
-        construction_time = time.clock() - start
+        values["construction_time"] = time.clock() - start
     except Exception as e:
         print( "Error: %s" % e , file=sys.stderr)
     
@@ -85,6 +85,7 @@ def main():
         
         # remember general DG values
         graph_properties = get_graph_properties(dg)
+        
         # create a initial design object
         if (args.nupack):
             design = nupackDesign(structures, start_sequence)
@@ -93,20 +94,13 @@ def main():
         
         # print header for csv file
         if (args.csv):
-            print(";".join(["jump",
-                        "exit",
+            print(";".join(["exit",
                         "mode",
-                        "score",
-                        "num_mutations",
-                        "construction_time",
-                        "sample_time",
-                        "num_samples",
-                        "num_mfes",
-			"num_eos",
-			"num_objectives",
+                        "time",
                         design.write_csv_header()] +
+                        values.keys() + 
                         graph_properties.keys()))
-
+        
         # main loop from zero to number of solutions
         for n in range(0, args.number):
             # reset the design object
@@ -115,40 +109,38 @@ def main():
             else:
                 design = vrnaDesign(structures, start_sequence)
             
-            start = time.clock()
-            # do a complete sampling jump times
-            (score, number_of_jumps) = classic_optimization(dg, design, exit=args.jump, mode='sample', progress=args.progress)
             # now do the optimization based on the chose mode
             try:
-                (score, number_of_mutations,number_mfes, number_objectives, number_eos, number_samples) = constraint_generation_optimization_eval(dg, design, exit=args.exit, mode=args.mode, 
+                constraint_generation_optimization_eval(args, graph_properties,
+                            dg, design, exit=args.exit, mode=args.mode, 
                             num_neg_constraints=args.size_constraint, max_eos_diff=args.max_eos_diff, progress=args.progress)
             except ValueError as e:
                 print (e.value)
                 exit(1)
-            # sum up for a complete number of mutations
-            number_of_mutations += number_of_jumps
-            sample_time = time.clock() - start
-            
-            if (args.csv):
-                print(args.jump,
-                        args.exit,
-                        "\"" + args.mode + "\"",
-                        score,
-                        number_of_mutations,
-                        construction_time,
-                        sample_time,
-                        number_samples,
-                        number_mfes,
-                        number_eos,
-                        number_objectives,
-                        design.write_csv(),
-                        *graph_properties.values(), sep=";")
-            else:
-                print(design.write_out(score))
     else:
         print('# Construction time out reached!')
 
-def constraint_generation_optimization_eval(dg, design, objective_function=calculate_objective, exit=1000, mode='sample', num_neg_constraints=100, max_eos_diff=0, progress=False):
+def logging_breakpoint(optimization_start, minutes, values, design, graph_properties, args):
+    timestamp = 10 * minutes
+    if (time.clock() - optimization_start > timestamp):
+        if (args.progress):
+            sys.stdout.write("\r" + " " * 60 + "\r")
+            sys.stdout.flush()
+        values["sample_time"] = time.clock() - optimization_start
+        if (args.csv):
+            print(args.exit,
+                    "\"" + args.mode + "\"",
+                    timestamp,
+                    design.write_csv(),
+                    *(values.values() + 
+                    graph_properties.values()), sep=";")
+        else:
+            print(design.write_out(score))
+        return minutes + 1
+    else:
+        return minutes
+
+def constraint_generation_optimization_eval(args, graph_properties, dg, design, objective_function=calculate_objective, exit=1000, mode='sample', num_neg_constraints=100, max_eos_diff=0, progress=False):
     '''
     Takes a Design object and does a constraint generation optimization of this sequence.
     :param dg: RNAdesign DependencyGraph object
@@ -162,11 +154,8 @@ def constraint_generation_optimization_eval(dg, design, objective_function=calcu
     :param return: Optimization score reached for the final sequence
     "param return: Number of samples neccessary to reach this result
     '''
-    
+    dg.set_history_size(100)
     neg_constraints = collections.deque(maxlen=num_neg_constraints)
-    
-    # count calculated objectives
-    number_objectives = 0
 
     # if the design has no sequence yet, sample one from scratch
     if not design.sequence:
@@ -180,48 +169,39 @@ def constraint_generation_optimization_eval(dg, design, objective_function=calcu
     count = 0
     # remember how many mutations were done
     number_of_samples = 0
-    number_samples = 0
-    # count mfes
-    number_mfes = 0
-    # count eos
-    number_eos = 0
-    # sample steps to do
-    sample_steps = 1
-    # count for unsucessful constraint generation sequences
-    cg_count = 0
+    # remember evalutaion values
+    # remember total time
+    optimization_start = time.clock()
+    minutes = 0
+    values = { "score":score, "num_mutations":0, "num_mfes":0, "num_objectives":1, "num_eos":0, "num_samples":0, "construction_time":0, "sample_time":0 }
     
     # main optimization loop
     while True:
+        minutes = logging_breakpoint(optimization_start, minutes, values, design, graph_properties, args)
         # constraint generation loop
         while True:
+            minutes = logging_breakpoint(optimization_start, minutes, values, design, graph_properties, args)
             # count up the mutations
             number_of_samples += 1
-            number_samples += 1
-            # evaluate cg_count and make search space bigger if necessary
-            #TODO fix hardcoded value
-            if (cg_count > 1000):
-                cg_count = 0
-                sample_steps += 1
-                dg.set_history_size(sample_steps+100)
-            # increase cg_count
-            cg_count += 1
+            values["num_samples"] += 1
             
             # sample a new sequence
-            (mut_nos, sample_count) = PyDesign._sample_sequence(dg, design, mode, sample_steps)
+            (mut_nos, sample_count) = PyDesign._sample_sequence(dg, design, mode)
             
             # write progress
             if progress:
-                sys.stdout.write("\rMutate: {0:7.0f}/{1:5.0f} | Steps: {2:3d} | EOS-Diff: {3:4.2f} | Scores: {4:5.2f} | NOS: {5:.5e}".format(number_of_samples, count, sample_steps, max_eos_diff, score, mut_nos))
+                sys.stdout.write("\rMutate: {0:7.0f}/{1:5.0f} | EOS-Diff: {2:4.2f} | Scores: {3:5.2f} | NOS: {4:.5e}".format(number_of_samples, count, max_eos_diff, score, mut_nos))
                 sys.stdout.flush()
             # boolean if it is perfect already
             perfect = True
-            number_eos += design.number_of_structures
+            values["num_eos"] += design.number_of_structures
             # evaluate the constraints
             for negc in reversed(neg_constraints):
+                minutes = logging_breakpoint(optimization_start, minutes, values, design, graph_properties, args)
                 # test if the newly sampled sequence is compatible to the neg constraint, if not -> Perfect!
                 if rd.sequence_structure_compatible(design.sequence, [negc]):
                     # count up number eos
-                    number_eos += 1
+                    values["num_eos"] += 1
                     if design.classtype == 'vrnaDesign':
                         neg_eos = RNA.energy_of_struct(design.sequence, negc)
                     elif design.classtype == 'nupackDesign':
@@ -232,8 +212,6 @@ def constraint_generation_optimization_eval(dg, design, objective_function=calcu
                     # the eos for all negative constraints, if not -> Perfect!
                     for k in range(0, design.number_of_structures):
                         if float(neg_eos) - float(design.eos[k]) < max_eos_diff:
-                       
-                       
                             # this is no better solution, revert!
                             perfect = False
                             dg.revert_sequence(sample_count)
@@ -248,28 +226,26 @@ def constraint_generation_optimization_eval(dg, design, objective_function=calcu
         
         # count this as a solution to analyse
         count += 1
-        # count calculated mfes 
-        number_mfes += 1
-        
         this_score = objective_function(design)
-        number_objectives += 1
-        
+        values["num_objectives"] += 1
+        minutes = logging_breakpoint(optimization_start, minutes, values, design, graph_properties, args)
         if (this_score < score):
             score = this_score
+            values["score"] = score
             # reset values
-            sample_steps = 1
-            cg_count = 0
             count = 0
         else:
             dg.revert_sequence(sample_count)
             design.sequence = dg.get_sequence()
         # else if current mfe is not in negative constraints, add to it
+        # count calculated mfes 
+        values["num_mfes"] += 1
         for mfe_str in design.mfe_structure:
             if mfe_str not in design.structures:
                 if mfe_str not in neg_constraints:
                     neg_constraints.append(mfe_str)
                     #print('\n'+'\n'.join(neg_constraints))
-
+        minutes = logging_breakpoint(optimization_start, minutes, values, design, graph_properties, args)
         # exit condition
         if count > exit:
             break
@@ -279,7 +255,7 @@ def constraint_generation_optimization_eval(dg, design, objective_function=calcu
         sys.stdout.write("\r" + " " * 60 + "\r")
         sys.stdout.flush()
     # finally return the result
-    return score, number_of_samples, number_mfes, number_objectives, number_eos, number_samples
+    return values
 
 if __name__ == "__main__":
     main()

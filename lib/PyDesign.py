@@ -691,7 +691,7 @@ def constraint_generation_optimization(dg, design, objective_function=calculate_
     :param return: Optimization score reached for the final sequence
     "param return: Number of samples neccessary to reach this result
     '''
-    
+    dg.set_history_size(100)
     neg_constraints = collections.deque(maxlen=num_neg_constraints)
     
     # if the design has no sequence yet, sample one from scratch
@@ -706,10 +706,6 @@ def constraint_generation_optimization(dg, design, objective_function=calculate_
     count = 0
     # remember how may mutations were done
     number_of_samples = 0
-    # sample steps to do
-    sample_steps = 1
-    # count for unsucessful constraint generation sequences
-    cg_count = 0
     
     # main optimization loop
     while True:
@@ -717,21 +713,12 @@ def constraint_generation_optimization(dg, design, objective_function=calculate_
         while True:
             # count up the mutations
             number_of_samples += 1
-            # evaluate cg_count and make search space bigger if necessary
-            #TODO fix hardcoded value!
-            if (cg_count > 1000):
-                cg_count = 0
-                sample_steps += 1
-                dg.set_history_size(sample_steps+100)
-            # increase cg_count
-            cg_count += 1
-            
             # sample a new sequence
-            (mut_nos, sample_count) = _sample_sequence(dg, design, mode, sample_steps)
+            (mut_nos, sample_count) = _sample_sequence(dg, design, mode)
             
             # write progress
             if progress:
-                sys.stdout.write("\rMutate: {0:7.0f}/{1:5.0f} | Steps: {2:3d} | EOS-Diff: {3:4.2f} | Score: {4:5.2f} | NOS: {5:.5e}".format(number_of_samples, count, sample_steps, max_eos_diff, score, mut_nos))
+                sys.stdout.write("\rMutate: {0:7.0f}/{1:5.0f} | EOS-Diff: {2:4.2f} | Score: {3:5.2f} | NOS: {4:.5e}".format(number_of_samples, count, max_eos_diff, score, mut_nos))
                 sys.stdout.flush()
             # boolean if it is perfect already
             perfect = True
@@ -769,8 +756,6 @@ def constraint_generation_optimization(dg, design, objective_function=calculate_
         if (this_score < score):
             score = this_score
             # reset values
-            sample_steps = 1
-            cg_count = 0
             count = 0
         else:
             dg.revert_sequence(sample_count)
