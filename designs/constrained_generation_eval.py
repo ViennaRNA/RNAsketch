@@ -55,7 +55,7 @@ def main():
     # try to construct dependency graph, catch errors and timeouts
     dg = None
     # remember values in a dict
-    values = { "score":float('inf'), "num_mutations":0, "num_mfes":0, "num_objectives":0, "num_eos":0, "num_samples":0, "construction_time":0, "sample_time":0 }
+    values = { "score":float('inf'), "num_mfes":0, "num_objectives":0, "num_eos":0, "num_mutations":0, "construction_time":0, "sample_time":0 }
         
     # construct dependency graph with these structures
     try:
@@ -124,8 +124,8 @@ def logging_breakpoint(optimization_start, minutes, values, design, graph_proper
     timestamp = 10 * minutes
     if (time.clock() - optimization_start > timestamp):
         if (args.progress):
-            sys.stdout.write("\r" + " " * 60 + "\r")
-            sys.stdout.flush()
+            sys.stderr.write("\r" + " " * 60 + "\r")
+            sys.stderr.flush()
         values["sample_time"] = time.clock() - optimization_start
         if (args.csv):
             print(args.exit,
@@ -167,13 +167,11 @@ def constraint_generation_optimization_eval(args, graph_properties, dg, design, 
     score = objective_function(design)
     # count for exit condition
     count = 0
-    # remember how many mutations were done
-    number_of_samples = 0
     # remember evalutaion values
     # remember total time
     optimization_start = time.clock()
     minutes = 0
-    values = { "score":score, "num_mutations":0, "num_mfes":0, "num_objectives":1, "num_eos":0, "num_samples":0, "construction_time":0, "sample_time":0 }
+    values = { "score":score, "num_mfes":0, "num_objectives":1, "num_eos":0, "num_mutations":0, "construction_time":0, "sample_time":0 }
     
     # main optimization loop
     while True:
@@ -182,16 +180,14 @@ def constraint_generation_optimization_eval(args, graph_properties, dg, design, 
         while True:
             minutes = logging_breakpoint(optimization_start, minutes, values, design, graph_properties, args)
             # count up the mutations
-            number_of_samples += 1
-            values["num_samples"] += 1
-            
+            values["num_mutations"] += 1
             # sample a new sequence
             (mut_nos, sample_count) = PyDesign._sample_sequence(dg, design, mode)
             
             # write progress
             if progress:
-                sys.stdout.write("\rMutate: {0:7.0f}/{1:5.0f} | EOS-Diff: {2:4.2f} | Scores: {3:5.2f} | NOS: {4:.5e}".format(number_of_samples, count, max_eos_diff, score, mut_nos))
-                sys.stdout.flush()
+                sys.stderr.write("\rMutate: {0:7.0f}/{1:5.0f} | EOS-Diff: {2:4.2f} | Scores: {3:5.2f} | NOS: {4:.5e}".format(values["num_mutations"], count, max_eos_diff, score, mut_nos))
+                sys.stderr.flush()
             # boolean if it is perfect already
             perfect = True
             values["num_eos"] += design.number_of_structures
@@ -252,8 +248,8 @@ def constraint_generation_optimization_eval(args, graph_properties, dg, design, 
         
     # clear the console
     if (progress):
-        sys.stdout.write("\r" + " " * 60 + "\r")
-        sys.stdout.flush()
+        sys.stderr.write("\r" + " " * 60 + "\r")
+        sys.stderr.flush()
     # finally return the result
     return values
 

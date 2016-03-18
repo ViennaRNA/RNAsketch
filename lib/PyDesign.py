@@ -222,10 +222,15 @@ class Design(object):
     def _calculate_mfe_energy_structure(self):
         self._mfe_energy = []
         self._mfe_structure = []
-        for i, temperature in enumerate(self.temperatures):
-            (structure, energie) = self._get_fold(self.sequence, temperature, self.ligands[i], self.constraints[i])
-            self._mfe_energy.append(energie)
-            self._mfe_structure.append(structure)
+        if self.temperatures[1:] == self.temperatures[:-1] and all(l is None for l in self.ligands) and all(c is None for c in self.constraints):
+            (structure, energie) = self._get_fold(self.sequence, self.temperatures[0], self.ligands[0], self.constraints[0])
+            self._mfe_energy = [energie] * self.number_of_structures
+            self._mfe_structure = [structure] * self.number_of_structures
+        else:
+            for i, temperature in enumerate(self.temperatures):
+                (structure, energie) = self._get_fold(self.sequence, temperature, self.ligands[i], self.constraints[i])
+                self._mfe_energy.append(energie)
+                self._mfe_structure.append(structure)
     
     @property
     def pf_energy(self):
@@ -242,10 +247,15 @@ class Design(object):
     def _calculate_pf_energy_structure(self):
         self._pf_energy = []
         self._pf_structure = []
-        for i, temperature in enumerate(self.temperatures):
-            (structure, energie) = self._get_pf_fold(self.sequence, temperature, self.ligands[i], self.constraints[i])
-            self._pf_energy.append(energie)
-            self._pf_structure.append(structure)
+        if self.temperatures[1:] == self.temperatures[:-1] and all(l is None for l in self.ligands) and all(c is None for c in self.constraints):
+            (structure, energie) = self._get_pf_fold(self.sequence, self.temperatures[0], self.ligands[0], self.constraints[0])
+            self._pf_energy = [energie] * self.number_of_structures
+            self._pf_structure = [structure] * self.number_of_structures
+        else:
+            for i, temperature in enumerate(self.temperatures):
+                (structure, energie) = self._get_pf_fold(self.sequence, temperature, self.ligands[i], self.constraints[i])
+                self._pf_energy.append(energie)
+                self._pf_structure.append(structure)
     
     def _get_KT(self, temperature):
         # KT = (betaScale*((temperature+K0)*GASCONST))/1000.0; /* in Kcal */
@@ -654,8 +664,8 @@ def classic_optimization(dg, design, objective_function=calculate_objective, exi
         
         # write progress
         if progress:
-            sys.stdout.write("\rMutate: {0:7.0f}/{1:5.0f} | Score: {2:5.2f} | NOS: {3:.5e}".format(number_of_samples, count, score, mut_nos) + " " * 20)
-            sys.stdout.flush()
+            sys.stderr.write("\rMutate: {0:7.0f}/{1:5.0f} | Score: {2:5.2f} | NOS: {3:.5e}".format(number_of_samples, count, score, mut_nos) + " " * 20)
+            sys.stderr.flush()
         
         this_score = objective_function(design)
         # evaluate
@@ -671,8 +681,8 @@ def classic_optimization(dg, design, objective_function=calculate_objective, exi
     
     # clear the console
     if (progress):
-        sys.stdout.write("\r" + " " * 60 + "\r")
-        sys.stdout.flush()
+        sys.stderr.write("\r" + " " * 60 + "\r")
+        sys.stderr.flush()
     
     # finally return the result
     return score, number_of_samples
@@ -718,8 +728,8 @@ def constraint_generation_optimization(dg, design, objective_function=calculate_
             
             # write progress
             if progress:
-                sys.stdout.write("\rMutate: {0:7.0f}/{1:5.0f} | EOS-Diff: {2:4.2f} | Score: {3:5.2f} | NOS: {4:.5e}".format(number_of_samples, count, max_eos_diff, score, mut_nos))
-                sys.stdout.flush()
+                sys.stderr.write("\rMutate: {0:7.0f}/{1:5.0f} | EOS-Diff: {2:4.2f} | Score: {3:5.2f} | NOS: {4:.5e}".format(number_of_samples, count, max_eos_diff, score, mut_nos))
+                sys.stderr.flush()
             # boolean if it is perfect already
             perfect = True
             # evaluate the constraints
@@ -773,8 +783,8 @@ def constraint_generation_optimization(dg, design, objective_function=calculate_
         
     # clear the console
     if (progress):
-        sys.stdout.write("\r" + " " * 60 + "\r")
-        sys.stdout.flush()
+        sys.stderr.write("\r" + " " * 60 + "\r")
+        sys.stderr.flush()
     # finally return the result
     return score, number_of_samples
 
