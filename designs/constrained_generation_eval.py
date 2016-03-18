@@ -122,11 +122,12 @@ def main():
 
 def logging_breakpoint(optimization_start, minutes, values, design, graph_properties, args):
     timestamp = 10 * minutes
-    if (time.clock() - optimization_start > timestamp):
+    now = time.clock() - optimization_start
+    if (now > timestamp):
         if (args.progress):
             sys.stderr.write("\r" + " " * 60 + "\r")
             sys.stderr.flush()
-        values["sample_time"] = time.clock() - optimization_start
+        values["sample_time"] = now
         if (args.csv):
             print(args.exit,
                     "\"" + args.mode + "\"",
