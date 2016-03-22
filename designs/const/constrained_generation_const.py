@@ -162,7 +162,7 @@ def constraint_generation_optimization_const(dg, design, objective_function=calc
     else:
         dg.set_sequence(design.sequence)
     
-    score = calculate_objective(design)
+    score = objective_function(design)
     # count for exit condition
     count = 0
     # remember how may mutations were done
