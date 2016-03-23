@@ -201,7 +201,7 @@ def constraint_generation_optimization_const(dg, design, objective_function=calc
                     # test if the newly sampled sequence eos for pos constraints is lower than
                     # the eos for all negative constraints, if not -> Perfect!
                     for k in range(0, design.number_of_structures):
-                        if float(neg_eos) - float(design.eos[k]) < max_eos_diff:
+                        if float(neg_eos) - float(design.eos[k]) <= max_eos_diff:
                             # this is no better solution, revert!
                             perfect = False
                             dg.revert_sequence(sample_count)
