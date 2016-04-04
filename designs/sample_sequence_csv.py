@@ -16,6 +16,8 @@ import datetime
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
+import numpy as np
+
 
 def plot_sequence_objective(args):
 
@@ -29,6 +31,9 @@ def plot_sequence_objective(args):
         for line in sys.stdin:
             data = data + '\n' + line
         (structures, constraint, start_sequence) = read_input(data)
+    elif (args.file is not None):
+        print("# Input File: {0:}".format(args.file))
+        (structures, constraint, start_sequence) = read_inp_file(args.file)
     else:
         structures = ['((((....))))....((((....))))........',
             '........((((....((((....))))....))))',
@@ -63,8 +68,10 @@ def plot_sequence_objective(args):
 
         # remember general DG values
         graph_properties = get_graph_properties(dg)
-        # create a initial design object
 
+        csv_file = open(args.out_file + ".csv", 'w') #TODO bessren standaradnamen
+
+        # create a initial design object
         if (args.nupack):
             design = nupackDesign(structures, start_sequence)
         else:
@@ -77,60 +84,54 @@ def plot_sequence_objective(args):
             dg.set_sequence(design.sequence)
 
 
-        # calculations for plot
+        # print header for csv file
+        csv_file.write(";".join(["objective 1",
+                        "objective 2",
+                        "score",
+                        "sequence \n"]))
 
         # calculate objectives for initial sequence
         x_center = calculate_objective_1(design)
         y_center = calculate_objective_2(design)
 
-        x_origin = 0 # = x_center-x_center
-        y_origin = 0
-
-        plt.xlabel('objective 2')
-        plt.ylabel('objective 1')
-        plt.plot([x_origin], [y_origin], 'ro')
-
-        ax_lim = 0
+        # print csv input for initial sequence
+        score = x_center + args.weight * y_center
+        csv_file.write(";".join([str(x_center),
+                str(y_center),
+                str(score),
+                design.sequence]) + "\n")
 
         for i in range(0, args.number):
             PyDesign._sample_sequence(dg, design, args.mode, args.sample_steps)
-            x_new = calculate_objective_2(design)
-            y_new = calculate_objective_1(design)
+            x_new = calculate_objective_1(design)
+            y_new = calculate_objective_2(design)
 
-            # calculate relative positions to initial sequence
-            x = x_new - x_center
-            y = y_new - y_center
+            if args.progress:
+                sys.stdout.write("\r# Sampling: {0:7.0f}/{1:5.0f}".format(i + 1, args.number) + " " * 20)
+                sys.stdout.flush()
 
-            # find largest x/y and use as limit for both axes
-            if abs(x) > ax_lim:
-                ax_lim = abs(x)
-            if abs(y) > ax_lim:
-                ax_lim = abs(y)
-
-            plt.plot([x], [y], 'bo')
-
-        plt.axhline(color='k')
-        plt.axvline(color='k')
-
-        ax_lim += 1 # +1 to avoid points on axes
-        plt.xlim([-ax_lim, ax_lim])
-        plt.ylim([-ax_lim, ax_lim])
-
-        plt.savefig(args.out_file)
-        print('# Output file: %s'% args.out_file)
-        plt.close()
+            score = x_new + args.weight * y_new
+            csv_file.write(";".join([str(x_new),
+                str(y_new),
+                str(score),
+                design.sequence]) + "\n")
 
     else:
         print('# Construction time out reached!')
 
+    print('\n # Output file: %s'% args.out_file + '.csv')
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Plot...')
+    parser.add_argument("-f", "--file", type = str, default=None, help='Read file in *.inp format')
     parser.add_argument("-i", "--input", default=False, action='store_true', help='Read custom structures and sequence constraints from stdin')
     parser.add_argument("-m", "--mode", type=str, default='sample_global', help='Mode for getting a new sequence: sample, sample_local, sample_global, sample_strelem')
     parser.add_argument("-s", "--sample_steps", type=int, default=1, help='Count how many times to do the sample operation')
-    parser.add_argument("-n", "--number", type=int, default=100, help='Count how many times to sample sequence')
+    parser.add_argument("-n", "--number", type=int, default=1000, help='Count how many times to sample sequence')
+    parser.add_argument("-w", "--weight", type=float, default=0.5, help='Define weighting-factor')
     parser.add_argument("-q", "--nupack", default=False, action='store_true', help='Use Nupack instead of the ViennaRNA package (for pseudoknots)')
-    parser.add_argument("-o", "--out_file", type=str, default= datetime.datetime.now().isoformat()+".png", help='Name output file')
+    parser.add_argument("-o", "--out_file", type=str, default= datetime.datetime.now().isoformat(), help='Name file')
+    parser.add_argument("-p", "--progress", default=False, action='store_true', help='Show progress of optimization')
     args = parser.parse_args()
 
     plot_sequence_objective(args)
