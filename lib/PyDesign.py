@@ -827,7 +827,7 @@ def sample_count_unique_solutions(solution_space_size, sample_size):
     :return: Expectancy value of how many times to draw from the solution space to gain this unique set
     '''
     sum = float(0)
-    for k in range(solution_space_size - sample_size + 1, solution_space_size + 1):
+    for k in xrange(int(solution_space_size) - int(sample_size) + 1, int(solution_space_size) + 1):
         sum += float(solution_space_size) / float(k)
     return float(sum)
 
