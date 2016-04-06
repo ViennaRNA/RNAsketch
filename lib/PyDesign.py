@@ -586,6 +586,7 @@ def _sample_sequence(dg, design, mode, sample_steps=1):
     sample_count = 0
     # remember the solution space we drew from
     mut_nos = 1
+    dg.set_history_size(sample_count + 100)
     
     # sample a new sequence
     # if random choice is requested pick something new
