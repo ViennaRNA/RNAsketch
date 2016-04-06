@@ -389,7 +389,6 @@ if vrna_available:
             return (structure, energie)
     
         def _get_pf_fold(self, sequence, temperature, ligand=None, constraint=None):
-            # TODO get hard constraints working in addition to soft constraints
             RNA.cvar.temperature = temperature
             fc = RNA.fold_compound(self._change_cuts(sequence), None, RNA.VRNA_OPTION_PF)
             if ligand:
