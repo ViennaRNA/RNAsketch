@@ -17,6 +17,7 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import numpy as np
+import math
 
 
 def plot_sequence_objective(args):
@@ -63,9 +64,25 @@ def plot_sequence_objective(args):
         # print the amount of connected components
         number_of_components = dg.number_of_connected_components()
         print('# Number of Connected Components: ' + str(number_of_components))
+        lnos_sum = 0
         for i in range(0, number_of_components):
-            print('# [' + str(i) + ']' + str(dg.component_vertices(i)))
-
+            lnos = dg.sample_global(i)
+            lnos_sum += lnos
+            dg.revert_sequence()
+            print('# [' + str(i) + ']' + str(dg.component_vertices(i)) + '\t' + str(lnos))
+           
+        print('LNOS: ' + str(lnos_sum))
+        perc_LNOS = args.percentage_of_LNOS
+        sample_number = int(sample_count_unique_solutions(int(lnos_sum), int(lnos_sum * perc_LNOS)))
+        print('LNOS * percentage: ' + str(int(lnos_sum * perc_LNOS)))
+        # print('SampleUniqueCountSolutions: ' + str(sample_number))
+        
+        if args.number > lnos_sum * perc_LNOS:
+            args.number = int(math.ceil(lnos_sum * perc_LNOS))
+            
+        if args.number == -1:
+            args.number = int(math.ceil(lnos_sum * perc_LNOS))
+            
         # remember general DG values
         graph_properties = get_graph_properties(dg)
 
@@ -82,8 +99,7 @@ def plot_sequence_objective(args):
             design.sequence = dg.get_sequence()
         else:
             dg.set_sequence(design.sequence)
-
-
+   
         # print header for csv file
         csv_file.write(";".join(["objective 1",
                         "objective 2",
@@ -93,29 +109,45 @@ def plot_sequence_objective(args):
         # calculate objectives for initial sequence
         x_center = calculate_objective_1(design)
         y_center = calculate_objective_2(design)
-
+    
         # print csv input for initial sequence
         score = x_center + args.weight * y_center
+                   
+        # store entries -> just unique entries
+        samples = set()
+        samples.add(design.sequence)
+        
         csv_file.write(";".join([str(x_center),
                 str(y_center),
                 str(score),
                 design.sequence]) + "\n")
-
-        for i in range(0, args.number):
-            PyDesign._sample_sequence(dg, design, args.mode, args.sample_steps)
+                
+        for i in range(2, args.number):
+            
+            while design.sequence in samples:
+                (mut_nos, sample_count) = PyDesign._sample_sequence(dg, design, args.mode, args.sample_steps)
+                
+                dg.revert_sequence(sample_count)
+                        
             x_new = calculate_objective_1(design)
             y_new = calculate_objective_2(design)
-
+            
+            
             if args.progress:
                 sys.stdout.write("\r# Sampling: {0:7.0f}/{1:5.0f}".format(i + 1, args.number) + " " * 20)
                 sys.stdout.flush()
 
             score = x_new + args.weight * y_new
+          
+           
             csv_file.write(";".join([str(x_new),
                 str(y_new),
                 str(score),
                 design.sequence]) + "\n")
-
+      
+            samples.add(design.sequence) 
+                    
+                
     else:
         print('# Construction time out reached!')
 
@@ -127,7 +159,8 @@ if __name__ == "__main__":
     parser.add_argument("-i", "--input", default=False, action='store_true', help='Read custom structures and sequence constraints from stdin')
     parser.add_argument("-m", "--mode", type=str, default='sample_global', help='Mode for getting a new sequence: sample, sample_local, sample_global, sample_strelem')
     parser.add_argument("-s", "--sample_steps", type=int, default=1, help='Count how many times to do the sample operation')
-    parser.add_argument("-n", "--number", type=int, default=1000, help='Count how many times to sample sequence')
+    parser.add_argument("-n", "--number", type=int, default=1000, help='Define LNOS')
+    parser.add_argument("-x", "--percentage_of_LNOS", type=int, default=0.85, help='Define percentage of LNOS')
     parser.add_argument("-w", "--weight", type=float, default=0.5, help='Define weighting-factor')
     parser.add_argument("-q", "--nupack", default=False, action='store_true', help='Use Nupack instead of the ViennaRNA package (for pseudoknots)')
     parser.add_argument("-o", "--out_file", type=str, default= datetime.datetime.now().isoformat(), help='Name file')
