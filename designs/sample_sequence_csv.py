@@ -72,16 +72,21 @@ def plot_sequence_objective(args):
             print('# [' + str(i) + ']' + str(dg.component_vertices(i)) + '\t' + str(lnos))
            
         print('LNOS: ' + str(lnos_sum))
+        
+        number = args.number
         perc_LNOS = args.percentage_of_LNOS
-        sample_number = int(sample_count_unique_solutions(int(lnos_sum), int(lnos_sum * perc_LNOS)))
-        print('LNOS * percentage: ' + str(int(lnos_sum * perc_LNOS)))
+        # sample_number = int(sample_count_unique_solutions(int(lnos_sum), int(lnos_sum * perc_LNOS)))
+        
+        print('LNOS * percentage: ' + str(int(math.ceil(lnos_sum * perc_LNOS))))
         # print('SampleUniqueCountSolutions: ' + str(sample_number))
         
-        if args.number > lnos_sum * perc_LNOS:
-            args.number = int(math.ceil(lnos_sum * perc_LNOS))
+        if number > lnos_sum * perc_LNOS:
+            number = int(math.ceil(lnos_sum * perc_LNOS))
             
-        if args.number == -1:
-            args.number = int(math.ceil(lnos_sum * perc_LNOS))
+        if number == -1:
+            number = int(math.ceil(lnos_sum * perc_LNOS))
+            
+        print('number: ' + str(number))
             
         # remember general DG values
         graph_properties = get_graph_properties(dg)
@@ -122,7 +127,7 @@ def plot_sequence_objective(args):
                 str(score),
                 design.sequence]) + "\n")
                 
-        for i in range(2, args.number):
+        for i in range(1, number):
             
             while design.sequence in samples:
                 (mut_nos, sample_count) = PyDesign._sample_sequence(dg, design, args.mode, args.sample_steps)
@@ -134,7 +139,7 @@ def plot_sequence_objective(args):
             
             
             if args.progress:
-                sys.stdout.write("\r# Sampling: {0:7.0f}/{1:5.0f}".format(i + 1, args.number) + " " * 20)
+                sys.stdout.write("\r# Sampling: {0:7.0f}/{1:5.0f}".format(i + 1, number) + " " * 20)
                 sys.stdout.flush()
 
             score = x_new + args.weight * y_new
@@ -160,7 +165,7 @@ if __name__ == "__main__":
     parser.add_argument("-m", "--mode", type=str, default='sample_global', help='Mode for getting a new sequence: sample, sample_local, sample_global, sample_strelem')
     parser.add_argument("-s", "--sample_steps", type=int, default=1, help='Count how many times to do the sample operation')
     parser.add_argument("-n", "--number", type=int, default=1000, help='Define LNOS')
-    parser.add_argument("-x", "--percentage_of_LNOS", type=int, default=0.85, help='Define percentage of LNOS')
+    parser.add_argument("-x", "--percentage_of_LNOS", type=float, default=0.85, help='Define percentage of LNOS')
     parser.add_argument("-w", "--weight", type=float, default=0.5, help='Define weighting-factor')
     parser.add_argument("-q", "--nupack", default=False, action='store_true', help='Use Nupack instead of the ViennaRNA package (for pseudoknots)')
     parser.add_argument("-o", "--out_file", type=str, default= datetime.datetime.now().isoformat(), help='Name file')
