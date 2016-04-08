@@ -108,13 +108,13 @@ def plot_sequence_objective(args):
             quad1 += 1
         if x_obj[i] < 0 and y_obj[i] > 0:
             quad2 += 1
-            if y_obj[i] <= (-args.weight * x_obj[i]):
+            if y_obj[i] < (-args.weight * x_obj[i]):
                 weighted1 += 1
         if x_obj[i] < 0 and y_obj[i] < 0:
             quad3 += 1
         if x_obj[i] > 0 and y_obj[i] < 0:
             quad4 += 1
-            if y_obj[i] <= (-args.weight * x_obj[i]):
+            if y_obj[i] < (-args.weight * x_obj[i]):
                 weighted2 += 1
 
     sum_weighted = weighted1 + weighted2 + quad3
