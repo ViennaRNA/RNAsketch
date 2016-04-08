@@ -570,7 +570,7 @@ def calculate_objective_2(design):
     
     return objective_difference_part * 2 / (design.number_of_structures * (design.number_of_structures-1))
 
-def sample_sequence(dg, design, mode, sample_steps=1, avoid=[]):
+def sample_sequence(dg, design, mode, sample_steps=1, avoid_motifs=None):
     '''
     This function samples a sequence with the given mode from the dependency graph object
     and writes it into the design object
@@ -578,59 +578,75 @@ def sample_sequence(dg, design, mode, sample_steps=1, avoid=[]):
     :param design: design object
     :param mode: mode how to sample, this is a string
     :param sample_steps: count how many times to do the sample operation
+    :param avoid_motifs: list of regex pattern specifiying sequence motifs to avoid
     :param return: mut_nos is the solution space we drew from
     :param return: sample_count is how many times we sampled a solution from the dependency graph object (important for revert later)
     '''
-    # count how many samples we did to be able to revert this later
-    sample_count = 0
+    if avoid_motifs is None:
+        avoid_motifs=[]
+    
     # remember the solution space we drew from
     mut_nos = 1
-    dg.set_history_size(sample_count + 100)
-    
-    # sample a new sequence
-    # if random choice is requested pick something new
-    if mode == "random":
-        modes = ['sample','sample_global','sample_local', 'sample_strelem']
-        mode = random.choice(modes)
-    if sample_steps == 0:
-        sample_steps = random.randrange(1, dg.number_of_connected_components())
+    dg.set_history_size(sample_steps + 100)
+    while True:
+        # count how many samples we did to be able to revert this later
+        sample_count = 0
+        # sample a new sequence
+        # if random choice is requested pick something new
+        if mode == "random":
+            modes = ['sample','sample_global','sample_local', 'sample_strelem']
+            mode = random.choice(modes)
+        if sample_steps == 0:
+            sample_steps = random.randrange(1, dg.number_of_connected_components())
 
-    if mode == 'sample':
-        mut_nos = dg.sample()
-        sample_count += 1
-    elif mode == 'sample_global':
-        for c in _sample_connected_components(dg, sample_steps):
-            mut_nos *= dg.sample_global(c)
+        if mode == 'sample':
+            mut_nos = dg.sample()
             sample_count += 1
-    elif mode == 'sample_local':
-        # TODO this local sampling is unfair this way and mut_nos is not calculated correctly!
-        for _ in range(0, sample_steps):
-            mut_nos *= dg.sample_local()
-            sample_count += 1
-    elif mode == 'sample_strelem':
-        if forgi_available:
-            # sample new sequences for structural elements
-            struct = design._remove_cuts(random.choice(design.structures))
-            bg = fgb.BulgeGraph(dotbracket_str=struct)
-            for s in bg.random_subgraph(sample_steps):
-                try:
-                    mut_nos *= dg.sample(bg.defines[s][0]-1, bg.defines[s][1]-1)
-                    sample_count += 1
-                    if s[0] == 'i':
-                        mut_nos *= dg.sample(bg.defines[s][2]-1, bg.defines[s][3]-1)
+        elif mode == 'sample_global':
+            for c in _sample_connected_components(dg, sample_steps):
+                mut_nos *= dg.sample_global(c)
+                sample_count += 1
+        elif mode == 'sample_local':
+            # TODO this local sampling is unfair this way and mut_nos is not calculated correctly!
+            for _ in range(0, sample_steps):
+                mut_nos *= dg.sample_local()
+                sample_count += 1
+        elif mode == 'sample_strelem':
+            if forgi_available:
+                # sample new sequences for structural elements
+                struct = design._remove_cuts(random.choice(design.structures))
+                bg = fgb.BulgeGraph(dotbracket_str=struct)
+                for s in bg.random_subgraph(sample_steps):
+                    try:
+                        mut_nos *= dg.sample(bg.defines[s][0]-1, bg.defines[s][1]-1)
                         sample_count += 1
-                except IndexError:
-                    pass
+                        if s[0] == 'i':
+                            mut_nos *= dg.sample(bg.defines[s][2]-1, bg.defines[s][3]-1)
+                            sample_count += 1
+                    except IndexError:
+                        pass
+            else:
+                raise ImportError("Forgi Library not available!")
         else:
-            raise ImportError("Forgi Library not available!")
-    else:
-        raise ValueError("Wrong mode argument: " + mode + "\n")
-    
+            raise ValueError("Wrong mode argument: " + mode + "\n")
+        
+        # check if motifs to avoid are present, if so sample a new sequence, else return
+        motiv_present = False
+        seq = dg.get_sequence()
+        for m in avoid_motifs:
+            if re.search(re.compile(m), seq, flags=0):
+                dg.revert_sequence(sample_count)
+                motiv_present = True
+                break
+        # if the motivs are not present, exit while and return
+        if not motiv_present:
+            break
+            
     # assign sequence to design and return values
     design.sequence = dg.get_sequence()
     return (mut_nos, sample_count)
 
-def classic_optimization(dg, design, objective_function=calculate_objective, exit=1000, mode='sample', progress=False):
+def classic_optimization(dg, design, objective_function=calculate_objective, exit=1000, mode='sample', avoid_motifs=None, progress=False):
     '''
     Takes a Design object and does a classic optimization of this sequence.
     :param dg: RNAdesign DependencyGraph object
@@ -638,10 +654,13 @@ def classic_optimization(dg, design, objective_function=calculate_objective, exi
     :param objective_functions: array of functions which takes a design object and returns a score for evaluation
     :param exit: Number of unsuccessful new sequences before exiting the optimization
     :param mode: String defining the sampling mode: sample, sample_global, sample_local
+    :param avoid_motifs: list of regex pattern specifiying sequence motifs to avoid
     :param progress: Whether or not to print the progress to the console
     :param return: Optimization score reached for the final sequence
     "param return: Number of samples neccessary to reach this result
     '''
+    if avoid_motifs is None:
+        avoid_motifs=[]
     # if the design has no sequence yet, sample one from scratch
     if not design.sequence:
         dg.sample()
@@ -656,11 +675,11 @@ def classic_optimization(dg, design, objective_function=calculate_objective, exi
     number_of_samples = 0
     
     # main optimization loop 
-    while True:
+    while exit:
         # count up the mutations
         number_of_samples += 1
         # sample a new sequence
-        (mut_nos, sample_count) = _sample_sequence(dg, design, mode)
+        (mut_nos, sample_count) = sample_sequence(dg, design, mode, avoid_motifs=avoid_motifs)
         
         # write progress
         if progress:
@@ -678,16 +697,15 @@ def classic_optimization(dg, design, objective_function=calculate_objective, exi
             count += 1
             if count > exit:
                 break
-    
+        
     # clear the console
     if (progress):
         sys.stderr.write("\r" + " " * 60 + "\r")
         sys.stderr.flush()
-    
     # finally return the result
     return score, number_of_samples
 
-def constraint_generation_optimization(dg, design, objective_function=calculate_objective, exit=1000, mode='sample', num_neg_constraints=100, max_eos_diff=0, progress=False):
+def constraint_generation_optimization(dg, design, objective_function=calculate_objective, exit=1000, mode='sample', num_neg_constraints=100, max_eos_diff=0, avoid_motifs=None, progress=False):
     '''
     Takes a Design object and does a constraint generation optimization of this sequence.
     :param dg: RNAdesign DependencyGraph object
@@ -697,10 +715,13 @@ def constraint_generation_optimization(dg, design, objective_function=calculate_
     :param mode: String defining the sampling mode: sample, sample_global, sample_local
     :param num_neg_constraints: Maximal number of negative constraints to accumulate during the optimization process
     :param max_eos_diff: Maximal difference between eos of the negative and positive constraints
+    :param avoid_motifs: list of regex pattern specifiying sequence motifs to avoid
     :param progress: Whether or not to print the progress to the console
     :param return: Optimization score reached for the final sequence
     "param return: Number of samples neccessary to reach this result
     '''
+    if avoid_motifs is None:
+        avoid_motifs=[]
     dg.set_history_size(100)
     neg_constraints = collections.deque(maxlen=num_neg_constraints)
     
@@ -718,13 +739,13 @@ def constraint_generation_optimization(dg, design, objective_function=calculate_
     number_of_samples = 0
     
     # main optimization loop
-    while True:
+    while exit:
         # constraint generation loop
         while True:
             # count up the mutations
             number_of_samples += 1
             # sample a new sequence
-            (mut_nos, sample_count) = _sample_sequence(dg, design, mode)
+            (mut_nos, sample_count) = sample_sequence(dg, design, mode, avoid_motifs=avoid_motifs)
             
             # write progress
             if progress:
