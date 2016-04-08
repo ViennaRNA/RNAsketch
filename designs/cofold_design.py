@@ -45,11 +45,14 @@ def main():
         print("# Input File: {0:}".format(args.file))
         (structures, constraint, start_sequence) = read_inp_file(args.file)
     else:
-        structures = ['..............................................((((((((((((((((((((((&.(((((.....))))).)))))))))))))))))))))).(((((....)))))........',
-            '....................................................................&.(((((.....)))))........................(((((....)))))........']
-        fold_constraints = ['...............................((((((((((((((((((((((...............&.................)))))))))))))))))))))).......................',
-            '....................................................xxxxxxxxxxxxxxxx&..............................................................']
-        constraint = 'ANNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNAAGGAGNNNNNNNATG&ANNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNGCGAAAGCNNNUUUUUUUU'
+        structures = [
+            '......................................((((((((((((((((((((((((((((((&.((((((((((.....)))))))))).))))))))))))))))))))))))))))))',
+            '....................................................................&.((((((((((.....))))))))))...............................']
+        fold_constraints = [
+            '......................................((((((((((((((((((((((((((((((&...........................))))))))))))))))))))))))))))))',
+            '...................................................xxxxxxxxxxxxxxxxx&.........................................................']
+        constraint = \
+            'ANNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNAAGGAGNNNNNNNATG&ANNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN'
     # try to construct dependency graph, catch errors and timeouts
     dg = None
     construction_time = 0.0
@@ -145,6 +148,7 @@ def main():
                         design.write_csv(),
                         *graph_properties.values(), sep=";")
             else:
+                print(design.sequence)
                 print(design.write_out(score))
     else:
         print('# Construction time out reached!')
@@ -154,62 +158,73 @@ def cofold_objective(design, weight=1):
     1 - [S AB ]/[A 0 ] + weight * P (RBS unpaired )
     1 - [AB] * e(-((Zsab/Zab')/(KT)))/ A0 + weight * P(RBS unpaired)
     
-    design object needs following input
+    design object needs following inputexcept:
+                raise 
     structure1 is the folded structure, in constraints we need only INTERmolecular pbs
     structure2 is the open state, in constraints we need the unpaired region (rbs) marked with xxxxxx and only mRNA!
     
     '''
-    print('seq = ' + design.sequence)
+    #print('seq = ' + design.sequence)
     seqs = design.sequence.split('&')
     constr = design.constraints[1].split('&')
     Ca0 = 1e-05
     
     # get concentration of ab: Cab
     # ab
+    RNA.cvar.dangles = 2
+    RNA.cvar.noLonelyPairs = 0
+
     RNA.cvar.cut_point = len(seqs[0])+1;
     # structure, Gfe seq1, Gfe seq2, Gfe all INTER bp, Gfe all structs (dimers and monomers)
     (x, ac, bc, fcab, cf) = RNA.co_pf_fold(seqs[0]+seqs[1]);
+    #print(x)
     # aa
     (x, usel1, usel2, fcaa, usel3)= RNA.co_pf_fold(seqs[0]+seqs[0])
     # bb
     RNA.cvar.cut_point = len(seqs[1])+1;
     (x, usel1, usel2, fcbb, usel3)= RNA.co_pf_fold(seqs[1]+seqs[1])
     
-    (Cab, Caa, Cbb, Ca, Cb)=RNA.get_concentrations(fcab, fcaa, fcbb, ac, bc, Ca0, 1e10);
+    (Cab, Caa, Cbb, Ca, Cb)=RNA.get_concentrations(fcab, fcaa, fcbb, ac, bc, Ca0, 1e-03);
     RNA.cvar.cut_point = -1
-    print('Cab = ' + str(Cab))
+    #print('Cab = ' + str(Cab))
     # save energy of all structures that build duplexes
     Eab = fcab
-    print('Eab = ' + str(Eab))
+    #print('Eab = ' + str(Eab))
     # save gibbs free energy of mrna
     Ea = ac
+    #print('Ea = ' + str(Ea))
     
     # get Esab  (constraint should look like: '....((((((.....&....))))))....')
     RNA.cvar.cut_point = len(seqs[0])+1;
-    (const_x, const_ac, const_bc, const_fcab, const_cf) = RNA.co_pf_fold(seqs[0]+seqs[1], design._remove_cuts(design.constraints[0]));
+    RNA.cvar.fold_constrained = 1
+    (const_x, const_ac, const_bc, const_fcab, conqst_cf) = RNA.co_pf_fold(seqs[0]+seqs[1], design._remove_cuts(design.constraints[0]));
+    RNA.cvar.fold_constrained = 0
+    #print(const_x)
     RNA.cvar.cut_point = -1
     # Energy of all structures that have our binding site
     Esab = const_fcab
-    print('Esab = ' + str(Esab))
+    #print('Esab = ' + str(Esab))
     
     # get Psab
-    Psab = math.exp(-(    (  Z_from_G(Esab)  /  Z_from_G(Eab)  )    /    (((37.0 + 273.15)*1.98717)/1000.0)   ))
-    print('Psab = ' + str(Psab))
+    Psab = Z_from_G(Esab-Eab)
+    #print('Psab = ' + str(Psab))
     # get concentration of Sab by multiplying Cab with the probability of Sab
     Csab = Cab * Psab
-    print('Csab = ' + str(Csab))
+    #print('Csab = ' + str(Csab))
     # get Prbs unpaired (constraint should look like: '..xxxxxxxx..........')
+    RNA.cvar.fold_constrained = 1
     (mrna_x, mrna_c) = RNA.pf_fold(seqs[0], constr[0]); #TODO constraints only length of seqs[0]
+    RNA.cvar.fold_constrained = 0
     # save the energy of all structures with the RBS being unpaired
     Erbsunpaired = mrna_c
-    print('Erbsunpaired = ' + str(Erbsunpaired))
+    #print('Erbsunpaired = ' + str(Erbsunpaired))
     
     # get the probability of the RBS being unpaired
-    Prbs = math.exp(-(    (  Z_from_G(Erbsunpaired)  /  Z_from_G(Ea)  )    /    (((37.0 + 273.15)*1.98717)/1000.0)   ))
-    print('Prbs = ' + str(Prbs))
+    Prbsunpaired =  Z_from_G(Erbsunpaired-Ea)
+    #print('Prbsunpaired = ' + str(Prbs))
     # calculate the objective and return
-    print('score = ' + str(1.0 - Csab / Ca0 + weight * 1 - Prbs))
-    return 1.0 - Csab / Ca0 + weight * 1 - Prbs
+    #print('score = ' + str(1.0 - Csab / Ca0 + weight * Prbsunpaired))
+    return 1.0 - Csab / Ca0 + weight * (1-Prbsunpaired)
 
 def G_from_Z(Z):
     return - ((37.0 + 273.15)*1.98717)/1000.0 * math.log(Z)

@@ -378,7 +378,7 @@ if vrna_available:
             if ligand:
                 fc.sc_add_hi_motif(ligand[0], ligand[1], ligand[2])
             if constraint:
-                fc.hc_add_db(constraint)
+                fc.hc_add_db(self._remove_cuts(constraint))
             if self.multifold == 0:
                 (structure, energie) = fc.mfe()
             if self.multifold == 1:
@@ -394,7 +394,7 @@ if vrna_available:
             if ligand:
                 fc.sc_add_hi_motif(ligand[0], ligand[1], ligand[2])
             if constraint:
-                fc.hc_add_db(constraint)
+                fc.hc_add_db(self._remove_cuts(constraint))
             if self.multifold == 0:
                 (structure, energie) = fc.pf()
             if self.multifold == 1:
@@ -570,7 +570,7 @@ def calculate_objective_2(design):
     
     return objective_difference_part * 2 / (design.number_of_structures * (design.number_of_structures-1))
 
-def _sample_sequence(dg, design, mode, sample_steps=1):
+def sample_sequence(dg, design, mode, sample_steps=1, avoid=[]):
     '''
     This function samples a sequence with the given mode from the dependency graph object
     and writes it into the design object
