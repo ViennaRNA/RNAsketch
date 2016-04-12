@@ -570,7 +570,7 @@ def calculate_objective_2(design):
     
     return objective_difference_part * 2 / (design.number_of_structures * (design.number_of_structures-1))
 
-def sample_sequence(dg, design, mode, sample_steps=1, avoid_motifs=None):
+def sample_sequence(dg, design, mode, sample_steps=1, avoid_motifs=None, white_positions=None):
     '''
     This function samples a sequence with the given mode from the dependency graph object
     and writes it into the design object
@@ -584,7 +584,8 @@ def sample_sequence(dg, design, mode, sample_steps=1, avoid_motifs=None):
     '''
     if avoid_motifs is None:
         avoid_motifs=[]
-    
+    if white_positions is None:
+        white_positions=[]
     # remember the solution space we drew from
     mut_nos = 1
     dg.set_history_size(sample_steps + 100)
@@ -633,6 +634,10 @@ def sample_sequence(dg, design, mode, sample_steps=1, avoid_motifs=None):
         # check if motifs to avoid are present, if so sample a new sequence, else return
         motiv_present = False
         seq = dg.get_sequence()
+        # remove hard sequence constraints for pattern matching
+        for pos in reversed(white_positions):
+            seq = seq[:pos[0]] + seq[pos[1]:]
+        # match motifs
         for m in avoid_motifs:
             if re.search(re.compile(m), seq, flags=0):
                 dg.revert_sequence(sample_count)
@@ -646,7 +651,7 @@ def sample_sequence(dg, design, mode, sample_steps=1, avoid_motifs=None):
     design.sequence = dg.get_sequence()
     return (mut_nos, sample_count)
 
-def classic_optimization(dg, design, objective_function=calculate_objective, exit=1000, mode='sample', avoid_motifs=None, progress=False):
+def classic_optimization(dg, design, objective_function=calculate_objective, exit=1000, mode='sample', avoid_motifs=None, white_positions=None, progress=False):
     '''
     Takes a Design object and does a classic optimization of this sequence.
     :param dg: RNAdesign DependencyGraph object
@@ -661,6 +666,8 @@ def classic_optimization(dg, design, objective_function=calculate_objective, exi
     '''
     if avoid_motifs is None:
         avoid_motifs=[]
+    if white_positions is None:
+        white_positions=[]
     # if the design has no sequence yet, sample one from scratch
     if not design.sequence:
         dg.sample()
@@ -679,7 +686,7 @@ def classic_optimization(dg, design, objective_function=calculate_objective, exi
         # count up the mutations
         number_of_samples += 1
         # sample a new sequence
-        (mut_nos, sample_count) = sample_sequence(dg, design, mode, avoid_motifs=avoid_motifs)
+        (mut_nos, sample_count) = sample_sequence(dg, design, mode, avoid_motifs=avoid_motifs, white_positions=white_positions)
         
         # write progress
         if progress:
@@ -705,7 +712,7 @@ def classic_optimization(dg, design, objective_function=calculate_objective, exi
     # finally return the result
     return score, number_of_samples
 
-def constraint_generation_optimization(dg, design, objective_function=calculate_objective, exit=1000, mode='sample', num_neg_constraints=100, max_eos_diff=0, avoid_motifs=None, progress=False):
+def constraint_generation_optimization(dg, design, objective_function=calculate_objective, exit=1000, mode='sample', num_neg_constraints=100, max_eos_diff=0, avoid_motifs=None, white_positions=None, progress=False):
     '''
     Takes a Design object and does a constraint generation optimization of this sequence.
     :param dg: RNAdesign DependencyGraph object
@@ -722,6 +729,8 @@ def constraint_generation_optimization(dg, design, objective_function=calculate_
     '''
     if avoid_motifs is None:
         avoid_motifs=[]
+    if white_positions is None:
+        white_positions=[]
     dg.set_history_size(100)
     neg_constraints = collections.deque(maxlen=num_neg_constraints)
     
@@ -745,7 +754,7 @@ def constraint_generation_optimization(dg, design, objective_function=calculate_
             # count up the mutations
             number_of_samples += 1
             # sample a new sequence
-            (mut_nos, sample_count) = sample_sequence(dg, design, mode, avoid_motifs=avoid_motifs)
+            (mut_nos, sample_count) = sample_sequence(dg, design, mode, avoid_motifs=avoid_motifs, white_positions=white_positions)
             
             # write progress
             if progress:
@@ -821,12 +830,13 @@ def _sample_connected_components(dg, amount=1):
     '''
     result = []
     noslist = {}
-    
-    if amount > dg.number_of_connected_components():
-        amount = dg.number_of_connected_components()
-    
+        
     for c in range(0, dg.number_of_connected_components()):
-        noslist[c] = dg.number_of_sequences(c)
+        if dg.number_of_sequences(c) != 1:
+            noslist[c] = dg.number_of_sequences(c)
+    
+    if amount > len(noslist):
+        amount = len(noslist)
     
     for _ in range(0, amount):
         rand = random.randint(0, sum(noslist.values())-1)

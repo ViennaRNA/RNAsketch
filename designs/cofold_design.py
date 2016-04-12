@@ -46,27 +46,30 @@ def main():
         (structures, constraint, start_sequence) = read_inp_file(args.file)
     else:
         structures = [
-            '........................................((((((((((((((((((((((((((((((.................................................&...((((((((((.....)))))))))).)))))))))))))))))))))))))))))).........(((((((((((((((......))))))))))))))).....',
-            '.......................................................................................................................&...((((((((((.....))))))))))........................................(((((((((((((((......))))))))))))))).....']
+            '........................................((((((((((((((((((((((((((((((.......................................&...((((((((((.....)))))))))).)))))))))))))))))))))))))))))).........(((((((((((((((......))))))))))))))).....',
+            '......((((((((((((((......)))))))))))))).....................................................................&...((((((((((.....))))))))))........................................(((((((((((((((......))))))))))))))).....']
         fold_constraints = [
-            '........................................((((((((((((((((((((((((((((((.................................................&.............................))))))))))))))))))))))))))))))..................................................',
-            '..............................................xxxxxxxxxxxxxxxxxxxxxxxx.................................................&.............................................................................................................']
+            '........................................((((((((((((((((((((((((((((((.......................................&.............................))))))))))))))))))))))))))))))..................................................',
+            '..............................................xxxxxxxxxxxxxxxxxxxxxxxx.......................................&.............................................................................................................']
         constraint = \
-            'GGGNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNAAGGAGNNNNNNNATGCGTAAGGGCGAAGAGCTTTTTACCGGTGTTGTGCCTATTCTCGTAGGTT&GGGNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNTAGCATAACCCCTTGGGGCCTCTAAACGGGTCTTGAGGGGTTTTTTG'
+            'GGGNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNAAGGAGNNNNNNNAUGAACAGCAGCAACCUGGCGGCAGCGCAAAAGAUGCGUAAA&GGGNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNUAGCAUAACCCCUUGGGGCCUCUAAACGGGUCUUGAGGGGUUUUUUG'
     
     #sequence motifs to avoid
     avoid_motifs = [
-        "[A]{4}",
-        "[C]{4}",
-        "[G]{4}",
-        "[U]{4}",
-        "[GT]{6}",
-        "[AC]{6}",
-        "[AG]{6}",
-        "[GC]{6}",
-        "[AT]{6}",
-        "[CT]{6}"
+        "[A]{4,}",
+        "[C]{4,}",
+        "[G]{4,}",
+        "[U]{4,}",
+        "[GU]{7,}",
+        "[AC]{7,}",
+        "[AG]{7,}",
+        "[GC]{7,}",
+        "[AU]{7,}",
+        "[CU]{7,}"
     ]
+    
+    white_positions = [[m.start(), m.end()] for m in re.finditer('[AUGCT]+', constraint)]
+    print(white_positions)
     
     # try to construct dependency graph, catch errors and timeouts
     dg = None
@@ -133,17 +136,17 @@ def main():
             
             start = time.clock()
             # do a complete sampling jump times
-            (score, number_of_jumps) = classic_optimization(dg, design, objective_function=cofold_objective, exit=args.jump, mode='sample', avoid_motifs=avoid_motifs, progress=args.progress)
+            (score, number_of_jumps) = classic_optimization(dg, design, objective_function=cofold_objective, exit=args.jump, mode='sample', avoid_motifs=avoid_motifs, white_positions=white_positions, progress=args.progress)
             # now do the optimization based on the chose mode
             try:
-                (score, number_of_mutations) = classic_optimization(dg, design, objective_function=cofold_objective, exit=args.exit, mode=args.mode, avoid_motifs=avoid_motifs, progress=args.progress)
+                (score, number_of_mutations) = classic_optimization(dg, design, objective_function=cofold_objective, exit=args.exit, mode=args.mode, avoid_motifs=avoid_motifs, white_positions=white_positions, progress=args.progress)
             except ValueError as e:
                 print (e.value)
                 exit(1)
             # now do the optimization with mode strelem where we take structural elements and replace them a little
             number_of_strelem = 0
             if forgi_available:
-                (score, number_of_strelem) = classic_optimization(dg, design, objective_function=cofold_objective, exit=args.strelem, mode='sample_strelem', avoid_motifs=avoid_motifs, progress=args.progress)
+                (score, number_of_strelem) = classic_optimization(dg, design, objective_function=cofold_objective, exit=args.strelem, mode='sample_strelem', avoid_motifs=avoid_motifs, white_positions=white_positions, progress=args.progress)
             else:
                 sys.stderr.write("-" * 60 + "\nWARNING: Strelem sampling not available!!!\nPlease install forgi https://github.com/pkerpedjiev/forgi\n" + "-" * 60 + "\n")
                 sys.stderr.flush() 
