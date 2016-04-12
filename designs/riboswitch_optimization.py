@@ -10,6 +10,7 @@ import RNAdesign as rd
 import argparse
 import sys
 import time
+from pylab import remainder
 
 def main():
     parser = argparse.ArgumentParser(description='Design of a transcription regulating riboswitch similar to Wachsmuth et al. 2013.')
@@ -19,7 +20,7 @@ def main():
     parser.add_argument("-n", "--number", type=int, default=4, help='Number of designs to generate')
     parser.add_argument("-j", "--jump", type=int, default=300, help='Do random jumps in the solution space for the first (jump) trials.')
     parser.add_argument("-e", "--exit", type=int, default=500, help='Exit optimization run if no better solution is aquired after (exit) trials.')
-    parser.add_argument("-s", "--strelem", type=int, default=1800, help='Optimize structural elements and exit after (strelem) unsucessful trials.')
+    parser.add_argument("-s", "--strelem", type=int, default=1200, help='Optimize structural elements and exit after (strelem) unsucessful trials.')
     parser.add_argument("-m", "--mode", type=str, default='sample_global', help='Mode for getting a new sequence: sample, sample_local, sample_global, sample_strelem')
     parser.add_argument("-k", "--kill", type=int, default=0, help='Timeout value of graph construction in seconds. (default: infinite)')
     parser.add_argument("-g", "--graphml", type=str, default=None, help='Write a graphml file with the given filename.')
@@ -30,7 +31,6 @@ def main():
     parser.add_argument("-r", "--range", type=str, default='6,20', help='Range of which a random number is generated to determine a spacer length')
     parser.add_argument("-t", "--three", type=int, default=10, help='Minimum length of the terminator stem, i.e. the number of nucleotides of the aptamer used to form a stem.')
     parser.add_argument("-u", "--ustretch", type=int, default=8, help='Length of the U stretch down stream of the terminator.')
-    parser.add_argument("-x", "--xi", type=int, default=15, help='Energy that is added to the binding competent state to simulate ligand binding.')
     args = parser.parse_args()
 
     print("# Options: number={0:d}, jump={1:d}, exit={2:d}, strelem={3:d}, mode={4:}, nupack={5:}".format(args.number, args.jump, args.exit, args.strelem, args.mode, str(args.nupack)))
@@ -65,29 +65,33 @@ def main():
             for spacer in range(spacerrange[0], (spacerrange[1]+1)):
                 counter+=1
                 print("# PROGRESS: " + str(counter) + "/" + str(total_optimizations))
-                # number of possibly base paired positions of the spacer
-                spbp = int((spacer-4)/2)
+
                 # number of single stranded bases in the termiantor loop
-                spss = (spacer-spbp*2)
-            
+                spss = 4
+                # number of possibly base paired positions of the spacer left (spbpl) and right (spbpr) to the loop
+                spbpl = spbpr = (spacer-spss)/2
+                if(remainder((spacer-spss),2)):
+                    spbpl += 1
+           
                 # select a random position in the aptamers 3' half that is used to form the perfect terminator stem
                 comp = len(aptseq) - aptpos + 1
             
                 # Build input structures and sequence constraints
-                # TODO: create hard constraint for structures
                 structures = []
                 constraint = ''
                 start_sequence = ''
                 print("# spacer length: " + str(spacer) + "\tlength of the complementary region: " + str(comp))
 
                 ONS = aptstr[0] + ("."*spacer) + ("."*comp) + ("."*args.ustretch)
-                ONH = "." * len(aptstr[0]) + ("."*spacer) + ("."*(comp-4)) + ("x"*4) + ("."*args.ustretch)
-                                
-                OFFS = ("."*(len(aptseq)-comp)) + ("("*comp) + ("("*spbp) + ("."*spss) + (")"*spbp) + (")"*comp)  + ("."*args.ustretch)
-                OFFH = ("."*(len(aptseq)-comp)) + ("("*comp) + ("("*spbp) + ("x"*spss) + (")"*spbp) + (")"*comp)  + ("x"*args.ustretch)
-                if(spbp>3):
-                    OFFS = ("."*(len(aptseq)-comp)) + ("("*comp) + ("."*(spbp-3)) + "(((" + ("."*spss) + ")))" + ("."*(spbp-3)) + (")"*comp)  + ("."*args.ustretch)
-                    OFFH = ("."*(len(aptseq)-comp)) + ("("*comp) + ("."*(spbp-3)) + "(((" + ("x"*spss) + ")))" + ("."*(spbp-3)) + (")"*comp)  + ("x"*args.ustretch)
+                ONH = "." * len(aptstr[0]) + ("."*spacer) + ("."*(comp-5)) + ("x"*5) + ("."*args.ustretch)
+                
+                OFFS = ("."*(len(aptseq)-comp)) + ("("*comp) + ("."*spbpl) + ("."*spss) + ("."*spbpr) + (")"*comp)  + ("."*args.ustretch)
+                OFFH = ("."*(len(aptseq)-comp)) + ("("*comp) + ("."*spbpl) + ("x"*spss) + ("."*spbpr) + (")"*comp)  + ("x"*args.ustretch)
+
+                if(spbpr>3):
+                        OFFS = ("."*(len(aptseq)-comp)) + ("("*comp) + ("."*(spbpl-3)) + "(((" + ("."*spss) + ")))" + ("."*(spbpr-3)) + (")"*comp)  + ("."*args.ustretch)
+                        OFFH = ("."*(len(aptseq)-comp)) + ("("*comp) + ("."*(spbpl-3)) + "(((" + ("x"*spss) + ")))" + ("."*(spbpr-3)) + (")"*comp)  + ("x"*args.ustretch)
+                        
                     
                 SEQ = aptseq + ("N"*(spacer+comp))  + ("U"*args.ustretch)
                 print("# Used input:\n# " + ONS + "\n# " + ONH + "\n# " + OFFS + "\n# " + OFFH + "\n# " + SEQ)
@@ -160,7 +164,6 @@ def main():
                     
                     #add variable
                     design.aptstr=aptstr
-                    design.diff=args.xi
                     design.aptsp_length=len(aptseq)+spacer
                     
                     start = time.clock()
@@ -205,32 +208,27 @@ def main():
                 
         print("\n\n" + "Best desgin:\n" + global_design.write_out(global_score))
     
-def calculate_switch_objective(design, weight=1):
-    '''
-    Calculates the objective function given a Design object containing the designed sequence,
-    input structures and the length of the aptamer + spacer.
+def calculate_switch_objective(design):
+    '''Calculates the objective function given a design object containing
+    the partition function energies of the following four states
+    [0]: Ligand bound state including hard constraint = on + ligand + hardconstr1
+    [1]: OFF state with hard constraints              = off + hardconstr2
+    [2]: Ligand bound state without hard constraints  = on + ligand
+    [3]: OFF state without hard constraints           = off
     
-    Objective function:    ((eos(1) - gibbs) + (aptsp_eos - gibbs_aptsp)/2)
-                         + weight * abs((eos(1) - (eos(2) + xi))
-                         + number of aptamer bp in ON and OFF state
-    :param design: Design object containing the sequence and structures
-    :param weight: To wheight the influence of the eos diffences
+    Objective function: ([0] - [2]) + ([1] - [3])
+    
+    First term ensures that the ligand bound state (ON state) has the
+    structure properties enforced by the hard constraints. The second
+    term ensures that the transcription terminating state (OFF state)
+    follows the hard constraints (e.g. is unpaired in the terminator
+    loop and poly-U stretch, respectively).
+    
+
+    :param design: Design object containing all necessary partition function energies
+
     '''
-    # [0]: on + ligand + hardconstr1
-    # [1]: off + hardconstr2
-    # [2]: on + ligand
-    # [3]: off
     return design.pf_energy[0]-design.pf_energy[2] + design.pf_energy[1] - design.pf_energy[3]
-
-    #aptsp_eos = RNA.energy_of_struct(design.sequence[:design.aptsp_length], design.structures[0][:design.aptsp_length])
-    #(aptsp_pf_str, aptsp_pf_energy) = RNA.pf_fold(design.sequence[:design.aptsp_length])
-    #
-    #objective_difference_part = abs(design.eos[0] - (design.eos[1]+design.diff))
-    #objective_ensemble = 0.5 * ((design.eos[1] - design.pf_energy) + (aptsp_eos - aptsp_pf_energy))
-    #(objective_bp_inboth, objective_bp_distance) = calculate_bp_distance(design.aptstr[0], design.mfe_structure)
-    #
-    #return (objective_ensemble + weight * (objective_difference_part) + objective_bp_inboth)
-
 
 def calculate_bp_distance(s1, s2):
     '''
