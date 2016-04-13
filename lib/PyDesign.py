@@ -690,7 +690,7 @@ def classic_optimization(dg, design, objective_function=calculate_objective, exi
         
         # write progress
         if progress:
-            sys.stderr.write("\rMutate: {0:7.0f}/{1:5.0f} | Score: {2:5.2f} | NOS: {3:.5e}".format(number_of_samples, count, score, mut_nos) + " " * 20)
+            sys.stderr.write("\rMutate: {0:7.0f}/{1:5.0f} | Score: {2:5.2f} | NOS: {3:.5e} | Mode: {4:s}".format(number_of_samples, count, score, mut_nos, mode) + " " * 20)
             sys.stderr.flush()
         
         this_score = objective_function(design)
@@ -758,7 +758,7 @@ def constraint_generation_optimization(dg, design, objective_function=calculate_
             
             # write progress
             if progress:
-                sys.stderr.write("\rMutate: {0:7.0f}/{1:5.0f} | EOS-Diff: {2:4.2f} | Score: {3:5.2f} | NOS: {4:.5e}".format(number_of_samples, count, max_eos_diff, score, mut_nos))
+                sys.stderr.write("\rMutate: {0:7.0f}/{1:5.0f} | EOS-Diff: {2:4.2f} | Score: {3:5.2f} | NOS: {4:.5e} | Mode: {5:s}".format(number_of_samples, count, max_eos_diff, score, mut_nos, mode))
                 sys.stderr.flush()
             # boolean if it is perfect already
             perfect = True
