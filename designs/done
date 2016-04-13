@@ -1,0 +1,27 @@
+#### RIBOSWITCH DESIGN
+
+#python -u riboswitch_optimization.py > riboswitch.out
+
+### manualy selected candidates based on score
+echo AAGUGAUACCAGCAUCGUCUUGAUGCCCUUGGCAGCACUUCAACCCCAGCCACCUGAACAUGAGGUGUUGCUGGGGGCAUCUUUUUUUU | RNAsubopt -e 40 --noLP| python -u correct_subopt.py > riboswitch_01_0.01.sub
+echo  AAGUGAUACCAGCAUCGUCUUGAUGCCCUUGGCAGCACUUCACCCCACGUGGGGUGUUGCCUUUUUUUU | RNAsubopt -e 30  --noLP| python -u correct_subopt.py > riboswitch_02_0.01.sub
+
+echo AAGUGAUACCAGCAUCGUCUUGAUGCCCUUGGCAGCACUUCACUAGCAACAGCUAGUGAAGUGCUGCUAAGGGUGUUUUUUUUUU | RNAsubopt -e 50  --noLP| python -u correct_subopt.py > riboswitch_03_2.89.sub
+echo AAGUGAUACCAGCAUCGUCUUGAUGCCCUUGGCAGCACUUCACAGCACUGGGGUGCUGUUGGGGGUGUUUUUUUU | RNAsubopt -e 35  --noLP| python -u correct_subopt.py > riboswitch_04_2.52.sub
+
+### do barrier
+for I in *.sub; do ~/bin/PROGS/Barriers-1.5.2/barriers -G RNA-noLP --bsize --rates < $I > $I.bar; done
+
+~/bin/PROGS/Treekin-0.3.1/treekin -m I --p0 1=1 < $I.bar | xmgrace -log x -nxy -
+
+
+#### COFOLD DESIGN
+
+python -u sven_cofold_design.py -p > cofold.out
+
+# promising results with objective: 1.0 - Csab / Ca0 + weight1 * (1-PmRNAunpaired) + weight2 * (1-PsRNAunpaired) + weight3 * (1-PdesignDominates)
+#GGGCCUGUCGGCUUGGCGACAGCCAAGUCGUUAGGCUGACAGGAACAAAUAAGGAGCAAGAAUAUG&GGGCGUGAUGGCGCUCCACGUUAUCGUGAUAUGUUCUUGUUCCUUAUUUGUUCCUGUUUAGCAUAACCCCUUGGGGCCUCUAAACGGGUCUUGAGGGGUUUUUUG	  1.78
+#GGGCGGCUUUCUAUAUGAAUAGCCCGAUUUAUGUAGAGAGUGGUGAGAGUAAGGAGUGAAGGUAUG&GGGAGGGAGCGGGAUCCGCUUGUUCCCUACAUACCUUCACUCUUUACUCUCAUCACUCUAGCAUAACCCCUUGGGGCCUCUAAACGGGUCUUGAGGGGUUUUUUG	  1.08
+
+#fold parts and color them
+~/bin/PROGS/ViennaRNA-2.2.4/src/Utils/relplot.pl -p rna.ps dot.ps > bunt.ps
