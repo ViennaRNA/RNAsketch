@@ -228,24 +228,54 @@ def cofold_objective(design, weight1=1, weight2=1, weight3=1):
     Csab = Cab * Psab
 
     # get probabilty that mRNA follows the given constraint (e.g RBS is unpaired '..xxxxxxxx..........')
-    PmRNAunpaired = getProbOfConstraintStructure(seqs[0], constr[0], Ea)
-
+    (con_str,con_energy)=getSaveConFold(seqs[0], constr[0],'pf_fold')
+    PmRNAunpaired = Z_from_G(con_energy-Ea)
+    
     # get probabilty that sRNA follows the given constraint (e.g sRNA binding side is unpaired '..xxxxxxxx..........')
-    PsRNAunpaired = getProbOfConstraintStructure(seqs[1], constr[1], Eb)
+    (con_str,con_energy)=getSaveConFold(seqs[1], constr[1],'pf_fold')
+    PsRNAunpaired = Z_from_G(con_energy-Eb)
 
     # The designed 5'UTR sequence is extended at its 3' end by the
     # context, e.g. part of an reporter gene and the probability that
     # the mfe structure of the designed 5'UTR dominates the longer
     # construct
-    (mRNA_structure,mRNA_energy) = RNA.fold(seqs[0])
+    (mRNA_structure,mRNA_energy) = getSaveConFold(seqs[0],constr[0],'fold')
     extendedSeq = (seqs[0] + design.context)
     extendedCon = (mRNA_structure.replace(".","x") + "."*len(design.context))
+    (ext_pf_structure,ext_pf_energy) = getSaveConFold(extendedSeq,'','pf_fold')
     
-    (ext_pf_structure,ext_pf_energy) = RNA.pf_fold(extendedSeq)
-    PdesignDominates = getProbOfConstraintStructure(extendedSeq, extendedCon, ext_pf_energy)
+    (con_str,con_energy)=getSaveConFold(extendedSeq, extendedCon,'pf_fold')
+    PdesignDominates = Z_from_G(con_energy-ext_pf_energy)
 
-    #print("1.0 - " + str(Csab) + "/" + str(Ca0) + "+" + str(weight) + " * (1-" + str(PmRNAunpaired) + ") + (1-" + str(PsRNAunpaired) + ") + (1-" + str(PdesignDominates) + ")")
+    #print("1.0 - " + str(Csab) + "/" + str(Ca0) + "+" + str(weight1) + " * (1-" + str(PmRNAunpaired) + ") + " + str(weight2) + " * (1-" + str(PsRNAunpaired) + ") + " + str(weight3) + " * (1-" + str(PdesignDominates) + ")")
     return 1.0 - Csab / Ca0 + weight1 * (1-PmRNAunpaired) + weight2 * (1-PsRNAunpaired) + weight3 * (1-PdesignDominates)
+
+def getSaveConFold(sequence, constraint='', mode='fold'):
+    # set RNA variables
+    RNA.cvar.dangles = 2
+    RNA.cvar.noLonelyPairs = 0
+    RNA.cvar.fold_constrained = 1
+    # pf_fold overwrites the constraint -> Bernard solved it!!! relys
+    # on undefined behavior!!! we create a list from a string and then
+    # join it into an presumably other string
+    con = list(constraint)
+    con = "".join(con)
+    seq = list(sequence)
+    seq = "".join(seq)
+    
+    #get free energy and structure
+    (structure, energy) = ('',0.0)
+    if(mode == 'fold'):
+        (structure, energy) = RNA.fold(seq, con)
+    elif(mode == 'pf_fold'):
+        (structure, energy) = RNA.pf_fold(seq, con)
+    else:
+        print("Could not run getSaveConFold with mode" + mode, file=std.err)
+        exit
+    RNA.cvar.fold_constrained = 0
+    # return free energy and structure
+    return (structure, energy)
+
 
 def getProbOfConstraintStructure(sequence, constraint, energy):
     # set RNA variables
