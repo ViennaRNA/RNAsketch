@@ -94,9 +94,6 @@ def plot_sequence_objective(args):
         start_sequences = [] 
         
         if args.start_seq is not None:
-            #start_sequences = []
-            #read_startsequences(args.start_seq)
-            #print(start_sequences)
             
             with open(args.start_seq) as f:
                 data = f.read()
@@ -111,11 +108,11 @@ def plot_sequence_objective(args):
         for i in range(0,len(start_sequences)):  
         
             if args.start_seq is not None:   
-                csv_file_name = args.out_file + "_start_seq_" + str(i + 1)   
+                csv_file_name = args.out_file + "_" + args.mode + "_start_seq_" + str(i + 1)   
             else:
-                csv_file_name = args.out_file   
+                csv_file_name = args.out_file + "_" + args.mode  
                 
-            csv_file = open(csv_file_name + ".csv", 'w') #TODO bessren standaradnamen
+            csv_file = open(csv_file_name + ".csv", 'w') 
             start_sequence = start_sequences[i]
 
             # create an initial design object
@@ -181,7 +178,6 @@ def plot_sequence_objective(args):
 
     else:
             print('# Construction time out reached!')
-
 
     
 def read_startsequences(filename):
