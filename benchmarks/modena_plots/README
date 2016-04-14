@@ -1,0 +1,5 @@
+for f in modena/tab2*.out; do file=`basename $f .out | sed 's/tab2.//g'`; cat $f | perl -ne 'print if m/^[AUGC]+$/' | python ~/modena_values.py -f ~/Software/RNAdesign-toolbox/benchmarks/inputData/RNAtabupath/$file > tab2/$file.out; done
+
+for f in modena/3str*.out; do file=`basename $f .out | sed 's/3str.//g'`; cat $f | perl -ne 'print if m/^[AUGC]+$/' | python ~/modena_values.py -f ~/Software/RNAdesign-toolbox/benchmarks/inputData/RNAdesign/3str/$file > 3str/$file.out; done
+
+for f in modena/4str*.out; do file=`basename $f .out | sed 's/4str.//g'`; cat $f | perl -ne 'print if m/^[AUGC]+$/' | python ~/modena_values.py -f ~/Software/RNAdesign-toolbox/benchmarks/inputData/RNAdesign/3str/$file > 4str/$file.out; done
