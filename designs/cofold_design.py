@@ -49,7 +49,6 @@ def main():
         structures = [
             '........................................((((((((((((((((((((((((((&...((((((((((.....)))))))))).)))))))))))))))))))))))))).........(((((((((((((((......))))))))))))))).....',
             '..................................................................&...((((((((((.....))))))))))....................................(((((((((((((((......))))))))))))))).....']
-            #'......((((((((((((((......))))))))))))))..........................&...((((((((((.....))))))))))....................................(((((((((((((((......))))))))))))))).....']
         fold_constraints = [
             '........................................((((((((((((((((((((((((((&.............................))))))))))))))))))))))))))..................................................',
             '..............................................xxxxxxxxxxxxxxxxxxxx&............................xxxxxxxxxxxxxxxxxxxxxxxxxxxx.................................................']
@@ -248,8 +247,20 @@ def cofold_objective(design, weight1=1, weight2=1, weight3=1):
     (con_str,con_energy)=getSaveConFold(extendedSeq, extendedCon,'pf_fold')
     PdesignDominates = Z_from_G(con_energy-ext_pf_energy)
 
-    #print("1.0 - " + str(Csab) + "/" + str(Ca0) + "+" + str(weight1) + " * (1-" + str(PmRNAunpaired) + ") + " + str(weight2) + " * (1-" + str(PsRNAunpaired) + ") + " + str(weight3) + " * (1-" + str(PdesignDominates) + ")")
-    return 1.0 - Csab / Ca0 + weight1 * (1-PmRNAunpaired) + weight2 * (1-PsRNAunpaired) + weight3 * (1-PdesignDominates)
+    # calculate the probability that the 5'UTR structure and the
+    # context structure folded individually dominate the structure
+    # ensemble of the concatenated sequence
+    (con_mRNA_pf_structure, con_mRNA_pf_energy) = getSaveConFold(seqs[0],constr[0],'pf_fold')
+    (context_pf_structure, context_mRNA_pf_energy) = getSaveConFold(design.context,'','pf_fold')
+    extendedSeq = (seqs[0] + design.context)
+    (ext_pf_structure,ext_pf_energy) = getSaveConFold(extendedSeq,'','pf_fold')
+    Pindividual = Z_from_G(con_mRNA_pf_energy+context_mRNA_pf_energy - ext_pf_energy)
+    
+
+    print("1.0 - " + str(Csab) + "/" + str(Ca0) + "+" + str(weight1) + " * (1-" + str(PmRNAunpaired) + ") + " + str(weight2) + " * (1-" + str(PsRNAunpaired) + ") + " + str(weight3) + " * (1-" + str(Pindividual) + ")")
+    print(str(1.0 - (Csab/Ca0)) + "+" + str(1-PmRNAunpaired) + " + " + str(1-PsRNAunpaired) + " + " + str(1-Pindividual))
+    print(str(1.0 - Csab / Ca0 + weight1 * (1-PmRNAunpaired) + weight2 * (1-PsRNAunpaired) + weight3 * (1-Pindividual)))
+    return 1.0 - Csab / Ca0 + weight1 * (1-PmRNAunpaired) + weight2 * (1-PsRNAunpaired) + weight3 * (1-Pindividual)
 
 def getSaveConFold(sequence, constraint='', mode='fold'):
     # set RNA variables
