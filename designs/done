@@ -9,8 +9,11 @@ echo  AAGUGAUACCAGCAUCGUCUUGAUGCCCUUGGCAGCACUUCACCCCACGUGGGGUGUUGCCUUUUUUUU | RN
 echo AAGUGAUACCAGCAUCGUCUUGAUGCCCUUGGCAGCACUUCACUAGCAACAGCUAGUGAAGUGCUGCUAAGGGUGUUUUUUUUUU | RNAsubopt -e 50  --noLP| python -u correct_subopt.py > riboswitch_03_2.89.sub
 echo AAGUGAUACCAGCAUCGUCUUGAUGCCCUUGGCAGCACUUCACAGCACUGGGGUGCUGUUGGGGGUGUUUUUUUU | RNAsubopt -e 35  --noLP| python -u correct_subopt.py > riboswitch_04_2.52.sub
 
+### sort
+for I in *.sub; do sort -T sort_tmp/ -k2n < $I > $I.sorted; done
 ### do barrier
-for I in *.sub; do ~/bin/PROGS/Barriers-1.5.2/barriers -G RNA-noLP --bsize --rates < $I > $I.bar; done
+
+for I in *.sorted; do ~/bin/PROGS/Barriers-1.5.2/barriers -G RNA-noLP --bsize --rates < $I > $I.bar; done
 
 ~/bin/PROGS/Treekin-0.3.1/treekin -m I --p0 1=1 < $I.bar | xmgrace -log x -nxy -
 
@@ -19,12 +22,25 @@ for I in *.sub; do ~/bin/PROGS/Barriers-1.5.2/barriers -G RNA-noLP --bsize --rat
 
 python -u sven_cofold_design.py -p > cofold.out
 
-# promising results with objective: 1.0 - Csab / Ca0 + weight1 * (1-PmRNAunpaired) + weight2 * (1-PsRNAunpaired) + weight3 * (1-PdesignDominates)
-#GGGCCUGUCGGCUUGGCGACAGCCAAGUCGUUAGGCUGACAGGAACAAAUAAGGAGCAAGAAUAU&GGGGCGUGAUGGCGCUCCACGUUAUCGUGAUAUGUUCUUGUUCCUUAUUUGUUCCUGUUUAGCAUAACCCCUUGGGGCCUCUAAACGGGUCUUGAGGGGUUUUUUG	  1.78
-#GGGCGGCUUUCUAUAUGAAUAGCCCGAUUUAUGUAGAGAGUGGUGAGAGUAAGGAGUGAAGGUAUG&GGGAGGGAGCGGGAUCCGCUUGUUCCCUACAUACCUUCACUCUUUACUCUCAUCACUCUAGCAUAACCCCUUGGGGCCUCUAAACGGGUCUUGAGGGGUUUUUUG	  1.08
 
-# without 5' stem
-GGGACGUUAAGUAGACCAGGCGACACACUAAGUGCUUACCGUUUCAGUUCAAGGAGUGUAUUAAUG&GGGGCCUUGCUAGGAAUACUGGUAGGGCAUAUUGAUACACUCCUUGAACUGAAACUAAUAGCAUAACCCCUUGGGGCCUCUAAACGGGUCUUGAGGGGUUUUUUG	  1.77
+# drawing done
+GGGUCCCUUGUUGAGUUUGCGAACAAGUGGACUCAGCGAGUGGAGUGAAUAAGGAGUGAAAGUAUGCGTAAGGGCGAAGAGCTTTTTACCGGTGTTGTGCCTATTCTCGTAGAGTTAGATGGCGACGTTAAT&GGGGGACAGUGGUUAGCCGCUGUUGUCCACAUACUUUCACUCUUUAUUCAUUCCACUCUAGCAUAACCCCUUGGGGCCUCUAAACGGGUCUUGAGGGGUUUUUUG	  1.05
+........................................((((((((((((((((((((((((((                                                                  &...((((((((((.....)))))))))).)))))))))))))))))))))))))).........(((((((((((((((......))))))))))))))).....
+
+                                     GAGUGGAGUGAAUAAGGAGUGAAAG                                                                      &                                 CUUUCACUCUUUAUUCAUUCCACUC
+                                     (((((((((((((((((((((((((                                                                      &                                 )))))))))))))))))))))))))  34,58  :  38,62  (-35.71 = -41.41 + 5.70)
+.....................................xxxxxxxxxxxxxxxxxxxxxxxxx......................................................................				     
+
+
+((((((((((((.........)))))).)))))).(((((((((((((((((((((((((((((((.((((((((.....)).))))))((.((((..((((((....)))).))..)))).))........&(((.((((((((....)))))))).))).)))))))))))))))))))))))))))))..))..(((((((((((((((......))))))))))))))).....
+
+((((((((((((.......,.)))))).)))))).(((((((((((((((((((((((((((((((.((((((((.....))))))))),|.{(((((,,(((({((...})))}.,),,,)))}),.....&(((.((((((((....)))))))).))).)))))))))))))))))))))))))))))..))..(((((((((((((((......))))))))))))))).....
+
+
+
 
 #fold parts and color them
 ~/bin/PROGS/ViennaRNA-2.2.4/src/Utils/relplot.pl -p rna.ps dot.ps > bunt.ps
+
+
+
