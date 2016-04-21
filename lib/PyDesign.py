@@ -367,14 +367,14 @@ if vrna_available:
             if self.multifold > 1:
                 raise NotImplementedError
             RNA.cvar.temperature = temperature
-            fc = RNA.fold_compound(self._change_cuts(sequence), None, RNA.VRNA_OPTION_MFE | RNA.VRNA_OPTION_EVAL_ONLY)
+            fc = RNA.fold_compound(self._change_cuts(sequence), None, RNA.OPTION_MFE | RNA.OPTION_EVAL_ONLY)
             if ligand:
                 fc.sc_add_hi_motif(ligand[0], ligand[1], ligand[2])
-            return fc.eos(self._remove_cuts(structure))
+            return fc.eval_structure(self._remove_cuts(structure))
     
         def _get_fold(self, sequence, temperature, ligand=None, constraint=None):
             RNA.cvar.temperature = temperature
-            fc = RNA.fold_compound(self._change_cuts(sequence), None, RNA.VRNA_OPTION_MFE)
+            fc = RNA.fold_compound(self._change_cuts(sequence), None, RNA.OPTION_MFE)
             if ligand:
                 fc.sc_add_hi_motif(ligand[0], ligand[1], ligand[2])
             if constraint:
@@ -390,7 +390,7 @@ if vrna_available:
     
         def _get_pf_fold(self, sequence, temperature, ligand=None, constraint=None):
             RNA.cvar.temperature = temperature
-            fc = RNA.fold_compound(self._change_cuts(sequence), None, RNA.VRNA_OPTION_PF)
+            fc = RNA.fold_compound(self._change_cuts(sequence), None, RNA.OPTION_PF)
             if ligand:
                 fc.sc_add_hi_motif(ligand[0], ligand[1], ligand[2])
             if constraint:

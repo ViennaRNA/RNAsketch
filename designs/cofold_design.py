@@ -10,7 +10,6 @@ import RNAdesign as rd
 import argparse
 import sys
 import time
-import copy
 
 def main():
     parser = argparse.ArgumentParser(description='Design a cofold device.')
