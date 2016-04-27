@@ -1,3 +1,20 @@
+----------------------------------
+create modena table
+----------------------------------
+mkdir raw
+mv *.out raw/
+mkdir tab2 3str 4str
+for i in tab2 3str 4str; do cp raw/$i*.out $i/; done
+rm -f *.tex *.log *.pdf *.aux
+for i in tab2 3str 4str; do echo -e "\\documentclass{article}\n\\usepackage{longtable}\n\\usepackage{lscape}\n\\\begin{document}\n\\\begin{landscape}\n" > $i.tex; Rscript ../../../result_modena.R -d $i -p $i. -s edif0.0.inp.out | sed 's/tabularnewline/\\/g' | sed 's/tabular/longtable/g' >> $i.tex; echo -e "\\\end{landscape}\n\\\end{document}" >> $i.tex; pdflatex $i.tex; done
+
+# pseudoknotted
+mkdir PK60 PK80 LE80
+for i in PK60 PK80 LE80; do cp raw/$i*.out $i/; done
+
+----------------------------------
+original modena evaluation
+----------------------------------
 for f in modena/tab2*.out; do file=`basename $f .out | sed 's/tab2.//g'`; cat $f | perl -ne 'print if m/^[AUGC]+$/' | python ~/modena_values.py -f ~/Software/RNAdesign-toolbox/benchmarks/inputData/RNAtabupath/$file > tab2/$file.out; done
 
 for f in modena/3str*.out; do file=`basename $f .out | sed 's/3str.//g'`; cat $f | perl -ne 'print if m/^[AUGC]+$/' | python ~/modena_values.py -f ~/Software/RNAdesign-toolbox/benchmarks/inputData/RNAdesign/3str/$file > 3str/$file.out; done
