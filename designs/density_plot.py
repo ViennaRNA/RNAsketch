@@ -35,7 +35,7 @@ def plot_sequence_objective(args):
             exit()
         path = os.path.join(args.directory, path)
 
-    filenames = {}
+    filenames = []
     if args.file is not None:
         if ";" in args.file:
             filenames = args.file.split(";")
@@ -44,7 +44,6 @@ def plot_sequence_objective(args):
     else:
         filenames = glob.glob(path)
 
-    where_is_seq_from = {}
     total = 0
     
     for filename in filenames:
