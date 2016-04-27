@@ -75,10 +75,9 @@ def plot_sequence_objective(args):
         
         number = args.number
         perc_LNOS = args.percentage_of_LNOS
-        # sample_number = int(sample_count_unique_solutions(int(lnos_sum), int(lnos_sum * perc_LNOS)))
         
         print('LNOS * percentage: ' + str(int(math.ceil(lnos_sum * perc_LNOS))))
-        # print('SampleUniqueCountSolutions: ' + str(sample_number))
+
         
         if number > lnos_sum * perc_LNOS:
             number = int(math.ceil(lnos_sum * perc_LNOS))
@@ -127,10 +126,11 @@ def plot_sequence_objective(args):
             else:
                 dg.set_sequence(design.sequence)
 
-            # print header for csv file
+            # print header for csv file                           
             csv_file.write(";".join(["objective 1",
                             "objective 2",
                             "score",
+                            "hamming distance",
                             "sequence \n"]))
 
             # calculate objectives for initial sequence
@@ -143,13 +143,15 @@ def plot_sequence_objective(args):
             # store entries -> just unique entries
             samples = set()
             samples.add(design.sequence)
-
+            
+            initial_seq = design.sequence
             csv_file.write(";".join([str(x_center),
                     str(y_center),
                     str(score),
+                    str(RNA.hamming_distance(initial_seq, initial_seq)),
                     design.sequence]) + "\n")
-
-            for i in range(1, number):
+                    
+            for i in range(1, number): 
 
                 while design.sequence in samples:
                     (mut_nos, sample_count) = PyDesign.sample_sequence(dg, design, args.mode, args.sample_steps)
@@ -170,6 +172,7 @@ def plot_sequence_objective(args):
                 csv_file.write(";".join([str(x_new),
                     str(y_new),
                     str(score),
+                    str(RNA.hamming_distance(initial_seq, design.sequence)),
                     design.sequence]) + "\n")
 
                 samples.add(design.sequence)
@@ -178,18 +181,6 @@ def plot_sequence_objective(args):
 
     else:
             print('# Construction time out reached!')
-
-    
-def read_startsequences(filename):
-    start_sequences = []
-    with open(args.start_seq) as f:
-        data = f.read()
-        start_seq = data.split("\n")  
-        for seq in start_seq:
-            if seq != '':
-                start_sequences.append(seq.rstrip('\n'))
-   #print(start_sequences)
-    return start_sequences
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Plot...')
