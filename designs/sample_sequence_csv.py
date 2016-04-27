@@ -151,13 +151,25 @@ def plot_sequence_objective(args):
                     str(RNA.hamming_distance(initial_seq, initial_seq)),
                     design.sequence]) + "\n")
                     
-            for i in range(1, number): 
+            for i in range(0, number): 
 
+                if args.exit is not None:
+                    no_tries = 0
+                    
                 while design.sequence in samples:
                     (mut_nos, sample_count) = PyDesign.sample_sequence(dg, design, args.mode, args.sample_steps)
+                    
+                    if args.exit is not None:
+                        no_tries += 1
 
+                        if no_tries == args.exit:
+                            break
+                           
                     dg.revert_sequence(sample_count)
 
+                if args.exit is not None and no_tries == args.exit:
+                    break
+                    
                 x_new = calculate_objective_1(design)
                 y_new = calculate_objective_2(design)
 
@@ -183,14 +195,15 @@ def plot_sequence_objective(args):
             print('# Construction time out reached!')
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='Plot...')
+    parser = argparse.ArgumentParser(description='Uses PyDesign.sample_sequence to explore sequence space and writes obj1,obj2,score and hamming distance (relative to first sequence) in *.csv')
     parser.add_argument("-f", "--file", type = str, default=None, help='Read file in *.inp format')
     parser.add_argument("-i", "--input", default=False, action='store_true', help='Read custom structures and sequence constraints from stdin')
     parser.add_argument("-y", "--start_seq", type = str, default=None, help='Read start_seq')
     parser.add_argument("-m", "--mode", type=str, default='sample_global', help='Mode for getting a new sequence: sample, sample_local, sample_global, sample_strelem')
     parser.add_argument("-s", "--sample_steps", type=int, default=1, help='Count how many times to do the sample operation')
-    parser.add_argument("-n", "--number", type=int, default=1000, help='Define LNOS')
-    parser.add_argument("-x", "--percentage_of_LNOS", type=float, default=0.85, help='Define percentage of LNOS')
+    parser.add_argument("-n", "--number", type=int, default=1000, help='Define number of neighbors')
+    parser.add_argument("-e", "--exit", type=int, default=None, help='Exit value')
+    parser.add_argument("-l", "--percentage_of_LNOS", type=float, default=0.85, help='Define percentage of LNOS')
     parser.add_argument("-w", "--weight", type=float, default=0.5, help='Define weighting-factor')
     parser.add_argument("-q", "--nupack", default=False, action='store_true', help='Use Nupack instead of the ViennaRNA package (for pseudoknots)')
     parser.add_argument("-o", "--out_file", type=str, default= datetime.datetime.now().isoformat(), help='Name file')
