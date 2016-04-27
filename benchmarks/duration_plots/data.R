@@ -62,15 +62,15 @@ cdata <- ddply(all_infiles, c("num_mutations", "mode", "number_of_structures"), 
 
 max_score <- max(cdata$mean_score)
 min_score <- min(cdata$mean_score)
-cdata$rel_score <- with(cdata, (mean_score - min_score) / (max_score-min_score))
+cdata$rel_score <- with(cdata, (mean_score) / (max_score))
 
 head(cdata)
 
 svg(paste(opt$directory, ".score.svg", sep=""), width=5, height=3)
 qplot(num_mutations, rel_score, colour = mode, shape=mode, data = cdata) +
-scale_x_log10() +
-coord_trans(x="log10") +
-#scale_x_continuous() +
+scale_x_log10(limits = c(90, 600000), breaks = c(100, 1000, 10000, 100000)) +
+#coord_trans(x="log10") +
+scale_y_continuous(limits = c(0, 0.6)) +
 geom_line() +
 ylab("relative mean Score") +
 xlab("Number of Sampled Sequences") +
@@ -79,9 +79,9 @@ dev.off()
 
 svg(paste(opt$directory, ".diff.svg", sep=""), width=5, height=3)
 qplot(num_mutations, mean_diff, colour = mode, shape=mode, data = cdata) +
-scale_x_log10() +
-coord_trans(x="log10") +
-#scale_x_continuous() +
+scale_x_log10(limits = c(90, 600000), breaks = c(100, 1000, 10000, 100000)) +
+#coord_trans(x="log10") +
+#scale_y_continuous(limits = c(0, 1)) +
 geom_line() +
 ylab("mean Diff EOS MFE") +
 xlab("Number of Sampled Sequences") +
@@ -90,9 +90,9 @@ dev.off()
 
 svg(paste(opt$directory, ".prob.svg", sep=""), width=5, height=3)
 qplot(num_mutations, mean_prob, colour = mode, shape=mode, data = cdata) +
-scale_x_log10() +
-coord_trans(x="log10") +
-#scale_x_continuous() +
+scale_x_log10(limits = c(90, 600000), breaks = c(100, 1000, 10000, 100000)) +
+#coord_trans(x="log10") +
+scale_y_continuous(limits = c(0, 1)) +
 geom_line() +
 ylab("mean Probability in Ensemble") +
 xlab("Number of Sampled Sequences") +
