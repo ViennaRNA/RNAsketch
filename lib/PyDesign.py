@@ -618,14 +618,9 @@ def sample_sequence(dg, design, mode, sample_steps=1, avoid_motifs=None, white_p
                 struct = design._remove_cuts(random.choice(design.structures))
                 bg = fgb.BulgeGraph(dotbracket_str=struct)
                 for s in bg.random_subgraph(sample_steps):
-                    try:
-                        mut_nos *= dg.sample(bg.defines[s][0]-1, bg.defines[s][1]-1)
+                    for i in range(0, len(bg.defines[s]), 2):
+                        mut_nos *= dg.sample(bg.defines[s][i]-1, bg.defines[s][i+1]-1)
                         sample_count += 1
-                        if s[0] == 'i':
-                            mut_nos *= dg.sample(bg.defines[s][2]-1, bg.defines[s][3]-1)
-                            sample_count += 1
-                    except IndexError:
-                        pass
             else:
                 raise ImportError("Forgi Library not available!")
         else:
