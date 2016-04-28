@@ -378,7 +378,7 @@ if vrna_available:
             if ligand:
                 fc.sc_add_hi_motif(ligand[0], ligand[1], ligand[2])
             if constraint:
-                fc.hc_add_db(self._remove_cuts(constraint))
+                fc.hc_add_from_db(self._remove_cuts(constraint))
             if self.multifold == 0:
                 (structure, energie) = fc.mfe()
             if self.multifold == 1:
@@ -394,7 +394,7 @@ if vrna_available:
             if ligand:
                 fc.sc_add_hi_motif(ligand[0], ligand[1], ligand[2])
             if constraint:
-                fc.hc_add_db(self._remove_cuts(constraint))
+                fc.hc_add_from_db(self._remove_cuts(constraint))
             if self.multifold == 0:
                 (structure, energie) = fc.pf()
             if self.multifold == 1:
