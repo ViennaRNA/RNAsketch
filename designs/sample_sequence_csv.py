@@ -78,15 +78,14 @@ def plot_sequence_objective(args):
         
         print('LNOS * percentage: ' + str(int(math.ceil(lnos_sum * perc_LNOS))))
 
-        
+        print('number: ' + str(number))
         if number > lnos_sum * perc_LNOS:
-            number = int(math.ceil(lnos_sum * perc_LNOS))
+            print('Number > 0.85 * LNOS!')
+            #number = int(math.ceil(lnos_sum * perc_LNOS))
             
         if number == -1:
             number = int(math.ceil(lnos_sum * perc_LNOS))
-            
-        print('number: ' + str(number))
-            
+                
         # remember general DG values
         graph_properties = get_graph_properties(dg)
 
@@ -158,15 +157,14 @@ def plot_sequence_objective(args):
                     
                 while design.sequence in samples:
                     (mut_nos, sample_count) = PyDesign.sample_sequence(dg, design, args.mode, args.sample_steps)
+                    dg.revert_sequence(sample_count)
                     
                     if args.exit is not None:
                         no_tries += 1
 
                         if no_tries == args.exit:
                             break
-                           
-                    dg.revert_sequence(sample_count)
-
+                
                 if args.exit is not None and no_tries == args.exit:
                     break
                     

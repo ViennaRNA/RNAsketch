@@ -23,6 +23,7 @@ import os
 import pylab as pl
 from decimal import Decimal
 import math
+from mpl_toolkits.axes_grid.anchored_artists import AnchoredText
 
 def plot_sequence_objective(args):
 
@@ -45,6 +46,7 @@ def plot_sequence_objective(args):
         filenames = glob.glob(path)
 
     total = 0
+    start_seq = 0
     
     for filename in filenames:
         with open(filename) as sampled_seq:
@@ -57,15 +59,14 @@ def plot_sequence_objective(args):
             y_center = float(initial_sequence[1])
 
 
-            x_origin = 0 # = x_center-x_center
-            y_origin = 0
+            #x_origin = 0 # = x_center-x_center
+            #y_origin = 0
+            start_seq += 1
             total += 1
  
-            x_obj.append(x_origin)
-            y_obj.append(y_origin)
+            #x_obj.append(x_origin)
+            #y_obj.append(y_origin)
 
-            #quad3_perc = 0 # NAME
-            #which_seq = []
             for line in reader:
             
                 x_new = float(line[0])
@@ -100,7 +101,6 @@ def plot_sequence_objective(args):
     Hmasked = np.ma.masked_where(H==0,H) # Mask pixels with a value of zero
 
     # Plot 2D histogram
-    plt.figure()
     fig = plt.figure()
     
     # grid options
@@ -114,13 +114,25 @@ def plot_sequence_objective(args):
         ax_lim = args.axis_limit
         plt.xlim([-ax_lim, ax_lim])
         plt.ylim([-ax_lim, ax_lim])
+        
+    # additional axes    
+    ax1=fig.add_subplot(1,1,1)
+    #ax1.tick_params(labeltop=True, labelright=True)
+    
+    ax1.get_yaxis().set_tick_params(which='both', direction='out')
+    ax1.get_xaxis().set_tick_params(which='both', direction='out')
+    minor_ticks = np.arange(-30,30,5)
+    ax1.set_xticks(minor_ticks, minor = True)
+    ax1.set_yticks(minor_ticks, minor = True)
       
     # additional weighting lines 
     if args.more_lines is True:
         #for i in pl.frange(-40, 40, 2):
-        for i in pl.frange(-60, 60, 2):
-            plt.plot([-ax_lim, ax_lim], [ax_lim * args.weight - i, -ax_lim * args.weight - i], '0.8')
-        #plt.plot([-ax_lim, ax_lim], [ax_lim * args.weight - 10, -ax_lim * args.weight - 10], '0.8')
+        for i in pl.frange(-90, 90, 2):
+            if i%5 == 0:
+                plt.plot([-ax_lim, ax_lim], [ax_lim * args.weight - i, -ax_lim * args.weight - i], '0.7')
+            else:
+                plt.plot([-ax_lim, ax_lim], [ax_lim * args.weight - i, -ax_lim * args.weight - i], '0.9')
         
     # plot "zero line"   
     plt.plot([-ax_lim, ax_lim], [ax_lim * args.weight, -ax_lim * args.weight], 'm')   
@@ -161,10 +173,6 @@ def plot_sequence_objective(args):
             
     for i in range(0, len(x_obj)):
         no_add = True
-        '''if args.more_lines is True:  
-            step_size = 1    
-            limit = 6 -1 #x-achse   
-            counts = [0]* (limit+1)'''
         
         # Quadrant 1
         if x_obj[i] >= 0 and y_obj[i] >= 0:
@@ -211,43 +219,48 @@ def plot_sequence_objective(args):
    
 
     sum_weighted = weighted1 + weighted2 + quad3
-        
-    plt.text(ax_lim - 4, ax_lim + 2, quad1, style='italic',
-    bbox={'facecolor':'white', 'alpha':0.5, 'pad':10})
-
-    plt.text(-(ax_lim - 2), ax_lim + 2, quad2, style='italic',
-    bbox={'facecolor':'white', 'alpha':0.5, 'pad':10})
-
-    plt.text(-(ax_lim - 2), -(ax_lim - 2), quad3, style='italic',
-    bbox={'facecolor':'white', 'alpha':0.5, 'pad':10})
-
-    plt.text(ax_lim - 4, -(ax_lim - 2), quad4, style='italic',
-    bbox={'facecolor':'white', 'alpha':0.5, 'pad':10})
     
-    plt.text(-(ax_lim - 2), ax_lim * args.weight + 0.65, sum_weighted, style='normal', # "hauptgewichtslinie"
-    bbox={'facecolor':'red', 'alpha':0.5, 'pad':10})
     
-    for i in pl.frange(0,7,1):
-        plt.text(-10 - i, ax_lim - 2.5, i, style='italic', color='0.4', fontsize=12) # beschriftung "score lines"
+    quad1_f = format(quad1, "6,d").replace(",", ".")    
+    quad2_f= format(quad2, "6,d").replace(",", ".")
+    quad3_f = format(quad3, "6,d").replace(",", ".")
+    quad4_f = format(quad4, "6,d").replace(",", ".")
+       
+    sum_weighted_f = format(sum_weighted, "6,d").replace(",", ".")
+
+    plt.text(-(ax_lim - 2), ax_lim - 9, sum_weighted_f, style='italic',
+    bbox={'facecolor':'white', 'edgecolor':'darkmagenta', 'pad':10})
     
-    for i in range(-20,20,5):   
-        plt.text(i, -0.4, '|', style='normal', color='0.4')
-  
+    q1 = AnchoredText(quad1_f, prop={'size':14}, frameon=True,loc=1)
+    q2 = AnchoredText(quad2_f, prop={'size':14}, frameon=True,loc=2)
+    q3 = AnchoredText(quad3_f, prop={'size':14}, frameon=True,loc=3)
+    q4 = AnchoredText(quad4_f, prop={'size':14}, frameon=True,loc=4)
+    ax1.add_artist(q1)
+    ax1.add_artist(q2)
+    ax1.add_artist(q3)
+    ax1.add_artist(q4)
+      
     plt.pcolormesh(xedges,yedges,Hmasked, vmax = 3000) # color legend
-    plt.xlabel('objective 1')
-    plt.ylabel('objective 2')
+    #plt.xlabel('objective 1')
+    #plt.ylabel('objective 2')
     plt.axhline(color='k')
     plt.axvline(color='k')
+    
+    neighbors = total - start_seq 
+    neighbors_f = format(neighbors, "6,d").replace(",", ".")
+    plt.title('Number of neighbors: %s' % neighbors_f)
+    
     cbar = plt.colorbar()
     cbar.ax.set_ylabel('Counts')
-    plt.savefig(args.out_file + '.png')
+    plt.savefig(args.out_file + '.svg')
     plt.close()
     
-    print('# Output file: %s'% args.out_file + '.png')
+    print('# Output file: %s'% args.out_file + '.svg')
     print('# Quadrant 1: %s'% quad1)
     print('# Quadrant 2: %s'% quad2)
     print('# Quadrant 3: %s'% quad3)
     print('# Quadrant 4: %s'% quad4)
+    
     print('# Quadrant 3++: %s'% sum_weighted)
 
     if args.more_lines is True:
@@ -259,8 +272,7 @@ def plot_sequence_objective(args):
     total_datapoints = quad1+quad2+quad3+quad4
     print('Total data points in plot: %s' % total_datapoints)
     print('Number of sequences: %s' % total)
-    if total_datapoints != total:
-        print('Number of points in plot and number of sequences are not equal.')
+    print('# Number of neighbors: %s'% neighbors)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Plot...')
@@ -269,6 +281,7 @@ if __name__ == "__main__":
     parser.add_argument("-p", "--progress", default=False, action='store_true', help='Show progress of optimization')
     parser.add_argument("-a", "--axis_limit", type=int, default=None, help='Axis limit')
     parser.add_argument("-g", "--grid_size", type=int, default=None, help='Grid size')
+    #parser.add_argument("-n", "--neighbors", type=str, default= None, help='Number of neighbors')
     parser.add_argument("-c", "--circle_grid", type=float, default=None, help='Circle grid size')
     parser.add_argument("-m", "--more_lines", default=False, action='store_true', help='Additional weighting lines')
     parser.add_argument("-f", "--file", type = str, default=None, help='Read file in *.csv format. Separate multiple filenames with ";". If not set reads all *.csv in current directory')

@@ -32,8 +32,8 @@ def plot_hamming(args):
     else:
         filenames = glob.glob(path)
     
+    distances = []
     for filename in filenames:
-        distances = []
         with open(filename) as sampled_seq:
             reader = csv.reader(sampled_seq, delimiter=";")
             header = reader.next()
@@ -45,8 +45,7 @@ def plot_hamming(args):
                 distances.append(int(line[3]))
                 
         print(distances)
-        bins = np.arange(0, max(distances), 1)
-        plt.hist(distances, bins=bins)
+        plt.hist(distances, bins = np.arange(-0.5, max(distances)+1.5,1), color = '#006ddb')
         plt.title("Hamming Distance to Neighbors")
         plt.xlabel("hamming distance")
         plt.ylabel("frequency")
