@@ -46,11 +46,11 @@ def main():
         (structures, constraint, start_sequence) = read_inp_file(args.file)
     else:
         structures = [
-            '........................................((((((((((((((((((((((((((&...((((((((((.....)))))))))).)))))))))))))))))))))))))).........(((((((((((((((......))))))))))))))).....',
-            '..................................................................&...((((((((((.....))))))))))....................................(((((((((((((((......))))))))))))))).....']
+            '........................................((((((((((((((((((((((((((&.............................)))))))))))))))))))))))))).........(((((((((((((((......))))))))))))))).....',
+            '..................................................................&................................................................(((((((((((((((......))))))))))))))).....']
         fold_constraints = [
             '........................................((((((((((((((((((((((((((&.............................))))))))))))))))))))))))))..................................................',
-            '..............................................xxxxxxxxxxxxxxxxxxxx&............................xxxxxxxxxxxxxxxxxxxxxxxxxxxx.................................................']
+            '.......................................xxxxxxxxxxxxxxxxxxxxxxxxxxx&............................xxxxxxxxxxxxxxxxxxxxxxxxxxxx<<<<<<<<.........................................']
         constraint = \
             'GGGNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNAAGGAGNNNNNNNAUG&GGGNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNUAGCAUAACCCCUUGGGGCCUCUAAACGGGUCUUGAGGGGUUUUUUG'
         context = \
@@ -257,7 +257,7 @@ def cofold_objective(design, weight1=1, weight2=1, weight3=1):
     
 
     print("1.0 - " + str(Csab) + "/" + str(Ca0) + "+" + str(weight1) + " * (1-" + str(PmRNAunpaired) + ") + " + str(weight2) + " * (1-" + str(PsRNAunpaired) + ") + " + str(weight3) + " * (1-" + str(Pindividual) + ")")
-    print(str(1.0 - (Csab/Ca0)) + "+" + str(1-PmRNAunpaired) + " + " + str(1-PsRNAunpaired) + " + " + str(1-Pindividual))
+    print(str(1.0 - (Csab/Ca0)) + " + " + str(1-PmRNAunpaired) + " + " + str(1-PsRNAunpaired) + " + " + str(1-Pindividual))
     print(str(1.0 - Csab / Ca0 + weight1 * (1-PmRNAunpaired) + weight2 * (1-PsRNAunpaired) + weight3 * (1-Pindividual)))
     return 1.0 - Csab / Ca0 + weight1 * (1-PmRNAunpaired) + weight2 * (1-PsRNAunpaired) + weight3 * (1-Pindividual)
 

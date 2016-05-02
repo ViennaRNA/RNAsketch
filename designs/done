@@ -20,27 +20,8 @@ for I in *.sorted; do ~/bin/PROGS/Barriers-1.5.2/barriers -G RNA-noLP --bsize --
 
 #### COFOLD DESIGN
 
-python -u sven_cofold_design.py -p > cofold.out
+python -u sven_cofold_design.py -p > srna-5prime-cofold.out
 
 
 # drawing done
-GGGUCCCUUGUUGAGUUUGCGAACAAGUGGACUCAGCGAGUGGAGUGAAUAAGGAGUGAAAGUAUGCGTAAGGGCGAAGAGCTTTTTACCGGTGTTGTGCCTATTCTCGTAGAGTTAGATGGCGACGTTAAT&GGGGGACAGUGGUUAGCCGCUGUUGUCCACAUACUUUCACUCUUUAUUCAUUCCACUCUAGCAUAACCCCUUGGGGCCUCUAAACGGGUCUUGAGGGGUUUUUUG	  1.05
-........................................((((((((((((((((((((((((((                                                                  &...((((((((((.....)))))))))).)))))))))))))))))))))))))).........(((((((((((((((......))))))))))))))).....
-
-                                     GAGUGGAGUGAAUAAGGAGUGAAAG                                                                      &                                 CUUUCACUCUUUAUUCAUUCCACUC
-                                     (((((((((((((((((((((((((                                                                      &                                 )))))))))))))))))))))))))  34,58  :  38,62  (-35.71 = -41.41 + 5.70)
-.....................................xxxxxxxxxxxxxxxxxxxxxxxxx......................................................................				     
-
-
-((((((((((((.........)))))).)))))).(((((((((((((((((((((((((((((((.((((((((.....)).))))))((.((((..((((((....)))).))..)))).))........&(((.((((((((....)))))))).))).)))))))))))))))))))))))))))))..))..(((((((((((((((......))))))))))))))).....
-
-((((((((((((.......,.)))))).)))))).(((((((((((((((((((((((((((((((.((((((((.....))))))))),|.{(((((,,(((({((...})))}.,),,,)))}),.....&(((.((((((((....)))))))).))).)))))))))))))))))))))))))))))..))..(((((((((((((((......))))))))))))))).....
-
-
-
-
-#fold parts and color them
-~/bin/PROGS/ViennaRNA-2.2.4/src/Utils/relplot.pl -p rna.ps dot.ps > bunt.ps
-
-
-
+GGGAAGCACCAGUCGGUUUAUCACAAGCCGCUGGUGCUUAGAGUAAAGAUAAGGAGUAAUGAAAUG&GGGUCCUAGCGUCAUUCACGCGGACCCUUCAUUUCAUUACUCCUUAUCUUUAUUCACCUAGCAUAACCCCUUGGGGCCUCUAAACGGGUCUUGAGGGGUUUUUUG	  1.08
