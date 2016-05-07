@@ -56,6 +56,8 @@ def box_plot(args):
 
             # get information of intial sequence
             initial_sequence = reader.next()
+            #print(sampled_seq)
+            #print(initial_sequence)
             score_center = float(initial_sequence['score'])
             hamming_center = int(initial_sequence['hamming distance'])
             total += 1
@@ -92,7 +94,7 @@ def box_plot(args):
     #plt.xlabel("hamming distance")
     plt.xlim([-0.5, max(distances)+0.5])
     plt.locator_params(axis='y', nbins=4)
-    plt.locator_params(axis='x', nbins=32)
+    plt.locator_params(axis='x', nbins=max(distances)+2)
     
     plt.savefig(args.out_file + '.svg')
     plt.close()
