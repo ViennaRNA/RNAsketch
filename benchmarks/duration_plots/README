@@ -1,6 +1,6 @@
 
 for i in g l r s z; do for j in 3 4 5; do echo $i$j; cat ${i}${j}str*.out > ../${i}${j}str.out; done; done
 cd ..
-mdir 3 4 5
-for f in *.out; do echo $f; sed -ne '/^mode/p' $f | head -n 1 > tmp; sed '/^mode/d' $f >> tmp; mv tmp $f; done
-for j in 3 4 5; do mv *${j}*.out ${j}/; Rscript ../../plot.R -d ${j}; done
+mkdir 3 4 5
+for f in *.out; do echo $f; sed -ne '/^mode/p' $f | head -n 1 > tmp; sed '/^mode/d' $f >> tmp; \mv tmp $f; done
+for j in 3 4 5; do \mv *${j}*.out ${j}/; Rscript ../../data.R -d ${j}; done
