@@ -139,6 +139,7 @@ means_best_designs$sum_prob <- mean_all_probs
 insert_point <- 3
 for (i in 1:num_of_structs) {
     means_best_designs[insert_point] <- mean(all_infiles[,insert_point])
+    print(mean(all_infiles[,insert_point]))
     insert_point <- insert_point + 1
 }
 
@@ -177,7 +178,10 @@ colnames(all_infiles) <- new_names
 
 # format numbers for latex table 
 format_numbers <- c(rep(2, last_element-1))
-format_numbers[c(1: (2 + num_of_structs))] <- 0
+
+# keine Nachkommastellen
+#format_numbers[c(1: (2 + num_of_structs))] <- 0
+format_numbers[c(1:2)] <- 0
 
 # generate latex table
 latex.default(all_infiles, cdec=format_numbers, rowname=NULL, n.rgroup=c(NROW(all_infiles) - 2, 2), na.blank=TRUE, booktabs=FALSE, table.env=FALSE, center="none", file="", title="") 
