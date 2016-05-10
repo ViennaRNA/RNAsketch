@@ -139,7 +139,7 @@ means_best_designs$sum_prob <- mean_all_probs
 insert_point <- 3
 for (i in 1:num_of_structs) {
     means_best_designs[insert_point] <- mean(all_infiles[,insert_point])
-    print(mean(all_infiles[,insert_point]))
+    #print(mean(all_infiles[,insert_point]))
     insert_point <- insert_point + 1
 }
 
