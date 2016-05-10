@@ -595,7 +595,7 @@ def sample_sequence(dg, design, mode, sample_steps=1, avoid_motifs=None, white_p
         # sample a new sequence
         # if random choice is requested pick something new
         if mode == "random":
-            modes = ['sample','sample_global','sample_local', 'sample_strelem']
+            modes = ['sample','sample_global','sample_local']
             mode = random.choice(modes)
         if sample_steps == 0:
             sample_steps = random.randrange(1, dg.number_of_connected_components())
