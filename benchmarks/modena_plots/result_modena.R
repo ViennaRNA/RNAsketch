@@ -135,6 +135,14 @@ means_best_designs$d1 <- mean_all_d1
 means_best_designs$d2 <- mean_all_d2
 means_best_designs$sum_prob <- mean_all_probs
 
+# calculate mean  of columns of ns
+insert_point <- 3
+for (i in 1:num_of_structs) {
+    means_best_designs[insert_point] <- mean(all_infiles[,insert_point])
+    insert_point <- insert_point + 1
+}
+
+
 # generate row for median of d1 and d2 and probs for latex table
 medians_best_designs <- c(rep(NA,last_element-1))
 medians_best_designs <- t(medians_best_designs)
@@ -144,6 +152,13 @@ medians_best_designs$RNA <- "$\\tilde x$"
 medians_best_designs$d1 <- median_all_d1
 medians_best_designs$d2 <- median_all_d2
 medians_best_designs$sum_prob <- median_all_probs
+
+# calculate median of columns of ns
+insert_point <- 3
+for (i in 1:num_of_structs) {
+    medians_best_designs[insert_point] <- median(all_infiles[,insert_point])
+    insert_point <- insert_point + 1
+}
 
 # add mean and median d1/d2 to existing data.frame
 all_infiles <- rbind(all_infiles, means_best_designs)
