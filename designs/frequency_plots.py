@@ -86,15 +86,25 @@ def box_plot(args):
             
     #ff8000
     ax2 = plt.subplot(1,1,1)
-    plt.hist(distances, bins = np.arange(-0.5, max(distances)+1.5,1), color = '#006ddb')
+    #plt.hist(distances, bins = np.arange(-0.5, max(distances)+1.5,1), color = '#006ddb')
+    plt.hist(distances, bins = np.arange(-0.5, 36+1.5,1), color = '#006ddb')
     ax2.get_xaxis().set_tick_params(top='off', direction='out')
+    #ax2.get_xticklabels()[1::2] # no effect
     ax2.get_yaxis().set_tick_params(which='both', direction='out')
     ax2.ticklabel_format(style='sci', axis='y', scilimits=(0,0))
     plt.ylabel("frequency")
     #plt.xlabel("hamming distance")
-    plt.xlim([-0.5, max(distances)+0.5])
+    #plt.xlim([-0.5, max(distances)+0.5])
+    plt.xlim([-0.5, 36 + 0.5]) 
     plt.locator_params(axis='y', nbins=4)
-    plt.locator_params(axis='x', nbins=max(distances)+2)
+    #plt.locator_params(axis='x', nbins=max(distances)+2)
+    plt.locator_params(axis='x', nbins=36+2)
+    
+    # label only every second tick
+    labels = ['']*37
+    for i in range(1, len(labels), 2):
+        labels[i+1] = i   
+    ax2.set_xticklabels(labels)
     
     plt.savefig(args.out_file + '.svg')
     plt.close()
