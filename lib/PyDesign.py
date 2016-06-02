@@ -827,8 +827,8 @@ def _sample_connected_components(dg, amount=1):
     noslist = {}
         
     for c in range(0, dg.number_of_connected_components()):
-        if dg.number_of_sequences(c) != 1:
-            noslist[c] = dg.number_of_sequences(c)
+        #if dg.number_of_sequences(c) != 1:
+        noslist[c] = dg.number_of_sequences(c)
     
     if amount > len(noslist):
         amount = len(noslist)

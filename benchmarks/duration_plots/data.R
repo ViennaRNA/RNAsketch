@@ -57,29 +57,39 @@ cdata <- ddply(all_infiles, c("num_mutations", "mode", "number_of_structures"), 
                mean_diff = mean(diff),
                mean_prob = mean(prob),
                sd   = sd(score),
-               se   = sd / sqrt(N)
+               se   = sd / sqrt(N),
+               min = min(score),
+               max = max(score)
 )
 
 max_score <- max(cdata$mean_score)
 min_score <- min(cdata$mean_score)
+
 cdata$rel_score <- with(cdata, (mean_score) / (max_score))
+cdata$rel_sd <- with(cdata, (sd) / (max_score))
+cdata$rel_min <- with(cdata, (min) / (max_score))
+cdata$rel_max <- with(cdata, (max) / (max_score))
 
 head(cdata)
 
-svg(paste(opt$directory, ".score.svg", sep=""), width=5, height=3)
+svg(paste(opt$directory, ".score.svg", sep=""), width=6, height=4)
+#ggplot(cdata, aes(num_mutations,rel_score, colour = mode, shape=mode)) + 
+#stat_smooth() +
+#geom_point() + 
 qplot(num_mutations, rel_score, colour = mode, shape=mode, data = cdata) +
-scale_x_log10(limits = c(90, 600000), breaks = c(100, 1000, 10000, 100000)) +
+#geom_errorbar(data=cdata, mapping=aes(x=num_mutations, ymin = rel_min, ymax = rel_max), width=0.1) +
+scale_x_log10(limits = c(0.2, 600000), breaks = c(1,10,100, 1000, 10000, 100000)) +
 #coord_trans(x="log10") +
-scale_y_continuous(limits = c(0, 0.6)) +
+scale_y_continuous(limits = c(0, 1)) +
 geom_line() +
 ylab("relative mean Score") +
 xlab("Number of Sampled Sequences") +
 labs(colour="Sample Mode", shape="Sample Mode")
 dev.off()
 
-svg(paste(opt$directory, ".diff.svg", sep=""), width=5, height=3)
+svg(paste(opt$directory, ".diff.svg", sep=""), width=6, height=4)
 qplot(num_mutations, mean_diff, colour = mode, shape=mode, data = cdata) +
-scale_x_log10(limits = c(90, 600000), breaks = c(100, 1000, 10000, 100000)) +
+scale_x_log10(limits = c(0.2, 600000), breaks = c(1,10,100, 1000, 10000, 100000)) +
 #coord_trans(x="log10") +
 #scale_y_continuous(limits = c(0, 1)) +
 geom_line() +
@@ -88,9 +98,9 @@ xlab("Number of Sampled Sequences") +
 labs(colour="Sample Mode", shape="Sample Mode")
 dev.off()
 
-svg(paste(opt$directory, ".prob.svg", sep=""), width=5, height=3)
+svg(paste(opt$directory, ".prob.svg", sep=""), width=6, height=4)
 qplot(num_mutations, mean_prob, colour = mode, shape=mode, data = cdata) +
-scale_x_log10(limits = c(90, 600000), breaks = c(100, 1000, 10000, 100000)) +
+scale_x_log10(limits = c(0.2, 600000), breaks = c(1,10,100, 1000, 10000, 100000)) +
 #coord_trans(x="log10") +
 scale_y_continuous(limits = c(0, 1)) +
 geom_line() +

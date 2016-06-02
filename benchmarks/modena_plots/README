@@ -1,4 +1,10 @@
 ----------------------------------
+check missing data
+----------------------------------
+for i in ../../../../../inputData/RNAdesign/4str/*; do f=$(basename $i); if [ ! -f 4str.$f.out ]; then echo $f; fi; done
+for i in ../../../../../inputData/RNAtabupath/*; do f=$(basename $i); if [ ! -f tab2.$f.out ]; then echo $f; fi; done
+
+----------------------------------
 create modena table
 ----------------------------------
 mkdir raw
