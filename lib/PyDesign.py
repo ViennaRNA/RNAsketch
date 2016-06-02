@@ -579,6 +579,7 @@ def sample_sequence(dg, design, mode, sample_steps=1, avoid_motifs=None, white_p
     :param mode: mode how to sample, this is a string
     :param sample_steps: count how many times to do the sample operation
     :param avoid_motifs: list of regex pattern specifiying sequence motifs to avoid
+    :param white_positions: list of positions in the sequence where the avoid_motifs pattern should be ignored
     :param return: mut_nos is the solution space we drew from
     :param return: sample_count is how many times we sampled a solution from the dependency graph object (important for revert later)
     '''
@@ -655,6 +656,7 @@ def classic_optimization(dg, design, objective_function=calculate_objective, exi
     :param exit: Number of unsuccessful new sequences before exiting the optimization
     :param mode: String defining the sampling mode: sample, sample_global, sample_local
     :param avoid_motifs: list of regex pattern specifiying sequence motifs to avoid
+    :param white_positions: list of positions in the sequence where the avoid_motifs pattern should be ignored
     :param progress: Whether or not to print the progress to the console
     :param return: Optimization score reached for the final sequence
     "param return: Number of samples neccessary to reach this result
@@ -718,6 +720,7 @@ def constraint_generation_optimization(dg, design, objective_function=calculate_
     :param num_neg_constraints: Maximal number of negative constraints to accumulate during the optimization process
     :param max_eos_diff: Maximal difference between eos of the negative and positive constraints
     :param avoid_motifs: list of regex pattern specifiying sequence motifs to avoid
+    :param white_positions: list of positions in the sequence where the avoid_motifs pattern should be ignored
     :param progress: Whether or not to print the progress to the console
     :param return: Optimization score reached for the final sequence
     "param return: Number of samples neccessary to reach this result
