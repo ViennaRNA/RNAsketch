@@ -88,6 +88,7 @@ int main () {
     
     
     for (unsigned int n=0; n<10; n++) {
+        dependency_graph.sample();
         std::string result_sequence = dependency_graph.get_sequence();
         float score = objective_function(result_sequence, structures);
     
@@ -99,6 +100,8 @@ int main () {
             if (this_score < score) {
                 score = this_score;
                 result_sequence = current_sequence;
+            } else {
+                dependency_graph.revert_sequence();
             }
         }
         std::cout << result_sequence << "\t" << score << std::endl;
