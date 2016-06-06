@@ -180,8 +180,8 @@ colnames(all_infiles) <- new_names
 format_numbers <- c(rep(2, last_element-1))
 
 # keine Nachkommastellen
-#format_numbers[c(1: (2 + num_of_structs))] <- 0
-format_numbers[c(1:2)] <- 0
+format_numbers[c(1: (2 + num_of_structs))] <- 0
+#format_numbers[c(1:2)] <- 0
 
 # generate latex table
 latex.default(all_infiles, cdec=format_numbers, rowname=NULL, n.rgroup=c(NROW(all_infiles) - 2, 2), na.blank=TRUE, booktabs=FALSE, table.env=FALSE, center="none", file="", title="") 
