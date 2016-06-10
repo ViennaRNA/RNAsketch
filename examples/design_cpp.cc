@@ -5,7 +5,7 @@
  * Author: Stefan Hammer <s.hammer@univie.ac.at>
  * License: GPLv3
  * 
- * Compile with: g++ -fopenmp -g -Wall --std=c++11 -I/home/jango/local/include/RNAdesign -L/home/jango/local/lib/ -L/usr/lib64/ design_cpp.cc -lRNA -lRNAdesign -lm -o design_cpp
+ * Compile with: g++ -fopenmp -g -Wall --std=c++11 -I$HOME/local/include/RNAdesign -L$HOME/local/lib/ -L/usr/lib64/ design_cpp.cc -lRNA -lRNAdesign -lm -o design_cpp
  */
 
 
@@ -13,6 +13,7 @@
 #include <vector>
 #include <string>
 #include <iostream>
+#include <exception>
 
 // include RNA header
 extern "C" {
@@ -48,6 +49,7 @@ float pf_fold(std::string& sequence, std::string& structure) {
 
 //objective function: eos(1)+eos(2)+eos(3) - 3 * gibbs + 1 * ((eos(1)-eos(2))^2 + (eos(1)-eos(3))^2 + (eos(2)-eos(3))^2)
 float objective_function(std::string& sequence, std::vector<std::string>& structures) {
+    int M = structures.size();
     std::vector<float> eos;
     for (auto s : structures) {
         eos.push_back(energy_of_structure(sequence, s));
@@ -58,14 +60,14 @@ float objective_function(std::string& sequence, std::vector<std::string>& struct
     float objective_difference_part = 0.0;
     for (unsigned int i=0; i < eos.size(); i++) {
         for (unsigned int j=i+1; j < eos.size(); j++) {
-            objective_difference_part += pow(eos[i] - eos[j], 2);
+            objective_difference_part += abs(eos[i] - eos[j]);
         }
     }
     float eos_sum = 0;
     for (int n : eos)
         eos_sum += n;
     
-    return eos_sum - eos.size() * gibbs + 1 * objective_difference_part;
+    return 1/M * (eos_sum - M * gibbs) + 0.5 * 2/(M * (M-1)) * objective_difference_part;
 }
 
 // main program starts here
@@ -82,29 +84,35 @@ int main () {
 	        structures.push_back(structure);
     }
     
-    design::DependencyGraph<std::mt19937> dependency_graph(structures);
-    std::cout << "Number of Sequences: " << dependency_graph.number_of_sequences() << std::endl;
-    //std::cout << "Graph: " << dependency_graph.get_graphml() << std::endl;
+    design::DependencyGraph<std::mt19937> * dependency_graph = NULL;
+    try {
+        dependency_graph = new design::DependencyGraph<std::mt19937>(structures);
+    } catch (std::exception& e) {
+        std::cout << "ERROR: " << e.what() << std::endl;
+        exit (EXIT_FAILURE);
+    }
+    std::cout << "Number of Sequences: " << dependency_graph->number_of_sequences() << std::endl;
+    //std::cout << "Graph: " << dependency_graph->get_graphml() << std::endl;
     
     
     for (unsigned int n=0; n<10; n++) {
-        dependency_graph.sample();
-        std::string result_sequence = dependency_graph.get_sequence();
+        dependency_graph->sample();
+        std::string result_sequence = dependency_graph->get_sequence();
         float score = objective_function(result_sequence, structures);
     
         for (unsigned int i=0; i<10000; i++) {
-            dependency_graph.sample_global();
-            std::string current_sequence = dependency_graph.get_sequence();
+            dependency_graph->sample_global();
+            std::string current_sequence = dependency_graph->get_sequence();
             float this_score = objective_function(current_sequence, structures);
             
             if (this_score < score) {
                 score = this_score;
                 result_sequence = current_sequence;
             } else {
-                dependency_graph.revert_sequence();
+                dependency_graph->revert_sequence();
             }
         }
         std::cout << result_sequence << "\t" << score << std::endl;
     }
-    exit(0);
+    exit (EXIT_SUCCESS);
 }
