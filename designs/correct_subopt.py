@@ -46,8 +46,9 @@ def main():
                             print(line)
         elif re.match(re.compile("^[ACGTU\&\+]+$"), a[0], flags=0) and sequence == '':
             sequence = a[0]
+            print(line)
     f.close()
-   
+    
 
 if __name__ == "__main__":
     main()
