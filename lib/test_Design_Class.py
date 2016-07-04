@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 '''
-    testPyDesign.py: UNIT tests for PyDesign.py
+    testPyDesign.py: UNIT tests for Design_Class.py
 '''
 
 __author__ = "Stefan Hammer"
@@ -10,10 +10,9 @@ __maintainer__ = "Stefan Hammer"
 __email__ = "s.hammer@univie.ac.at"
 
 from PyDesign import *
-import tempfile
 import unittest
 
-class TestPyDesign(unittest.TestCase):
+class TestDesignClass(unittest.TestCase):
 
     def test_init(self):
         a = vrnaDesign(['.'], 'A')
@@ -23,7 +22,7 @@ class TestPyDesign(unittest.TestCase):
             b = vrnaDesign('.', 'A')
             b = vrnaDesign(['.'], 'Y')
             b = vrnaDesign(['%'], 'A')
-    
+            
     def test_init_empty_sequence(self):
         a = vrnaDesign(['...'])
         self.assertEqual(a.sequence, None)
@@ -70,46 +69,3 @@ class TestPyDesign(unittest.TestCase):
         assert a.eos is not None
         assert a.mfe_energy != mfe_energy
         assert a.pf_energy != pf_energy
-    
-    def test_read_inp_file(self):
-        fp = tempfile.NamedTemporaryFile(delete=True)
-        fp.write(b'.....\n  C  \n;')
-        fp.seek(0)
-        (structures, constraint, sequence) = read_inp_file(fp.name)
-        self.assertEqual(structures, ['.....'])
-        self.assertEqual(constraint, 'NNCNN')
-        self.assertEqual(sequence, '')
-    
-    def test_wrong_inp_file(self):
-        fp = tempfile.NamedTemporaryFile(delete=True)
-        fp.write(b'....\n...\nNNY\n;')
-        fp.seek(0)
-        with self.assertRaises(ValueError):
-            read_inp_file(fp.name)
-    
-    def test_read_input(self):
-        data = '.[].\n({})\nAGCC\nNNAC'
-        (structures, constraint, sequence) = read_input(data)
-        self.assertEqual(structures, ['.[].','({})'])
-        self.assertEqual(constraint, 'NNAC')
-        self.assertEqual(sequence, 'AGCC')
-    
-    def test_get_graph_properties(self):
-        print('TODO')
-    
-    def test_calculate_objective(self):
-        a = vrnaDesign(['((((....))))'], 'GGGGAAAACCCC')
-        score = calculate_objective(a)
-        self.assertEqual(score, 0.107421875)
-    
-    def test_classic_optimization(self):
-        print('TODO')
-    
-    def test_cut_points(self):
-        a = vrnaDesign(['..&..+..&..'], 'AA&AA+AA')
-        self.assertEqual(a.state['0'].cut_points, [3,6,9])
-        a = vrnaDesign(['..&..+..&..'], 'AA&AA+AA')
-        
-
-if __name__ == '__main__':
-    unittest.main()
