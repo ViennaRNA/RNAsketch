@@ -55,21 +55,194 @@ class Design(object):
     '''
     def __init__(self, structures, sequence=''):
         '''
-        Construct a new Design object.
-
-        :param sequence:
+        Construct a new State object.
+        
         :param structures:
+        :param sequence:
         '''
-        for struct in structures:
-            create_bp_table(struct) #check for balanced brackets
-        self.structures = structures
+        self._number_of_structures = None
+        self.state = {}
+        self._structures = structures
         self.sequence = sequence
-        self._reset_all()
-        self._temperatures = [37.0] * self.number_of_structures
-        self._ligands = [None] * self.number_of_structures
-        self._constraints = [None] * self.number_of_structures
+        
+        for i, struct in enumerate(structures):
+            create_bp_table(struct) #check for balanced brackets
+            length = len(structures[0])
+            if not (isinstance(struct, basestring) and re.match(re.compile("[\(\)\.\+\&]"), struct)):
+                raise TypeError('Structure be a string in dot-bracket notation')
+            if length != len(struct):
+                raise TypeError('Structures must have equal length')
+            self.state[str(i)] = self._newState(struct)
     
-    def _reset_sequence_dependent(self):
+    def _newState(self, struct):
+        raise NotImplementedError
+    
+    @property
+    def structures(self):
+        return self._structures
+    @structures.setter
+    def structures(self, s):
+        raise AttributeError('Cannot change structures in this object')
+    
+    @property
+    def sequence(self):
+        return self._sequence
+    @sequence.setter
+    def sequence(self, s):
+        if isinstance(s, basestring) and re.match(re.compile("[AUGC\+\&]"), s):
+            self._sequence = s
+            for state in self.state.values():
+                state.reset()
+        elif s == '':
+            self._sequence = None
+        else:
+            raise TypeError('Sequence must be a string containing a IUPAC RNA sequence')
+    
+    @property
+    def number_of_structures(self):
+        if not self._number_of_structures:
+            self._number_of_structures = len(self.structures)
+        return self._number_of_structures
+    
+    def write_out(self, score=0):
+        '''
+        Generates a nice human readable version of all values of this design
+        :param score: optimization score for this design
+        :return: string containing a nicely formatted version of all design values
+        '''
+        result = '{0:}\t {1:5.2f}'.format(self.sequence, score)
+        for k in self.state:
+            state = self.state[k]
+            result += '\n{0:}'.format(k)
+            result += '\n{0:}\t{1:9.4f}\t{2:+9.4f}\t{3:9.4f}'.format(state.structure, state.eos, state.eos-state.mfe_energy, state.pos)
+            result += '\n{0:}\t{1:9.4f}'.format(state.mfe_structure, state.mfe_energy)
+            result += '\n{0:}\t{1:9.4f}'.format(state.pf_structure, state.pf_energy)
+        return result
+    
+    def write_csv(self, separator=';'):
+        '''
+        Generates a csv version of all values of this design separated by the given separator
+        :param separator: separator for the values
+        :return: string containing all values of this design separated by the given separator
+        '''
+        result = separator.join(map(str, ['\"' + self.sequence + '\"', self.length, self.number_of_structures ]))
+        for state in self.state.values():
+            result = separator.join(map(str, [result,
+            state.mfe_energy,
+            state.mfe_structure,
+            state.pf_energy,
+            state.pf_structure,
+            state.eos,
+            state.eos_diff_mfe, 
+            state.eos_reached_mfe,
+            state.pos]))
+        return result
+    
+    def write_csv_header(self, separator=';'):
+        '''
+        Generates a csv header for all values of this design separated by the given separator
+        :param separator: separator for the values
+        :return: string containing a csv header for this design separated by the given separator
+        '''
+        result = separator.join(['sequence', 'seq_length', 'number_of_structures'])
+        strings = ['mfe_energy_', 'mfe_structure_', 'pf_energy_', 'pf_structure_', 'eos_', 'diff_eos_mfe_', 'mfe_reached_', 'prob_']
+        for state in self.state:
+            for s in strings:
+                result += separator + s + state
+        return result
+    
+    @property
+    def eos(self):
+        result = []
+        for s in self.state.values():
+            result.append(s.eos)
+        return result
+    
+    @property
+    def pos(self):
+        result = []
+        for s in self.state.values():
+            result.append(s.pos)
+        return result
+    
+    @property
+    def eos_diff_mfe(self):
+        result = []
+        for s in self.state.values():
+            result.append(s.eos_diff_mfe)
+        return result
+    
+    @property
+    def eos_reached_mfe(self):
+        result = []
+        for s in self.state.values():
+            result.append(s.eos_reached_mfe)
+        return result
+    
+    @property
+    def mfe_structure(self):
+        result = []
+        for s in self.state.values():
+            result.append(s.mfe_structure)
+        return result
+    
+    @property
+    def mfe_energy(self):
+        result = []
+        for s in self.state.values():
+            result.append(s.mfe_energy)
+        return result
+    @property
+    def pf_structure(self):
+        result = []
+        for s in self.state.values():
+            result.append(s.pf_structure)
+        return result
+    @property
+    def pf_energy(self):
+        result = []
+        for s in self.state.values():
+            result.append(s.pf_energy)
+        return result
+    
+    @property
+    def length(self):
+        return len(self.sequence)
+
+if vrna_available:
+    class vrnaDesign(Design):
+        def _newState(self, struct):
+            return vrnaState(struct, self)
+    
+if nupack_available:
+    class nupackDesign(Design):
+        def _newState(self, struct):
+            return nupackState(struct, self)
+    
+class State(object):
+    '''
+    State object holds structure, ligand, constraints and calculates all values
+    for this state.
+    '''
+    
+    def __init__(self, structure, parent):
+        '''
+        Construct a new State object.
+        
+        :param structure:
+        :param parent:
+        '''
+        self.structure = structure
+        self.parent = parent
+        self.reset()
+        self._temperature = 37.0
+        self._ligand = None
+        self._constraint = None
+        self._length = None
+        self._cut_points = None
+        self._multifold = None
+    
+    def reset(self):
         self._eos = None
         self._pos = None
         self._eos_diff_mfe = None
@@ -79,183 +252,118 @@ class Design(object):
         self._pf_structure = None
         self._pf_energy = None
     
-    def _reset_all(self):
-        self._reset_sequence_dependent()
-        self._number_of_structures = None
-        self._length = None
-        self._cut_points = None
-        self._multifold = None
     
     @property
-    def temperatures(self):
-        return self._temperatures
-    @temperatures.setter
-    def temperatures(self, t):
-        if isinstance(t, int):
-            self._reset_sequence_dependent()
-            self._temperatures = [t] * self.number_of_structures
-        elif isinstance(t, list):
-            if len(t) == self.number_of_structures:
-                self._reset_sequence_dependent()
-                self._temperatures = t
-            else:
-                raise TypeError('Temperature must be a list of doubles specifying the temperature for each structure')
-        else:
-            raise TypeError('Temperature must either be a list of doubles containing the temperature for every structure, or one integer.')
+    def temperature(self):
+        return self._temperature
+    @temperature.setter
+    def temperature(self, t):
+        self.reset()
+        self._temperature = t
     
     @property
-    def ligands(self):
-        return self._ligands
-    @ligands.setter
-    def ligands(self, ligs):
-        if isinstance(ligs, list) and len(ligs) == self.number_of_structures:
-            for lig in ligs:
-                if isinstance(lig, list) or not lig:
-                    self._reset_sequence_dependent()
-                    self._ligands = ligs
-                else:
-                    TypeError('A ligand list must either be None or must contain three values: sequence motif, struture motif and binding energy.')
-        else:
-            raise TypeError('Ligands must be a list of ligand lists for each structure.')
+    def ligand(self):
+        return self._ligand
+    @ligand.setter
+    def ligand(self, lig):
+        self.reset()
+        self._ligand = lig
     
     @property
-    def constraints(self):
-        return self._constraints
-    @constraints.setter
-    def constraints(self, constraints):
-        if isinstance(constraints, list) and len(constraints) == self.number_of_structures:
-            for const in constraints:
-                if isinstance(const, basestring) or not const:
-                    if const:
-                        create_bp_table(const) #check for balanced brackets
-                    self._reset_sequence_dependent()
-                    self._constraints = constraints
-                else:
-                    TypeError('A hard constraint must be a string containting only this characters: ().|x')
-        else:
-            raise TypeError('Constraints is a hard constraint string for each structure wraped in a list.')
+    def constraint(self):
+        return self._constraint
+    @constraint.setter
+    def constraint(self, constraint):
+        if constraint:
+            create_bp_table(const) #check for balanced brackets
+        self.reset()
+        self._constraint = constraint
+    
+    @property
+    def length(self):
+        if not self._length:
+            self._length = len(self.structure)
+        return self._length
+    
+    @property
+    def cut_points(self):
+        if not self._cut_points:
+            self._cut_points = []
+            iterator = re.finditer(re.compile('\&|\+'), self.structure)
+            for match in iterator:
+                self._cut_points.append(match.start()+1)
+        return self._cut_points
+    
+    @property
+    def multifold(self):
+        if not self._multifold:
+            self._multifold = len(self.cut_points)
+        return self._multifold
     
     @property
     def classtype(self):
         return None
     
     @property
-    def sequence(self):
-        return self._sequence
-    @sequence.setter
-    def sequence(self, s):
-        if isinstance(s, basestring) and re.match(re.compile("[AUGC\+\&]"), s):
-            if len(s) != self.length:
-                raise TypeError('Sequence must have the same length as the structural constraints')
-            self._reset_sequence_dependent()
-            self._sequence = s
-        elif s == '':
-            self._reset_sequence_dependent()
-            self._sequence = None
-        else:
-            raise TypeError('Sequence must be a string containing a IUPAC RNA sequence')
-    
-    @property
-    def structures(self):
-        return self._structures
-    @structures.setter
-    def structures(self, s):
-        if isinstance(s, list):
-            length = len(s[0])
-            for struct in s:
-                if not (isinstance(struct, basestring) and re.match(re.compile("[\(\)\.\+\&]"), struct)):
-                    raise TypeError('Structure be a string in dot-bracket notation')
-                if length != len(struct):
-                    raise TypeError('Structures must have equal length')
-            self._reset_all()
-            self._structures = s
-        else:
-            raise TypeError('Structures must be a list of dot-bracket strings')
-    
-    @property
     def eos(self):
-        if not self._eos and self._sequence:
-            self._eos = []
-            for i, struct in enumerate(self.structures):
-                self._eos.append(self._get_eos(self.sequence, struct, self.temperatures[i], self.ligands[i]))
+        if not self._eos and self.parent.sequence:
+            self._eos = self._get_eos(self.parent.sequence, self.structure, self.temperature, self.ligand)
         return self._eos
          
     @property
     def pos(self):
-        if not self._pos and self._sequence:
-            self._pos = []
-            for i, eos in enumerate(self.eos):
-                self._pos.append(math.exp((self.pf_energy[i]-eos) / self._get_KT(self.temperatures[i]) ))
+        if not self._pos and self.parent.sequence:
+            self._pos = math.exp((self.pf_energy-self.eos) / self._get_KT(self.temperature) )
         return self._pos
          
     @property
     def eos_diff_mfe(self):
-        if not self._eos_diff_mfe and self._sequence:
-            self._eos_diff_mfe = []
-            for i, eos in enumerate(self.eos):
-                self._eos_diff_mfe.append(eos - self.mfe_energy[i])
+        if not self._eos_diff_mfe and self.parent.sequence:
+            self._eos_diff_mfe = self.eos - self.mfe_energy
         return self._eos_diff_mfe
     
     @property
     def eos_reached_mfe(self):
-        if not self._eos_reached_mfe and self._sequence:
-            self._eos_reached_mfe = []
-            for i, eos in enumerate(self.eos):
-                if (eos == self.mfe_energy[i]):
-                    self._eos_reached_mfe.append(1)
-                else:
-                    self._eos_reached_mfe.append(0)
+        if not self._eos_reached_mfe and self.parent.sequence:
+            if (self.eos == self.mfe_energy):
+                self._eos_reached_mfe = 1
+            else:
+                self._eos_reached_mfe = 0
         return self._eos_reached_mfe
     
     @property
     def mfe_energy(self):
-        if not self._mfe_energy and self._sequence:
+        if not self._mfe_energy and self.parent.sequence:
             self._calculate_mfe_energy_structure()
         return self._mfe_energy
     
     @property
     def mfe_structure(self):
-        if not self._mfe_structure and self._sequence:
+        if not self._mfe_structure and self.parent.sequence:
             self._calculate_mfe_energy_structure()
         return self._mfe_structure
     
     def _calculate_mfe_energy_structure(self):
-        self._mfe_energy = []
-        self._mfe_structure = []
-        if self.temperatures[1:] == self.temperatures[:-1] and all(l is None for l in self.ligands) and all(c is None for c in self.constraints):
-            (structure, energie) = self._get_fold(self.sequence, self.temperatures[0], self.ligands[0], self.constraints[0])
-            self._mfe_energy = [energie] * self.number_of_structures
-            self._mfe_structure = [structure] * self.number_of_structures
-        else:
-            for i, temperature in enumerate(self.temperatures):
-                (structure, energie) = self._get_fold(self.sequence, temperature, self.ligands[i], self.constraints[i])
-                self._mfe_energy.append(energie)
-                self._mfe_structure.append(structure)
+        (structure, energie) = self._get_fold(self.parent.sequence, self.temperature, self.ligand, self.constraint)
+        self._mfe_energy = energie
+        self._mfe_structure = structure
     
     @property
     def pf_energy(self):
-        if not self._pf_energy and self._sequence:
+        if not self._pf_energy and self.parent.sequence:
             self._calculate_pf_energy_structure()
         return self._pf_energy
     
     @property
     def pf_structure(self):
-        if not self._pf_structure and self._sequence:
+        if not self._pf_structure and self.parent.sequence:
             self._calculate_pf_energy_structure()
         return self._pf_structure
     
     def _calculate_pf_energy_structure(self):
-        self._pf_energy = []
-        self._pf_structure = []
-        if self.temperatures[1:] == self.temperatures[:-1] and all(l is None for l in self.ligands) and all(c is None for c in self.constraints):
-            (structure, energie) = self._get_pf_fold(self.sequence, self.temperatures[0], self.ligands[0], self.constraints[0])
-            self._pf_energy = [energie] * self.number_of_structures
-            self._pf_structure = [structure] * self.number_of_structures
-        else:
-            for i, temperature in enumerate(self.temperatures):
-                (structure, energie) = self._get_pf_fold(self.sequence, temperature, self.ligands[i], self.constraints[i])
-                self._pf_energy.append(energie)
-                self._pf_structure.append(structure)
+        (structure, energie) = self._get_pf_fold(self.parent.sequence, self.temperature, self.ligand, self.constraint)
+        self._pf_energy = energie
+        self._pf_structure = structure
     
     def _get_KT(self, temperature):
         # KT = (betaScale*((temperature+K0)*GASCONST))/1000.0; /* in Kcal */
@@ -270,95 +378,12 @@ class Design(object):
     def _get_pf_fold(self, sequence, temperature, ligand, constraint):
         raise NotImplementedError
     
-    @property
-    def number_of_structures(self):
-        if not self._number_of_structures:
-            self._number_of_structures = len(self.structures)
-        return self._number_of_structures
-    
-    @property
-    def length(self):
-        if not self._length:
-            self._length = len(self.structures[0])
-        return self._length
-    
-    @property
-    def cut_points(self):
-        if not self._cut_points:
-            self._cut_points = []
-            iterator = re.finditer(re.compile('\&|\+'), self.structures[0])
-            for count, match in enumerate(iterator):
-                self._cut_points.append(match.start()-count+1)
-        return self._cut_points
-    
-    def _remove_cuts(self, input):
-        return re.sub('[+&]', '', input)
-    
-    def _add_cuts(self, input):
-        result = input
-        for cut in self.cut_points:
-            result = result[:cut-1] + '&' + result[cut-1:]
-        return result
-    
-    @property
-    def multifold(self):
-        if not self._multifold:
-            self._multifold = len(self.cut_points)
-        return self._multifold
-    
-    def write_out(self, score=0):
-        '''
-        Generates a nice human readable version of all values of this design
-        :param score: optimization score for this design
-        :return: string containing a nicely formatted version of all design values
-        '''
-        result = '{0:}\t {1:5.2f}'.format(self.sequence, score)
-        for i, struct in enumerate(self.structures):
-            result += '\n{0:}\t{1:9.4f}\t{2:+9.4f}\t{3:9.4f}'.format(struct, self.eos[i], self.eos[i]-self.mfe_energy[i], self.pos[i])
-            result += '\n{0:}\t{1:9.4f}'.format(self.mfe_structure[i], self.mfe_energy[i])
-            result += '\n{0:}\t{1:9.4f}'.format(self.pf_structure[i], self.pf_energy[i])
-        return result
-    
-    def write_csv(self, separator=';'):
-        '''
-        Generates a csv version of all values of this design separated by the given separator
-        :param separator: separator for the values
-        :return: string containing all values of this design separated by the given separator
-        '''
-        result = separator.join(map(str, ['\"' + self.sequence + '\"', self.length, self.number_of_structures ] + 
-            self.mfe_energy +
-            self.mfe_structure +
-            self.pf_energy +
-            self.pf_structure +
-            self.eos + 
-            self.eos_diff_mfe + 
-            self.eos_reached_mfe + 
-            self.pos))
-        return result
-    
-    def write_csv_header(self, separator=';'):
-        '''
-        Generates a csv header for all values of this design separated by the given separator
-        :param separator: separator for the values
-        :return: string containing a csv header for this design separated by the given separator
-        '''
-        result = separator.join(['sequence', 'seq_length', 'number_of_structures'])
-        strings = ['mfe_energy_', 'mfe_structure_', 'pf_energy_', 'pf_structure_', 'eos_', 'diff_eos_mfe_', 'mfe_reached_', 'prob_']
-        for s in strings:
-            for i in range(0, self.number_of_structures):
-                result += separator + s + str(i)
-        return result
-    
-    def _create_header(self, separator, strings):
-        result = ''
-        
-        return result
 
 if vrna_available:
-    class vrnaDesign(Design):
+    class vrnaState(State):
         @property
         def classtype(self):
-            return 'vrnaDesign'
+            return 'vrna'
         
         def _change_cuts(self, input):
             return re.sub('[+]', '&', input)
@@ -370,7 +395,7 @@ if vrna_available:
             fc = RNA.fold_compound(self._change_cuts(sequence), None, RNA.OPTION_MFE | RNA.OPTION_EVAL_ONLY)
             if ligand:
                 fc.sc_add_hi_motif(ligand[0], ligand[1], ligand[2])
-            return fc.eval_structure(self._remove_cuts(structure))
+            return fc.eval_structure(_remove_cuts(structure))
     
         def _get_fold(self, sequence, temperature, ligand=None, constraint=None):
             RNA.cvar.temperature = temperature
@@ -378,12 +403,12 @@ if vrna_available:
             if ligand:
                 fc.sc_add_hi_motif(ligand[0], ligand[1], ligand[2])
             if constraint:
-                fc.hc_add_from_db(self._remove_cuts(constraint))
+                fc.hc_add_from_db(_remove_cuts(constraint))
             if self.multifold == 0:
                 (structure, energie) = fc.mfe()
             if self.multifold == 1:
                 (structure, energie) = fc.mfe_dimer()
-                structure = self._add_cuts(structure)
+                structure = _add_cuts(structure)
             if self.multifold > 1:
                 raise NotImplementedError
             return (structure, energie)
@@ -394,21 +419,21 @@ if vrna_available:
             if ligand:
                 fc.sc_add_hi_motif(ligand[0], ligand[1], ligand[2])
             if constraint:
-                fc.hc_add_from_db(self._remove_cuts(constraint))
+                fc.hc_add_from_db(_remove_cuts(constraint))
             if self.multifold == 0:
                 (structure, energie) = fc.pf()
             if self.multifold == 1:
                 (structure, energie) = fc.pf_dimer()
-                structure = self._add_cuts(structure)
+                structure = _add_cuts(structure)
             elif self.multifold > 1:
                 raise NotImplementedError
             return (structure, energie)
 
 if nupack_available:
-    class nupackDesign(Design):
+    class nupackState(State):
         @property
         def classtype(self):
-            return 'nupackDesign'
+            return 'nupack'
         
         def _change_cuts(self, input):
             return re.sub('[&]', '+', input)
@@ -568,7 +593,10 @@ def calculate_objective_2(design):
         for eos2 in design.eos[i+1:]:
             objective_difference_part += math.fabs(eos1 - eos2)
     
-    return objective_difference_part * 2 / (design.number_of_structures * (design.number_of_structures-1))
+    if design.number_of_structures == 1:
+        return objective_difference_part
+    else:
+        return objective_difference_part * 2 / (design.number_of_structures * (design.number_of_structures-1))
 
 def sample_sequence(dg, design, mode, sample_steps=1, avoid_motifs=None, white_positions=None):
     '''
@@ -616,7 +644,7 @@ def sample_sequence(dg, design, mode, sample_steps=1, avoid_motifs=None, white_p
         elif mode == 'sample_strelem':
             if forgi_available:
                 # sample new sequences for structural elements
-                struct = design._remove_cuts(random.choice(design.structures))
+                struct = _remove_cuts(random.choice(design.structures))
                 bg = fgb.BulgeGraph(dotbracket_str=struct)
                 for s in bg.random_subgraph(sample_steps):
                     for i in range(0, len(bg.defines[s]), 2):
@@ -815,6 +843,15 @@ def constraint_generation_optimization(dg, design, objective_function=calculate_
         sys.stderr.flush()
     # finally return the result
     return score, number_of_samples
+
+def _remove_cuts(input):
+    return re.sub('[+&]', '', input)
+
+def _add_cuts(input):
+    result = input
+    for cut in self.cut_points:
+        result = result[:cut-1] + '&' + result[cut-1:]
+    return result
 
 def _sample_connected_components(dg, amount=1):
     '''

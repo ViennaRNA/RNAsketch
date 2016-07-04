@@ -28,23 +28,23 @@ class TestPyDesign(unittest.TestCase):
         a = vrnaDesign(['...'])
         self.assertEqual(a.sequence, None)
         self.assertEqual(a.structures, ['...'])
-        self.assertEqual(a.mfe_energy, None)
-        self.assertEqual(a.mfe_structure, None)
-        self.assertEqual(a.pf_energy, None)
-        self.assertEqual(a.pf_structure, None)
+        self.assertEqual(a.mfe_energy, [None])
+        self.assertEqual(a.mfe_structure, [None])
+        self.assertEqual(a.pf_energy, [None])
+        self.assertEqual(a.pf_structure, [None])
         self.assertEqual(a.number_of_structures, 1)
-        self.assertEqual(a.eos, None)
-        self.assertEqual(a.pos, None)
-        self.assertEqual(a.eos_reached_mfe, None)
-        self.assertEqual(a.eos_diff_mfe, None)
+        self.assertEqual(a.eos, [None])
+        self.assertEqual(a.pos, [None])
+        self.assertEqual(a.eos_reached_mfe, [None])
+        self.assertEqual(a.eos_diff_mfe, [None])
       
 
     def test_calculations(self):
         a = vrnaDesign(['.'], 'A')
-        self.assertEqual(a.mfe_energy, 0.0)
-        self.assertEqual(a.mfe_structure, '.')
-        self.assertEqual(a.pf_energy, 0.0)
-        self.assertEqual(a.pf_structure, '.')
+        self.assertEqual(a.mfe_energy, [0.0])
+        self.assertEqual(a.mfe_structure, ['.'])
+        self.assertEqual(a.pf_energy, [0.0])
+        self.assertEqual(a.pf_structure, ['.'])
         self.assertEqual(a.number_of_structures, 1)
         self.assertEqual(a.length, 1)
         self.assertEqual(a.eos, [0.0])
@@ -106,9 +106,9 @@ class TestPyDesign(unittest.TestCase):
         print('TODO')
     
     def test_cut_points(self):
-        a = vrnaDesign(['..&..+..'], 'AA&AA+AA')
-        self.assertEqual(a.cut_points, [3,6])
-        a = vrnaDesign(['..&..+..'], 'AA&AA+AA')
+        a = vrnaDesign(['..&..+..&..'], 'AA&AA+AA')
+        self.assertEqual(a.state['0'].cut_points, [3,6,9])
+        a = vrnaDesign(['..&..+..&..'], 'AA&AA+AA')
         
 
 if __name__ == '__main__':
