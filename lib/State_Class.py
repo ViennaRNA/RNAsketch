@@ -20,6 +20,7 @@ nupack_available = True
 
 try:
     import RNA
+    #RNA.read_parameter_file('/usr/share/ViennaRNA/rna_turner1999.par')
 except ImportError, e:
     vrna_available = False
     sys.stderr.write("-" * 60 + "\nWARNING: " + e.message + "!!!\n" + "-" * 60 + "\n")
@@ -187,7 +188,10 @@ class State(object):
     @property
     def ensemble_defect(self):
         if not self._ensemble_defect and self.parent.sequence:
-            self._get_ensemble_defect(self.parent.sequence, self.structure, self.temperature, self.ligand)
+            if (len(self.parent.sequence) == len(self.structure)):
+                self._ensemble_defect = self._get_ensemble_defect(self.parent.sequence, self.structure, self.temperature, self.ligand)
+            else:
+                raise ValueError('sequence and structure must have equal length to calculate the ensemble defect!')
         return self._ensemble_defect
     
     def _get_KT(self, temperature):
@@ -218,6 +222,7 @@ if vrna_available:
         def _get_fold_compound(self, sequence, temperature, ligand=None, constraint=None, enforce_constraint=False, options=RNA.OPTION_PF):
             md = RNA.md()
             md.temperature = temperature
+            md.dangles = 2
             fc = RNA.fold_compound(self._change_cuts(sequence), md, options)
             if ligand:
                 fc.sc_add_hi_motif(ligand[0], ligand[1], ligand[2])
@@ -266,7 +271,22 @@ if vrna_available:
                 structure = add_cuts(structure, self.cut_points)
             elif self.multifold > 1:
                 raise NotImplementedError
-            return (structure, energie)
+            # get base pairing probability matrix
+            bpm = fc.bpp()
+            # get base pair table
+            bpt = create_bp_table(structure)
+            # delta(i,j, s) = 1 if (i,j) in s, 0 otherwise
+            # d(s1, s2) = sum{i,j in s1}(1-delta{i,j}(s2)) + sum{i,j not in s1}(delta{i,j}(s2))
+            # ensemble defect = sum{i,j in structure}(1-P(i,j)) + sum{i,j not in structure}(P(i,j))
+            result = 0
+            for i in range(0, len(structure)):
+                for j in range(i, len(structure)):
+                    if (bpt[i] == j):
+                        #print('{0:1.0f}/{1:1.0f}: {2:10.10f}'.format(i, j, bpm[i+1][j+1]))
+                        result += 1-bpm[i+1][j+1]
+                    else:
+                        result += bpm[i+1][j+1]
+            return 2 * result
 
 if nupack_available:
     class nupackState(State):
@@ -308,3 +328,24 @@ def add_cuts(input, cut_points):
     for cut in cut_points:
         result = result[:cut-1] + '&' + result[cut-1:]
     return result
+
+def create_bp_table(structure):
+    '''
+    Takes a structure in dot bracket notation and returns a base pair table.
+    Unpaired positions are -1, otherwise the index of the adjacent bracket is listed
+    :param structure: string with dot-bracket notation of the strcture
+    :return bpt: base pair table
+    '''
+    bpo=[]
+    bpt=[-1]*len(structure)
+    for i, substr in enumerate(structure):
+        if(substr=="("):
+            bpo.append(i)
+        elif(substr==")"):
+            try:
+                bpt[bpo.pop()] = i
+            except:
+                raise ValueError('Unbalanced brackets: too few opening brackets')
+    if len(bpo) > 0:
+        raise LogicError('Unbalanced brackets: too few closing brackets')
+    return bpt

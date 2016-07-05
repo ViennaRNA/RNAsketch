@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 '''
-    testPyDesign.py: UNIT tests for Design_Class.py
+    test_Design_Class.py: UNIT tests for Design_Class.py
 '''
 
 __author__ = "Stefan Hammer"
@@ -69,3 +69,6 @@ class TestDesignClass(unittest.TestCase):
         assert a.eos is not None
         assert a.mfe_energy != mfe_energy
         assert a.pf_energy != pf_energy
+
+if __name__ == '__main__':
+    unittest.main()

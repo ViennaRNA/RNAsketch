@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 '''
-    testPyDesign.py: UNIT tests for PyDesign.py
+    test_PyDesign.py: UNIT tests for PyDesign.py
 '''
 
 __author__ = "Stefan Hammer"

@@ -184,24 +184,3 @@ class vrnaDesign(Design):
 class nupackDesign(Design):
     def _newState(self, struct):
         return nupackState(struct, self)
-    
-def create_bp_table(structure):
-    '''
-    Takes a structure in dot bracket notation and returns a base pair table.
-    Unpaired positions are -1, otherwise the index of the adjacent bracket is listed
-    :param structure: string with dot-bracket notation of the strcture
-    :return bpt: base pair table
-    '''
-    bpo=[]
-    bpt=[-1]*len(structure)
-    for i, substr in enumerate(structure):
-        if(substr=="("):
-            bpo.append(i)
-        elif(substr==")"):
-            try:
-                bpt[bpo.pop()] = i
-            except:
-                raise ValueError('Unbalanced brackets: too few opening brackets')
-    if len(bpo) > 0:
-        raise LogicError('Unbalanced brackets: too few closing brackets')
-    return bpt
