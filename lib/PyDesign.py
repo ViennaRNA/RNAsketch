@@ -148,19 +148,26 @@ def calculate_objective_2(design):
     else:
         return objective_difference_part * 2 / (design.number_of_structures * (design.number_of_structures-1))
 
-def sample_sequence(dg, input, mode, sample_steps=1, avoid_motifs=None, white_positions=None, avoid_codons=None):
-
+def sample_sequence(dg, design, mode, sample_steps=1, avoid_motifs=None, white_positions=None):
+    '''
+    This function samples a sequence with the given mode from the dependency graph object
+    and writes it into the design object
+    :param dg: RNAdesign dependency graph object
+    :param design: design object
+    :param mode: mode how to sample, this is a string
+    :param sample_steps: count how many times to do the sample operation
+    :param avoid_motifs: list of regex pattern specifiying sequence motifs to avoid
+    :param white_positions: list of positions in the sequence where the avoid_motifs pattern should be ignored
+    :param return: mut_nos is the solution space we drew from
+    :param return: sample_count is how many times we sampled a solution from the dependency graph object (important for revert later)
+    '''
     if avoid_motifs is None:
         avoid_motifs=[]
     if white_positions is None:
         white_positions=[]
-    if avoid_codons is None:
-        avoid_codons=[]
-        
-    # check revert setup
-    tmp_seq = dg.get_sequence()
     # remember the solution space we drew from
     mut_nos = 1
+    dg.set_history_size(sample_steps + 100)
     while True:
         # count how many samples we did to be able to revert this later
         sample_count = 0
@@ -184,11 +191,20 @@ def sample_sequence(dg, input, mode, sample_steps=1, avoid_motifs=None, white_po
             for _ in range(0, sample_steps):
                 mut_nos *= dg.sample_local()
                 sample_count += 1
+        elif mode == 'sample_strelem':
+            if forgi_available:
+                # sample new sequences for structural elements
+                struct = remove_cuts(random.choice(design.structures))
+                bg = fgb.BulgeGraph(dotbracket_str=struct)
+                for s in bg.random_subgraph(sample_steps):
+                    for i in range(0, len(bg.defines[s]), 2):
+                        mut_nos *= dg.sample(bg.defines[s][i]-1, bg.defines[s][i+1]-1)
+                        sample_count += 1
+            else:
+                raise ImportError("Forgi Library not available!")
         else:
             raise ValueError("Wrong mode argument: " + mode + "\n")
         
-        
-        #print(' _ '.join(dg.get_history()))
         # check if motifs to avoid are present, if so sample a new sequence, else return
         motiv_present = False
         seq = dg.get_sequence()
@@ -198,40 +214,15 @@ def sample_sequence(dg, input, mode, sample_steps=1, avoid_motifs=None, white_po
         # match motifs
         for m in avoid_motifs:
             if re.search(re.compile(m), seq, flags=0):
+                dg.revert_sequence(sample_count)
                 motiv_present = True
                 break
-        # exit this solution if motif is present
-        if motiv_present:
-            dg.revert_sequence(sample_count)
-            if tmp_seq != dg.get_sequence():
-                raise ValueError('revert does not work properly ' + str(sample_count) + ' _ '.join(dg.get_history()))
-            continue
-        
-        # check if unwanted codon is present
-        codon_present = False
-        seq = dg.get_sequence()
-        codons = [seq[a:a+3] for a in range(input.codon_range[0], input.codon_range[1], 3)]
-        #print(codons)
-        #print(input.avoid_codons)
-        for c in codons:
-            # check for avoid codons
-            if c in input.avoid_codons:
-                codon_present = True
-                #print('reject because of: ' + c + '\t' + ' '.join( codons))
-                break
-        
-        if codon_present:
-            dg.revert_sequence(sample_count)
-            if tmp_seq != dg.get_sequence():
-                raise ValueError('revert does not work properly ' + str(sample_count) + ' _ '.join(dg.get_history()))
-            continue
-        
-        # if the motivs and codons are not present, exit while and return
-        break
-        
+        # if the motivs are not present, exit while and return
+        if not motiv_present:
+            break
+            
     # assign sequence to design and return values
-    input.sequence = dg.get_sequence()
-    #print(input.sequence + '\n-----\n' + ' _ '.join(dg.get_history()))
+    design.sequence = dg.get_sequence()
     return (mut_nos, sample_count)
 
 def classic_optimization(dg, design, objective_function=calculate_objective, exit=1000, mode='sample', avoid_motifs=None, white_positions=None, progress=False):
