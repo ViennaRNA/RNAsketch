@@ -129,7 +129,7 @@ def calculate_objective_1(design):
     objective function (3 seqs):    (eos(1)+eos(2)+eos(3) - 3 * gibbs) / number_of_structures
     :param design: Design object containing the sequence and structures
     '''
-    return (sum(design.eos) - sum(design.pf_energy)) / design.number_of_structures
+    return (sum(design.eos.values()) - sum(design.pf_energy.values())) / design.number_of_structures
 
 def calculate_objective_2(design):
     '''
@@ -138,8 +138,9 @@ def calculate_objective_2(design):
     :param design: Design object containing the sequence and structures
     '''
     objective_difference_part = 0
-    for i, eos1 in enumerate(design.eos):
-        for eos2 in design.eos[i+1:]:
+    eos = design.eos.values()
+    for i, eos1 in enumerate(eos):
+        for eos2 in eos[i+1:]:
             objective_difference_part += math.fabs(eos1 - eos2)
     
     if design.number_of_structures == 1:

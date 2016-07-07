@@ -49,12 +49,17 @@ class State(object):
         :param structure:
         :param parent:
         '''
-        self.structure = structure
-        self.parent = parent
+        
+        if not isinstance(structure, basestring):
+            raise ValueError('Not a structure string: ' + repr(structure))
+        
+        self._structure = structure
+        self._parent = parent
         self.reset()
         self._temperature = 37.0
         self._ligand = None
         self._constraint = None
+        self._enforce_constraint = False
         self._length = None
         self._cut_points = None
         self._multifold = None
@@ -69,14 +74,18 @@ class State(object):
         self._pf_structure = None
         self._pf_energy = None
         self._ensemble_defect = None
-        self._enforce_constraint = False
     
+    @property
+    def structure(self):
+        return self._structure
     
     @property
     def temperature(self):
         return self._temperature
     @temperature.setter
     def temperature(self, t):
+        if not isinstance(t, float):
+            raise ValueError('Temperature must be a float pointing value')
         self.reset()
         self._temperature = t
     
@@ -85,6 +94,8 @@ class State(object):
         return self._ligand
     @ligand.setter
     def ligand(self, lig):
+        if (len(lig) != 3) or not isinstance(lig, list):
+            raise ValueError('Ligand must be a list with three items: sequence pattern, structure pattern and binding energy')
         self.reset()
         self._ligand = lig
     
@@ -92,24 +103,34 @@ class State(object):
     def constraint(self):
         return self._constraint
     @constraint.setter
-    def constraint(self, constraint, enforced=False):
+    def constraint(self, constraint):
         if constraint:
-            create_bp_table(const) #check for balanced brackets
+            create_bp_table(constraint) #check for balanced brackets
+            if (len(constraint) != len(self._structure)):
+                raise ValueError('constraint and structure must have equal length!')
         self.reset()
-        self._enforced_constraint = enforced
         self._constraint = constraint
+    
+    @property
+    def enforce_constraint(self):
+        return self._enforce_constraint
+    @enforce_constraint.setter
+    def enforce_constraint(self, enforced):
+        if enforced is not self._enforce_constraint:
+            self.reset()
+            self._enforce_constraint = enforced
     
     @property
     def length(self):
         if not self._length:
-            self._length = len(self.structure)
+            self._length = len(self._structure)
         return self._length
     
     @property
     def cut_points(self):
         if not self._cut_points:
             self._cut_points = []
-            iterator = re.finditer(re.compile('\&|\+'), self.structure)
+            iterator = re.finditer(re.compile('\&|\+'), self._structure)
             for match in iterator:
                 self._cut_points.append(match.start()+1)
         return self._cut_points
@@ -126,25 +147,25 @@ class State(object):
     
     @property
     def eos(self):
-        if not self._eos and self.parent.sequence:
-            self._eos = self._get_eos(self.parent.sequence, self.structure, self.temperature, self.ligand)
+        if not self._eos and self._parent.sequence:
+            self._eos = self._get_eos(self._parent.sequence, self._structure, self.temperature, self.ligand)
         return self._eos
          
     @property
     def pos(self):
-        if not self._pos and self.parent.sequence:
+        if not self._pos and self._parent.sequence:
             self._pos = math.exp((self.pf_energy-self.eos) / self._get_KT(self.temperature) )
         return self._pos
          
     @property
     def eos_diff_mfe(self):
-        if not self._eos_diff_mfe and self.parent.sequence:
+        if not self._eos_diff_mfe and self._parent.sequence:
             self._eos_diff_mfe = self.eos - self.mfe_energy
         return self._eos_diff_mfe
     
     @property
     def eos_reached_mfe(self):
-        if not self._eos_reached_mfe and self.parent.sequence:
+        if not self._eos_reached_mfe and self._parent.sequence:
             if (self.eos == self.mfe_energy):
                 self._eos_reached_mfe = 1
             else:
@@ -153,45 +174,44 @@ class State(object):
     
     @property
     def mfe_energy(self):
-        if not self._mfe_energy and self.parent.sequence:
+        if not self._mfe_energy and self._parent.sequence:
             self._calculate_mfe_energy_structure()
         return self._mfe_energy
     
     @property
     def mfe_structure(self):
-        if not self._mfe_structure and self.parent.sequence:
+        if not self._mfe_structure and self._parent.sequence:
             self._calculate_mfe_energy_structure()
         return self._mfe_structure
     
     def _calculate_mfe_energy_structure(self):
-        (structure, energie) = self._get_fold(self.parent.sequence, self.temperature, self.ligand, self.constraint, self._enforce_constraint)
+        (structure, energie) = self._get_fold(self._parent.sequence, self.temperature, self.ligand, self.constraint)
         self._mfe_energy = energie
         self._mfe_structure = structure
     
     @property
     def pf_energy(self):
-        if not self._pf_energy and self.parent.sequence:
+        if not self._pf_energy and self._parent.sequence:
             self._calculate_pf_energy_structure()
         return self._pf_energy
     
     @property
     def pf_structure(self):
-        if not self._pf_structure and self.parent.sequence:
+        if not self._pf_structure and self._parent.sequence:
             self._calculate_pf_energy_structure()
         return self._pf_structure
     
     def _calculate_pf_energy_structure(self):
-        (structure, energie) = self._get_pf_fold(self.parent.sequence, self.temperature, self.ligand, self.constraint)
+        (structure, energie) = self._get_pf_fold(self._parent.sequence, self.temperature, self.ligand, self.constraint)
         self._pf_energy = energie
         self._pf_structure = structure
     
     @property
     def ensemble_defect(self):
-        if not self._ensemble_defect and self.parent.sequence:
-            if (len(self.parent.sequence) == len(self.structure)):
-                self._ensemble_defect = self._get_ensemble_defect(self.parent.sequence, self.structure, self.temperature, self.ligand)
-            else:
+        if not self._ensemble_defect and self._parent.sequence:
+            if (len(self._parent.sequence) != len(self._structure)):
                 raise ValueError('sequence and structure must have equal length to calculate the ensemble defect!')
+            self._ensemble_defect = self._get_ensemble_defect(self._parent.sequence, self._structure, self.temperature, self.ligand)
         return self._ensemble_defect
     
     def _get_KT(self, temperature):
@@ -201,7 +221,7 @@ class State(object):
     def _get_eos(self, sequence, structure, temperature, ligand):
         raise NotImplementedError
     
-    def _get_fold(self, sequence, temperature, ligand, constraint, enforce_constraint):
+    def _get_fold(self, sequence, temperature, ligand, constraint):
         raise NotImplementedError
     
     def _get_pf_fold(self, sequence, temperature, ligand, constraint):
@@ -219,7 +239,7 @@ if vrna_available:
         def _change_cuts(self, input):
             return re.sub('[+]', '&', input)
         
-        def _get_fold_compound(self, sequence, temperature, ligand=None, constraint=None, enforce_constraint=False, options=RNA.OPTION_PF):
+        def _get_fold_compound(self, sequence, temperature, ligand=None, constraint=None, options=RNA.OPTION_PF):
             md = RNA.md()
             md.temperature = temperature
             md.dangles = 2
@@ -227,8 +247,8 @@ if vrna_available:
             if ligand:
                 fc.sc_add_hi_motif(ligand[0], ligand[1], ligand[2])
             if constraint:
-                if enforce_constraint:
-                    fc.hc_add_from_db(remove_cuts(constraint), RNA.CONSTRAINT_DB_ENFORCE_BP)
+                if self._enforce_constraint:
+                    fc.hc_add_from_db(remove_cuts(constraint), RNA.CONSTRAINT_DB_DEFAULT | RNA.CONSTRAINT_DB_ENFORCE_BP)
                 else:
                     fc.hc_add_from_db(remove_cuts(constraint))
             return fc
@@ -239,8 +259,8 @@ if vrna_available:
             fc = self._get_fold_compound(sequence, temperature, ligand, options=RNA.OPTION_MFE | RNA.OPTION_EVAL_ONLY)
             return fc.eval_structure(remove_cuts(structure))
 
-        def _get_fold(self, sequence, temperature, ligand=None, constraint=None, enforce_constraint=False):
-            fc = self._get_fold_compound(sequence, temperature, ligand, constraint, enforce_constraint, options=RNA.OPTION_MFE)
+        def _get_fold(self, sequence, temperature, ligand=None, constraint=None):
+            fc = self._get_fold_compound(sequence, temperature, ligand, constraint, options=RNA.OPTION_MFE)
             if self.multifold == 0:
                 (structure, energie) = fc.mfe()
             if self.multifold == 1:
@@ -301,7 +321,7 @@ if nupack_available:
             #TODO nupack.energy can not handle unconnected cofold structures
             return nupack.energy([self._change_cuts(sequence)], self._change_cuts(structure), material = 'rna', pseudo = True, T = temperature)
 
-        def _get_fold(self, sequence, temperature, ligand=None, constraint=None, enforce_constraint=False):
+        def _get_fold(self, sequence, temperature, ligand=None, constraint=None):
             nupack_mfe = nupack.mfe([self._change_cuts(sequence)], material = 'rna', pseudo = True, T = temperature) # if str, 0, no error
 
             pattern = re.compile('(\[\(\')|(\',)|(\'\)\])')
@@ -347,5 +367,5 @@ def create_bp_table(structure):
             except:
                 raise ValueError('Unbalanced brackets: too few opening brackets')
     if len(bpo) > 0:
-        raise LogicError('Unbalanced brackets: too few closing brackets')
+        raise ValueError('Unbalanced brackets: too few closing brackets')
     return bpt

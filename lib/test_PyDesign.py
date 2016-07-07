@@ -10,6 +10,8 @@ __maintainer__ = "Stefan Hammer"
 __email__ = "s.hammer@univie.ac.at"
 
 from PyDesign import *
+from test_State_Class import TestStateClass
+from test_Design_Class import TestDesignClass
 import tempfile
 import unittest
 
@@ -39,7 +41,7 @@ class TestPyDesign(unittest.TestCase):
         self.assertEqual(sequence, 'AGCC')
     
     def test_get_graph_properties(self):
-        print('TODO')
+        pass #this is not necessary to test
     
     def test_calculate_objective(self):
         a = vrnaDesign(['((((....))))'], 'GGGGAAAACCCC')
@@ -47,8 +49,22 @@ class TestPyDesign(unittest.TestCase):
         self.assertEqual(score, 0.107421875)
     
     def test_classic_optimization(self):
-        print('TODO')
+        pass
+    
+    def test_constraint_generation_optimization(self):
+        pass
+    
+    def test_sample_sequence(self):
+        pass
+    
+    def _sample_connected_components(self):
+        pass
+    
+    def test_sample_count_unique_solutions(self):
+        self.assertEqual(sample_count_unique_solutions(6, 6), 14.7)
+    
         
 
 if __name__ == '__main__':
+    
     unittest.main()

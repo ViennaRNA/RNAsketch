@@ -30,17 +30,25 @@ class Design(object):
         '''
         self._number_of_structures = None
         self.state = {}
-        self._structures = structures
+        self._structures = []
+        
+        if isinstance(structures, list):
+            for key , struct in enumerate(structures):
+                self._parseStructures(key, struct)
+        elif isinstance(structures, dict):
+            for key, struct in structures.items():
+                self._parseStructures(key, struct)
+        else:
+            raise TypeError('Structures must be a list or a dict hoding the state name and the structure')
+        
         self.sequence = sequence
         
-        for i, struct in enumerate(structures):
-            create_bp_table(struct) #check for balanced brackets
-            length = len(structures[0])
-            if not (isinstance(struct, basestring) and re.match(re.compile("[\(\)\.\+\&]"), struct)):
-                raise TypeError('Structure be a string in dot-bracket notation')
-            if length != len(struct):
-                raise TypeError('Structures must have equal length')
-            self.state[str(i)] = self._newState(struct)
+    def _parseStructures(self, key, struct):
+        create_bp_table(struct) #check for balanced brackets
+        if not (isinstance(struct, basestring) and re.match(re.compile("[\(\)\.\+\&]"), struct)):
+            raise TypeError('Structure be a string in dot-bracket notation')
+        self.state[str(key)] = self._newState(struct)
+        self._structures.append(struct)
     
     def _newState(self, struct):
         raise NotImplementedError
@@ -48,9 +56,6 @@ class Design(object):
     @property
     def structures(self):
         return self._structures
-    @structures.setter
-    def structures(self, s):
-        raise AttributeError('Cannot change structures in this object')
     
     @property
     def sequence(self):
@@ -121,56 +126,63 @@ class Design(object):
     
     @property
     def eos(self):
-        result = []
-        for s in self.state.values():
-            result.append(s.eos)
+        result = {}
+        for s in self.state:
+            result[s] = self.state[s].eos
         return result
     
     @property
     def pos(self):
-        result = []
-        for s in self.state.values():
-            result.append(s.pos)
+        result = {}
+        for s in self.state:
+            result[s] = self.state[s].pos
         return result
     
     @property
     def eos_diff_mfe(self):
-        result = []
-        for s in self.state.values():
-            result.append(s.eos_diff_mfe)
+        result = {}
+        for s in self.state:
+            result[s] = self.state[s].eos_diff_mfe
         return result
     
     @property
     def eos_reached_mfe(self):
-        result = []
-        for s in self.state.values():
-            result.append(s.eos_reached_mfe)
+        result = {}
+        for s in self.state:
+            result[s] = self.state[s].eos_reached_mfe
         return result
     
     @property
     def mfe_structure(self):
-        result = []
-        for s in self.state.values():
-            result.append(s.mfe_structure)
+        result = {}
+        for s in self.state:
+            result[s] = self.state[s].mfe_structure
         return result
     
     @property
     def mfe_energy(self):
-        result = []
-        for s in self.state.values():
-            result.append(s.mfe_energy)
+        result = {}
+        for s in self.state:
+            result[s] = self.state[s].mfe_energy
         return result
     @property
     def pf_structure(self):
-        result = []
-        for s in self.state.values():
-            result.append(s.pf_structure)
+        result = {}
+        for s in self.state:
+            result[s] = self.state[s].pf_structure
         return result
     @property
     def pf_energy(self):
-        result = []
-        for s in self.state.values():
-            result.append(s.pf_energy)
+        result = {}
+        for s in self.state:
+            result[s] = self.state[s].pf_energy
+        return result
+    
+    @property
+    def ensemble_defect(self):
+        result = {}
+        for s in self.state:
+            result[s] = self.state[s].ensemble_defect
         return result
     
     @property
