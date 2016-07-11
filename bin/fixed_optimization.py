@@ -2,6 +2,7 @@ from __future__ import print_function
 
 try:
     from PyDesign import *
+    import PyDesign
 except ImportError, e:
     print(e.message)
     exit(1)
@@ -15,11 +16,10 @@ import random
 def main():
     parser = argparse.ArgumentParser(description='Design a tri-stable example same to Hoehner 2013 paper.')
     parser.add_argument("-f", "--file", type = str, default=None, help='Read file in *.inp format')
-    parser.add_argument("-s", "--start", type = str, default=None, help='Read file in with start sequence')
     parser.add_argument("-i", "--input", default=False, action='store_true', help='Read custom structures and sequence constraints from stdin')
     parser.add_argument("-q", "--nupack", default=False, action='store_true', help='Use Nupack instead of the ViennaRNA package (for pseudoknots)')
     parser.add_argument("-n", "--number", type=int, default=100, help='Number of designs to generate')
-    parser.add_argument("-e", "--exit", type=int, default=100000, help='Exit optimization run if no better solution is aquired after (exit) trials.')
+    parser.add_argument("-e", "--exit", type=int, default=40000, help='Exit optimization run if no better solution is aquired after (exit) trials.')
     parser.add_argument("-m", "--mode", type=str, default='sample_global', help='Mode for getting a new sequence: sample, sample_local, sample_global, sample_strelem')
     parser.add_argument("-k", "--kill", type=int, default=0, help='Timeout value of graph construction in seconds. (default: infinite)')
     parser.add_argument("-g", "--graphml", type=str, default=None, help='Write a graphml file with the given filename.')
@@ -48,11 +48,6 @@ def main():
             '........((((....((((....))))....))))',
             '((((((((....))))((((....))))....))))']
         constraint = 'NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN'
-    if (args.start is not None):
-        with open(args.start, 'r') as f:
-            data = f.read()
-            start_sequence = data.rstrip('\n')
-            print('# ' + start_sequence)
     # try to construct dependency graph, catch errors and timeouts
     dg = None
     construction_time = 0.0
@@ -70,14 +65,11 @@ def main():
     print("# " + "\n# ".join(structures) + "\n# " + constraint)
 
     if (dg is not None):
+        
         # if requested write out a graphml file
         if args.graphml is not None:
             with open(args.graphml, 'w') as f:
                 f.write(dg.get_graphml() + "\n")
-        
-        # if start sequence is not set, generate one
-        if (start_sequence is ''):
-            start_sequence = dg.get_sequence()
         
         # print the amount of solutions
         print('# Maximal number of solutions: ' + str(dg.number_of_sequences()))
@@ -105,13 +97,6 @@ def main():
                         "sample_time",
                         design.write_csv_header()] +
                         graph_properties.keys()))
-        
-        samplings = []
-        endpoint = math.log(args.exit, 10)
-        for i in range(0, int(endpoint)):
-            samplings.append(10**i - sum(samplings))
-            samplings.append(2*10**i - sum(samplings))
-            samplings.append(5*10**i - sum(samplings))
 
         # main loop from zero to number of solutions
         for n in range(0, args.number):
@@ -122,43 +107,30 @@ def main():
                 design = vrnaDesign(structures, start_sequence)
             # optimize this design further and further
             number_of_mutations = 0
-            start = time.clock()
-            # print number of mutations for point 0
-            score = calculate_objective(design)
-            if (args.csv):
-                print("\"" + args.mode + "\"",
-                    score,
-                    number_of_mutations,
-                    construction_time,
-                    0,
-                    design.write_csv(),
-                    *graph_properties.values(), sep=";")
-            else:
-                print(design.write_out(score))
-            
-            for s in samplings: 
-                try:
-                    (score, mutations) = fixed_optimization(dg, design, number=s, mode=args.mode, progress=args.progress)
-                except ValueError as e:
-                    print (e.value)
-                    exit(1)
-                number_of_mutations += mutations
-                sample_time = time.clock() - start
-                 
-                if (args.csv):
-                    print("\"" + args.mode + "\"",
-                        score,
-                        number_of_mutations,
-                        construction_time,
-                        sample_time,
-                        design.write_csv(),
-                        *graph_properties.values(), sep=";")
-                else:
-                    print(design.write_out(score))
+            for _ in range(0, args.exit, 100): 
+		    start = time.clock()
+		    try:
+			(score, mutations) = fixed_optimization(dg, design, number=100, mode=args.mode, progress=args.progress)
+		    except ValueError as e:
+			print (e.value)
+			exit(1)
+                    number_of_mutations += mutations
+		    sample_time = time.clock() - start
+		    
+		    if (args.csv):
+			print("\"" + args.mode + "\"",
+				score,
+				number_of_mutations,
+				construction_time,
+				sample_time,
+				design.write_csv(),
+				*graph_properties.values(), sep=";")
+		    else:
+			print(design.write_out(score))
     else:
         print('# Construction time out reached!')
 
-def fixed_optimization(dg, design, objective_function=calculate_objective, weight=0.5, number=100, mode='sample', progress=False):
+def fixed_optimization(dg, design, objective_function=calculate_objective, weight=1, number=100, mode='sample', progress=False):
     '''
     Takes a Design object and does a classic optimization of this sequence.
     :param dg: RNAdesign DependencyGraph object
@@ -182,16 +154,16 @@ def fixed_optimization(dg, design, objective_function=calculate_objective, weigh
     # remember how may mutations were done
     number_of_samples = 0
     # modes
-    modes = ['sample','sample_global','sample_local']
+    modes = ['sample','sample_global','sample_strelem']
     # main optimization loop 
     for n in range(0, number):
         # count up the mutations
         number_of_samples += 1
         # sample a new sequence
         if mode == "random":
-            (mut_nos, sample_count) = sample_sequence(dg, design, random.choice(modes), 1)
+            (mut_nos, sample_count) = PyDesign._sample_sequence(dg, design, random.choice(modes), 1)
         else:
-            (mut_nos, sample_count) = sample_sequence(dg, design, mode, 1)
+            (mut_nos, sample_count) = PyDesign._sample_sequence(dg, design, mode, 1)
         
         # write progress
         if progress:
