@@ -42,7 +42,7 @@ class State(object):
     for this state.
     '''
     
-    def __init__(self, structure, parent):
+    def __init__(self, parent, structure=None, temperature=37.0, ligand=None, constraint=None, enforce_constraint=False):
         '''
         Construct a new State object.
         
@@ -56,10 +56,10 @@ class State(object):
         self._structure = structure
         self._parent = parent
         self.reset()
-        self._temperature = 37.0
-        self._ligand = None
-        self._constraint = None
-        self._enforce_constraint = False
+        self._temperature = temperature
+        self._ligand = ligand
+        self._constraint = constraint
+        self._enforce_constraint = enforce_constraint
         self._length = None
         self._cut_points = None
         self._multifold = None
@@ -106,8 +106,8 @@ class State(object):
     def constraint(self, constraint):
         if constraint:
             create_bp_table(constraint) #check for balanced brackets
-            if (len(constraint) != len(self._structure)):
-                raise ValueError('constraint and structure must have equal length!')
+            if (len(constraint) != self.length):
+                raise ValueError('constraint and sequence must have equal length!')
         self.reset()
         self._constraint = constraint
     
@@ -123,12 +123,16 @@ class State(object):
     @property
     def length(self):
         if not self._length:
-            self._length = len(self._structure)
+            if self._parent:
+                if self._parent.sequence:
+                    self._length = len(self._parent.sequence)
+            else:
+                self._length = len(self.structure)
         return self._length
     
     @property
     def cut_points(self):
-        if not self._cut_points:
+        if not self._cut_points and self._structure:
             self._cut_points = []
             iterator = re.finditer(re.compile('\&|\+'), self._structure)
             for match in iterator:
@@ -147,7 +151,7 @@ class State(object):
     
     @property
     def eos(self):
-        if not self._eos and self._parent.sequence:
+        if not self._eos and self._parent.sequence and self._structure:
             self._eos = self._get_eos(self._parent.sequence, self._structure, self.temperature, self.ligand)
         return self._eos
          
@@ -208,7 +212,7 @@ class State(object):
     
     @property
     def ensemble_defect(self):
-        if not self._ensemble_defect and self._parent.sequence:
+        if not self._ensemble_defect and self._parent.sequence and self._structure:
             if (len(self._parent.sequence) != len(self._structure)):
                 raise ValueError('sequence and structure must have equal length to calculate the ensemble defect!')
             self._ensemble_defect = self._get_ensemble_defect(self._parent.sequence, self._structure, self.temperature, self.ligand)

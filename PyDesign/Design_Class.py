@@ -30,7 +30,6 @@ class Design(object):
         '''
         self._number_of_structures = None
         self.state = {}
-        self._structures = []
         
         if isinstance(structures, list):
             for key , struct in enumerate(structures):
@@ -47,15 +46,18 @@ class Design(object):
         create_bp_table(struct) #check for balanced brackets
         if not (isinstance(struct, basestring) and re.match(re.compile("[\(\)\.\+\&]"), struct)):
             raise TypeError('Structure be a string in dot-bracket notation')
-        self.state[str(key)] = self._newState(struct)
-        self._structures.append(struct)
+        self.newState(str(key), struct)
     
-    def _newState(self, struct):
+    def newState(self, key, struct, temperature=37.0, ligand=None, constraint=None, enforce_constraint=False):
         raise NotImplementedError
     
     @property
     def structures(self):
-        return self._structures
+        result = []
+        for s in self.state:
+            if self.state[s].structure not in result:
+                result.append(self.state[s].structure)
+        return result
     
     @property
     def sequence(self):
@@ -190,9 +192,9 @@ class Design(object):
         return len(self.sequence)
 
 class vrnaDesign(Design):
-    def _newState(self, struct):
-        return vrnaState(struct, self)
+    def newState(self, key, struct, temperature=37.0, ligand=None, constraint=None, enforce_constraint=False):
+        self.state[key] = vrnaState(self, structure=struct, temperature=temperature, ligand=ligand, constraint=constraint, enforce_constraint=enforce_constraint)
 
 class nupackDesign(Design):
-    def _newState(self, struct):
-        return nupackState(struct, self)
+    def newState(self, key, struct, temperature=37.0, ligand=None, constraint=None, enforce_constraint=False):
+        self.state[key] = nupackState(self, structure=struct, temperature=temperature, ligand=ligand, constraint=constraint, enforce_constraint=enforce_constraint)

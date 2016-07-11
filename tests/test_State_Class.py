@@ -15,7 +15,7 @@ import unittest
 class TestStateClass(unittest.TestCase):
     
     def test_init(self):
-        a = vrnaState('(...)', None)
+        a = vrnaState(None, '(...)')
         self.assertEqual(a._parent, None)
         self.assertEqual(a.structure, '(...)')
         self.assertEqual(a.temperature, 37.0)
@@ -27,7 +27,7 @@ class TestStateClass(unittest.TestCase):
         self.assertEqual(a.multifold, 0)
         
     def test_set_values(self):
-        a = vrnaState('(...)', None)
+        a = vrnaState(None, '(...)')
         a.temperature = 24.0
         self.assertEqual(a.temperature, 24.0)
         a.ligand = ['A&U', '(&)', -5.6]
@@ -39,8 +39,8 @@ class TestStateClass(unittest.TestCase):
     
     def test_wrong_values(self):
         with self.assertRaises(ValueError):
-            a = vrnaState(['(...)'], None)
-        a = vrnaState('(...)', None)
+            a = vrnaState(None, ['(...)'])
+        a = vrnaState(None, '(...)')
         with self.assertRaises(AttributeError):
             a.structure = '.....'
         with self.assertRaises(ValueError):
@@ -53,9 +53,9 @@ class TestStateClass(unittest.TestCase):
             a.constraint = '.(.))'
     
     def test_cut_points(self):
-        a = vrnaState('..&..+..&..', None)
+        a = vrnaState(None, '..&..+..&..')
         self.assertEqual(a.cut_points, [3,6,9])
-        a = vrnaState('..&..+..&&..', None)
+        a = vrnaState(None, '..&..+..&&..')
         self.assertEqual(a.cut_points, [3,6,9,10])
     
     def test_eos(self):
@@ -123,7 +123,7 @@ class TestStateClass(unittest.TestCase):
         self.assertEqual(round(a.state['0'].mfe_energy, 2), round(a.state['1'].mfe_energy+5.6, 2))
     
     def test_length(self):
-        a = vrnaState('(...)', None)
+        a = vrnaState(None, '(...)')
         self.assertEqual(a.length, 5)
         with self.assertRaises(AttributeError):
             a.length = 6
