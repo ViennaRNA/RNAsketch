@@ -49,7 +49,6 @@ class State(object):
         :param structure:
         :param parent:
         '''
-        
         if not isinstance(structure, basestring):
             raise ValueError('Not a structure string: ' + repr(structure))
         
@@ -123,11 +122,11 @@ class State(object):
     @property
     def length(self):
         if not self._length:
-            if self._parent:
-                if self._parent.sequence:
-                    self._length = len(self._parent.sequence)
+            if self._parent and self._parent.sequence:
+                self._length = len(self._parent.sequence)
             else:
-                self._length = len(self.structure)
+                self._length = len(self._structure)
+
         return self._length
     
     @property
