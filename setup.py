@@ -19,16 +19,6 @@ setup(
     url = "http://github.com/ribonets/PyDesign",
     packages=['PyDesign'],
     install_requires=[
-              'sys',
-              'os',
-              're',
-              'random',
-              'sys',
-              'collections',
-              'sys',
-              'math',
-              'tempfile',
-              'subprocess'
                     ],
     scripts=['bin/classic_optimization.py'],
     long_description=read('README.md'),
