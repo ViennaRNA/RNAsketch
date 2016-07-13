@@ -133,7 +133,7 @@ def main():
                 design = vrnaDesign(structures, start_sequence)
             
             # set fold constraints
-            design.constraints = fold_constraints
+            design.foldconstraints = fold_constraints
             design.context = context
             
             start = time.clock()
@@ -186,7 +186,7 @@ def cofold_objective(design, weight1=1, weight2=1, weight3=1):
     '''
 
     seqs = design.sequence.split('&')
-    constr = design.constraints[1].split('&')
+    constr = design.foldconstraints[1].split('&')
     Ca0 = 1e-05
 
     # set RNA variables
@@ -215,7 +215,7 @@ def cofold_objective(design, weight1=1, weight2=1, weight3=1):
     # Get Energy of all structures that have our binding site Esab (constraint should look like: '....((((((.....&....))))))....')
     RNA.cvar.cut_point = len(seqs[0])+1;
     RNA.cvar.fold_constrained = 1
-    (const_x, const_ac, const_bc, const_fcab, conqst_cf) = RNA.co_pf_fold(seqs[0]+seqs[1], design._remove_cuts(design.constraints[0]))
+    (const_x, const_ac, const_bc, const_fcab, conqst_cf) = RNA.co_pf_fold(seqs[0]+seqs[1], remove_cuts(design.foldconstraints[0]))
     RNA.cvar.fold_constrained = 0
     RNA.cvar.cut_point = -1
     Esab = const_fcab
