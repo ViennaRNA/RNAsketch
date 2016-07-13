@@ -18,6 +18,7 @@ setup(
     keywords = "RNA design synthetic biology",
     url = "http://github.com/ribonets/PyDesign",
     packages=['PyDesign'],
+    test_suite="tests",
     install_requires=[
                     ],
     scripts=['bin/classic_optimization.py'],
