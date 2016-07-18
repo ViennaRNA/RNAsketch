@@ -43,16 +43,27 @@ class Design(object):
         self.sequence = sequence
         
     def _parseStructures(self, key, struct):
+        '''
+        Function to create a new state given the state-name and the structure in dot-bracket notation
+        :param key: Name of the state
+        :param struct: Dot-bracket notation of a structure input
+        '''
         create_bp_table(struct) #check for balanced brackets
         if not (isinstance(struct, basestring) and re.match(re.compile("[\(\)\.\+\&]"), struct)):
             raise TypeError('Structure be a string in dot-bracket notation')
         self.newState(str(key), struct)
     
     def newState(self, key, struct, temperature=37.0, ligand=None, constraint=None, enforce_constraint=False):
+        '''
+        Creates a new state of the given subclass.
+        '''
         raise NotImplementedError
     
     @property
     def structures(self):
+        '''
+        :return: List containing the structures of all states
+        '''
         result = []
         for s in self.state:
             if self.state[s].structure not in result:
@@ -61,6 +72,9 @@ class Design(object):
     
     @property
     def sequence(self):
+        '''
+        :return: Sequence of this design object
+        '''
         return self._sequence
     @sequence.setter
     def sequence(self, s):
@@ -75,6 +89,9 @@ class Design(object):
     
     @property
     def number_of_structures(self):
+        '''
+        :return: Number of uniq structures of all states
+        '''
         if not self._number_of_structures:
             self._number_of_structures = len(self.structures)
         return self._number_of_structures
@@ -128,6 +145,9 @@ class Design(object):
     
     @property
     def eos(self):
+        '''
+        :return: Dict of energy of structure values of all states with state names as keys
+        '''
         result = {}
         for s in self.state:
             result[s] = self.state[s].eos
@@ -135,6 +155,9 @@ class Design(object):
     
     @property
     def pos(self):
+        '''
+        :return: Dict of probability of structure values of all states with state names as keys
+        '''
         result = {}
         for s in self.state:
             result[s] = self.state[s].pos
@@ -142,6 +165,9 @@ class Design(object):
     
     @property
     def eos_diff_mfe(self):
+        '''
+        :return: Dict of energy of structure to MFE difference values of all states with state names as keys
+        '''
         result = {}
         for s in self.state:
             result[s] = self.state[s].eos_diff_mfe
@@ -149,6 +175,9 @@ class Design(object):
     
     @property
     def eos_reached_mfe(self):
+        '''
+        :return: Dict of booleans telling if the energy of struct equals the mfe energy of all states with state names as keys
+        '''
         result = {}
         for s in self.state:
             result[s] = self.state[s].eos_reached_mfe
@@ -156,6 +185,9 @@ class Design(object):
     
     @property
     def mfe_structure(self):
+        '''
+        :return: Dict of mfe structures of all states with state names as keys
+        '''
         result = {}
         for s in self.state:
             result[s] = self.state[s].mfe_structure
@@ -163,18 +195,27 @@ class Design(object):
     
     @property
     def mfe_energy(self):
+        '''
+        :return: Dict of mfe values of all states with state names as keys
+        '''
         result = {}
         for s in self.state:
             result[s] = self.state[s].mfe_energy
         return result
     @property
     def pf_structure(self):
+        '''
+        :return: Dict of partition function consensus structures of all states with state names as keys
+        '''
         result = {}
         for s in self.state:
             result[s] = self.state[s].pf_structure
         return result
     @property
     def pf_energy(self):
+        '''
+        :return: Dict of partition function energy values of all states with state names as keys
+        '''
         result = {}
         for s in self.state:
             result[s] = self.state[s].pf_energy
@@ -182,6 +223,9 @@ class Design(object):
     
     @property
     def ensemble_defect(self):
+        '''
+        :return: Dict of ensemble defect values of all states with state names as keys
+        '''
         result = {}
         for s in self.state:
             result[s] = self.state[s].ensemble_defect
@@ -189,6 +233,9 @@ class Design(object):
     
     @property
     def length(self):
+        '''
+        :return: Length of the designed sequence
+        '''
         return len(self.sequence)
 
 class vrnaDesign(Design):

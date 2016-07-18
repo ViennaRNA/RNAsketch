@@ -76,10 +76,16 @@ class State(object):
     
     @property
     def structure(self):
+        '''
+        :return: Dot-bracket structure as constraint for this state
+        '''
         return self._structure
     
     @property
     def temperature(self):
+        '''
+        :return: Temperature of this state 
+        '''
         return self._temperature
     @temperature.setter
     def temperature(self, t):
@@ -90,6 +96,9 @@ class State(object):
     
     @property
     def ligand(self):
+        '''
+        :return: Ligand binding definitions for this state; List with sequence pattern, structure pattern and binding energy (soft constraint)
+        '''
         return self._ligand
     @ligand.setter
     def ligand(self, lig):
@@ -100,6 +109,9 @@ class State(object):
     
     @property
     def constraint(self):
+        '''
+        :return: Structural constraint of this state (hard constraint)
+        '''
         return self._constraint
     @constraint.setter
     def constraint(self, constraint):
@@ -112,6 +124,9 @@ class State(object):
     
     @property
     def enforce_constraint(self):
+        '''
+        :return: Boolean whether to enforce the hard constraint or not 
+        '''
         return self._enforce_constraint
     @enforce_constraint.setter
     def enforce_constraint(self, enforced):
@@ -121,6 +136,9 @@ class State(object):
     
     @property
     def length(self):
+        '''
+        :return: Length of the design sequence if available, otherwise of the stuctural input 
+        '''
         if not self._length:
             if self._parent and self._parent.sequence:
                 self._length = len(self._parent.sequence)
@@ -131,6 +149,9 @@ class State(object):
     
     @property
     def cut_points(self):
+        '''
+        :return: List containing the positions of the cut points (& or +) in the sequence
+        '''
         if not self._cut_points and self._structure:
             self._cut_points = []
             iterator = re.finditer(re.compile('\&|\+'), self._structure)
@@ -140,6 +161,9 @@ class State(object):
     
     @property
     def multifold(self):
+        '''
+        :return: Number of cut points to specify if it is a cofold or multifold problem
+        '''
         if not self._multifold:
             self._multifold = len(self.cut_points)
         return self._multifold
@@ -150,24 +174,36 @@ class State(object):
     
     @property
     def eos(self):
+        '''
+        :return: Energy of structure given all the properties of this state (constraints, temperature,...)
+        '''
         if not self._eos and self._parent.sequence and self._structure:
             self._eos = self._get_eos(self._parent.sequence, self._structure, self.temperature, self.ligand)
         return self._eos
          
     @property
     def pos(self):
+        '''
+        :return: Probability of structure given all the properties of this state (constraints, temperature,...)
+        '''
         if not self._pos and self._parent.sequence:
             self._pos = math.exp((self.pf_energy-self.eos) / self._get_KT(self.temperature) )
         return self._pos
          
     @property
     def eos_diff_mfe(self):
+        '''
+        :return: Energy difference of structure to mfe given all the properties of this state (constraints, temperature,...)
+        '''
         if not self._eos_diff_mfe and self._parent.sequence:
             self._eos_diff_mfe = self.eos - self.mfe_energy
         return self._eos_diff_mfe
     
     @property
     def eos_reached_mfe(self):
+        '''
+        :return: Boolean defining whether the eos reached the mfe energy
+        '''
         if not self._eos_reached_mfe and self._parent.sequence:
             if (self.eos == self.mfe_energy):
                 self._eos_reached_mfe = 1
@@ -177,12 +213,18 @@ class State(object):
     
     @property
     def mfe_energy(self):
+        '''
+        :return: MFE value given all the properties of this state (constraints, temperature,...)
+        '''
         if not self._mfe_energy and self._parent.sequence:
             self._calculate_mfe_energy_structure()
         return self._mfe_energy
     
     @property
     def mfe_structure(self):
+        '''
+        :return: MFE structure given all the properties of this state (constraints, temperature,...)
+        '''
         if not self._mfe_structure and self._parent.sequence:
             self._calculate_mfe_energy_structure()
         return self._mfe_structure
@@ -194,12 +236,18 @@ class State(object):
     
     @property
     def pf_energy(self):
+        '''
+        :return: Partition function energy value given all the properties of this state (constraints, temperature,...)
+        '''
         if not self._pf_energy and self._parent.sequence:
             self._calculate_pf_energy_structure()
         return self._pf_energy
     
     @property
     def pf_structure(self):
+        '''
+        :return: Partition function consensus structure given all the properties of this state (constraints, temperature,...)
+        '''
         if not self._pf_structure and self._parent.sequence:
             self._calculate_pf_energy_structure()
         return self._pf_structure
@@ -211,6 +259,9 @@ class State(object):
     
     @property
     def ensemble_defect(self):
+        '''
+        :return: Ensemble defect value given all the properties of this state (constraints, temperature,...)
+        '''
         if not self._ensemble_defect and self._parent.sequence and self._structure:
             if (len(self._parent.sequence) != len(self._structure)):
                 raise ValueError('sequence and structure must have equal length to calculate the ensemble defect!')
@@ -344,9 +395,19 @@ if nupack_available:
             return nupack.defect([self._change_cuts(sequence)], structure, material = 'rna', pseudo = True, T = temperature)
         
 def remove_cuts(input):
+    '''
+    Takes a string and removes all cut characters (+&) from this string
+    :param input: string containing cut point characters
+    :return: string without cut point characters
+    '''
     return re.sub('[+&]', '', input)
 
 def add_cuts(input, cut_points):
+    '''
+    Takes a string and add back the cut point characters at the positions stored in the cut points list
+    :param input: string without cut point characters
+    :return: string containing cut point characters
+    '''
     result = input
     for cut in cut_points:
         result = result[:cut-1] + '&' + result[cut-1:]

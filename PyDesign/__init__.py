@@ -34,6 +34,7 @@ def read_inp_file(filename):
     :param filename: Filename of the file to read
     :return structures: List of structures in dot-bracket notation
     :return constraint: Sequence constraint
+    :return sequence: Start sequence
     '''
     
     with open(filename) as f:
@@ -122,6 +123,7 @@ def calculate_objective(design, weight=0.5):
     :type design: Object of type Design
     :param weight: To wheight the influence of the eos diffences
     :type weight: float
+    :return score: score calculated by the objective function
     '''
     return calculate_objective_1(design) + weight * calculate_objective_2(design)
 
@@ -131,6 +133,7 @@ def calculate_objective_1(design):
     objective function (3 seqs):    (eos(1)+eos(2)+eos(3) - 3 * gibbs) / number_of_structures
     :param design: Design object containing the sequence and structures
     :type design: Object of type Design
+    :return score: score calculated by the objective function
     '''
     return (sum(design.eos.values()) - sum(design.pf_energy.values())) / design.number_of_structures
 
@@ -139,6 +142,7 @@ def calculate_objective_2(design):
     Calculates the objective function given a Design object containing the designed sequence and input structures.
     objective function (3 seqs):    (eos(1)-eos(2))^2 + (eos(1)-eos(3))^2 + (eos(2)-eos(3))^2) * 2 / (number_of_structures * (number_of_structures-1))
     :param design: Design object containing the sequence and structures
+    :return score: score calculated by the objective function
     '''
     objective_difference_part = 0
     eos = design.eos.values()
