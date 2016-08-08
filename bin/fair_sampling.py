@@ -76,9 +76,9 @@ def main():
     values = []
        
     # do everything twice with fair and unfair sampling
-    import RNAdesign as rd
+    import RNAblueprint as rbp
     for mode in ['fair', 'unfair']:
-        rd.initialize_library(args.debug, args.kill)
+        rbp.initialize_library(args.debug, args.kill)
         
         # try to construct dependency graph, catch errors and timeouts
         dg = None
@@ -94,7 +94,7 @@ def main():
         
         try:
             start = time.clock()
-            dg = rd.DependencyGraphMT(structures, constraint)
+            dg = rbp.DependencyGraphMT(structures, constraint)
             construction_time = time.clock() - start
         except Exception as e:
             print( "Error: %s" % e , file=sys.stderr)
@@ -158,7 +158,7 @@ def main():
                         result[2], 
                         result[3], sep=";")
             # now once more with unfair sampling
-            import RNAunfairdesign as rd
+            import RNAunfairdesign as rbp
     
     plot_data(values, unfair_values, args);
 

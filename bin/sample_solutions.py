@@ -22,12 +22,12 @@ def main():
     print("# Options: number={0:d}, kill={1:d}".format(args.number, args.kill))
     
     if (args.unfair):
-        import RNAunfairdesign as rd
+        import RNAunfairdesign as rbp
     else:
-        import RNAdesign as rd
+        import RNAblueprint as rbp
     
     # initialize library
-    rd.initialize_library(args.debug, args.kill)
+    rbp.initialize_library(args.debug, args.kill)
     
     # define structures
     structures = []
@@ -63,7 +63,7 @@ def main():
     dg = None
     
     try:
-        dg = rd.DependencyGraphMT(structures, constraint)
+        dg = rbp.DependencyGraphMT(structures, constraint)
     except Exception as e:
         print( "Error: %s" % e , file=sys.stderr)
     

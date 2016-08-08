@@ -6,7 +6,7 @@ except ImportError, e:
     print(e.message)
     exit(1)
 
-import RNAdesign as rd
+import RNAblueprint as rbp
 import argparse
 import sys
 import time
@@ -29,7 +29,7 @@ def main():
     args = parser.parse_args()
 
     print("# Options: number={0:d}, jump={1:d}, exit={2:d}, strelem={3:d}, mode={4:}, nupack={5:}".format(args.number, args.jump, args.exit, args.strelem, args.mode, str(args.nupack)))
-    rd.initialize_library(args.debug, args.kill)
+    rbp.initialize_library(args.debug, args.kill)
     # define structures
     structures = []
     fold_constraints = []
@@ -80,7 +80,7 @@ def main():
     # construct dependency graph with these structures
     try:
         start = time.clock()
-        dg = rd.DependencyGraphMT(structures, constraint)
+        dg = rbp.DependencyGraphMT(structures, constraint)
         construction_time = time.clock() - start
     except Exception as e:
         print( "Error: %s" % e , file=sys.stderr)

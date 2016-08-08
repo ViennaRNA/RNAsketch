@@ -7,7 +7,7 @@ except ImportError, e:
     print(e.message)
     exit(1)
 
-import RNAdesign as rd
+import RNAblueprint as rbp
 import argparse
 import sys
 import time

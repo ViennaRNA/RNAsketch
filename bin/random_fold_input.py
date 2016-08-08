@@ -1,12 +1,12 @@
 from __future__ import print_function
-import RNAdesign as rd
+import RNAblueprint as rbp
 import RNA
 import argparse
 
 
 def get_structures(args):
     # calculate a RNAfold for random structures
-    dg = rd.DependencyGraphMT(["." * args.length])
+    dg = rbp.DependencyGraphMT(["." * args.length])
     structures = []
     amount = args.structures
     while (amount > 0):
@@ -15,7 +15,7 @@ def get_structures(args):
         if (structure == "." * args.length):
             continue
         structures.append(structure)
-        bipartite = rd.graph_is_bipartite(structures)
+        bipartite = rbp.graph_is_bipartite(structures)
         if (bipartite):
             amount -= 1
         else:
@@ -35,7 +35,7 @@ def main():
     parser.add_argument("-d", "--debug", default=False, action='store_true', help='Show debug information of library')
     args = parser.parse_args()
     
-    rd.initialize_library(args.debug)
+    rbp.initialize_library(args.debug)
     RNA.temperature = args.temperature
     
     for n in range(0, args.number):        

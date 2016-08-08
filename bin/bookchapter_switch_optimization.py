@@ -6,7 +6,7 @@ except ImportError, e:
     print(e.message)
     exit(1)
 
-import RNAdesign as rd
+import RNAblueprint as rbp
 import argparse
 import sys
 import time
@@ -34,7 +34,7 @@ def main():
     args = parser.parse_args()
 
     print("# Options: number={0:d}, exit={1:d}, mode={2:}, nupack={3:}".format(args.number, args.exit,  args.mode, str(args.nupack)))
-    rd.initialize_library(args.debug, args.kill)
+    rbp.initialize_library(args.debug, args.kill)
 
     try:
         spacerrange = map(int, args.range.split(",")) #convert region to array of integers
@@ -111,7 +111,7 @@ def main():
             # construct dependency graph with these structures
             try:
                 start = time.clock()
-                dg = rd.DependencyGraphMT([ONL, OFFI, OFFL], SEQ)
+                dg = rbp.DependencyGraphMT([ONL, OFFI, OFFL], SEQ)
                 construction_time = time.clock() - start
             except Exception as e:
                 print( "Error: %s" % e , file=sys.stderr)

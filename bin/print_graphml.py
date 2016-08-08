@@ -1,5 +1,5 @@
 # http://hadim.fr/pygraphml/usage.html
-import RNAdesign
+import RNAblueprint
 import argparse
 import tempfile
 import sys
@@ -10,7 +10,7 @@ def graph_from_input(structures, constraint):
     g = None
     # get graphml from library
     try:
-        graphml = RNAdesign.structures_to_graphml(structures, constraint)
+        graphml = RNAblueprint.structures_to_graphml(structures, constraint)
     except Exception as e:
         print e
         quit()

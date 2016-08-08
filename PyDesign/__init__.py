@@ -14,7 +14,7 @@ import sys
 import random
 import collections
 
-import RNAdesign as rd
+import RNAblueprint as rbp
 from Design_Class import *
 
 '''
@@ -348,7 +348,7 @@ def constraint_generation_optimization(dg, design, objective_function=calculate_
             # evaluate the constraints
             for negc in reversed(neg_constraints):
                 # test if the newly sampled sequence is compatible to the neg constraint, if not -> Perfect!
-                if rd.sequence_structure_compatible(design.sequence, [negc]):
+                if rbp.sequence_structure_compatible(design.sequence, [negc]):
                     if design.classtype == 'vrnaDesign':
                         neg_eos = RNA.energy_of_struct(design.sequence, negc)
                     elif design.classtype == 'nupackDesign':

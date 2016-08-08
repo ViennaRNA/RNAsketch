@@ -7,7 +7,7 @@ except ImportError, e:
     print(e.message)
     exit(1)
 
-import RNAdesign as rd
+import RNAblueprint as rbp
 import argparse
 import sys
 import time
@@ -29,7 +29,7 @@ def main():
     args = parser.parse_args()
 
     print("# Options: number={0:d}, exit={1:d}, mode={2:}, nupack={3:}".format(args.number, args.exit, args.mode, str(args.nupack)))
-    rd.initialize_library(args.debug, args.kill)
+    rbp.initialize_library(args.debug, args.kill)
     # define structures
     structures = []
     constraint = ''
@@ -56,7 +56,7 @@ def main():
     # construct dependency graph with these structures
     try:
         start = time.clock()
-        dg = rd.DependencyGraphMT(structures, constraint)
+        dg = rbp.DependencyGraphMT(structures, constraint)
         construction_time = time.clock() - start
     except Exception as e:
         print( "Error: %s" % e , file=sys.stderr)
@@ -133,7 +133,7 @@ def main():
 def fixed_optimization(dg, design, objective_function=calculate_objective, weight=1, number=100, mode='sample', progress=False):
     '''
     Takes a Design object and does a classic optimization of this sequence.
-    :param dg: RNAdesign DependencyGraph object
+    :param dg: RNAblueprint DependencyGraph object
     :param design: Design object containing the sequence and structures
     :param objective_function: function which takes a design object and returns a score for evaluation
     :param weight: float specifying the weight of the difference part of the objective function
