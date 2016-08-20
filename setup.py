@@ -10,7 +10,7 @@ def read(fname):
 
 setup(
     name = "PyDesign",
-    version = "0.1.0",
+    version = "1.0",
     author = "Stefan Hammer",
     author_email = "s.hammer@univie.ac.at",
     description = ("A wrapper framework to design RNA molecules."),
@@ -24,7 +24,7 @@ setup(
     scripts=['bin/classic_optimization.py'],
     long_description=read('README.md'),
     classifiers=[
-        "Development Status :: 4 - Beta",
+        "Development Status :: 5 - Production/Stable",
         "Topic :: Scientific/Engineering :: Chemistry",
         "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
     ],

@@ -14,5 +14,5 @@ python setup.py install
 
 * Classic optimization script 
 
-  >>> echo -e '(((((....)))))....\n....(((((....)))))' | classic_optimization.py -i -m random -e 500
+> echo -e '(((((....)))))....\n....(((((....)))))' | classic_optimization.py -i -m random -e 500
 
