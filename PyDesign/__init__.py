@@ -31,10 +31,11 @@ except ImportError, e:
 def read_inp_file(filename):
     '''
     Reads a file in *.inp format and returns all neccessary information
+
     :param filename: Filename of the file to read
-    :return structures: List of structures in dot-bracket notation
-    :return constraint: Sequence constraint
-    :return sequence: Start sequence
+    :return: structures - List of structures in dot-bracket notation
+    :return: constraint - Sequence constraint
+    :return: sequence - Start sequence
     '''
     
     with open(filename) as f:
@@ -49,10 +50,11 @@ def read_input(content):
     Reads some input and returns all neccessary information in the right container.
     Input is a string, lines separated by linebreaks. Content might be structures, 
     a sequence constraint and a start sequence
+    
     :param filename: Filename of the file to read
-    :return structures: List of structures in dot-bracket notation
-    :return constraint: Sequence constraint
-    :return sequence: Start sequence
+    :return: structures - List of structures in dot-bracket notation
+    :return: constraint - Sequence constraint
+    :return: sequence - Start sequence
     '''
     structures = []
     constraint = ''
@@ -87,8 +89,9 @@ def get_graph_properties(dg):
     '''
     Takes a RNAdesign DependencyGraph Object and constructs a dicionary with all the
     calculated properties.
+    
     :param dg: RNAdesign DependencyGraph object
-    :return properties: Dictionary containing all the graph properties
+    :return: properties - Dictionary containing all the graph properties
     '''
     properties = {}
     special_ratios = []
@@ -119,11 +122,12 @@ def calculate_objective(design, weight=0.5):
     Calculates the objective function given a Design object containing the designed sequence and input structures.
     objective function (3 seqs):    (eos(1)+eos(2)+eos(3) - 3 * gibbs) / number_of_structures +
     weight * (eos(1)-eos(2))^2 + (eos(1)-eos(3))^2 + (eos(2)-eos(3))^2) * 2 / (number_of_structures * (number_of_structures-1))
+    
     :param design: Design object containing the sequence and structures
     :type design: Object of type Design
     :param weight: To wheight the influence of the eos diffences
     :type weight: float
-    :return score: score calculated by the objective function
+    :return: score calculated by the objective function
     '''
     return calculate_objective_1(design) + weight * calculate_objective_2(design)
 
@@ -131,9 +135,10 @@ def calculate_objective_1(design):
     '''
     Calculates the objective function given a Design object containing the designed sequence and input structures.
     objective function (3 seqs):    (eos(1)+eos(2)+eos(3) - 3 * gibbs) / number_of_structures
+    
     :param design: Design object containing the sequence and structures
     :type design: Object of type Design
-    :return score: score calculated by the objective function
+    :return: score calculated by the objective function
     '''
     return (sum(design.eos.values()) - sum(design.pf_energy.values())) / design.number_of_structures
 
@@ -141,8 +146,9 @@ def calculate_objective_2(design):
     '''
     Calculates the objective function given a Design object containing the designed sequence and input structures.
     objective function (3 seqs):    (eos(1)-eos(2))^2 + (eos(1)-eos(3))^2 + (eos(2)-eos(3))^2) * 2 / (number_of_structures * (number_of_structures-1))
+    
     :param design: Design object containing the sequence and structures
-    :return score: score calculated by the objective function
+    :return: score calculated by the objective function
     '''
     objective_difference_part = 0
     eos = design.eos.values()
@@ -159,14 +165,15 @@ def sample_sequence(dg, design, mode, sample_steps=1, avoid_motifs=None, white_p
     '''
     This function samples a sequence with the given mode from the dependency graph object
     and writes it into the design object
+    
     :param dg: RNAdesign dependency graph object
     :param design: design object
     :param mode: mode how to sample, this is a string
     :param sample_steps: count how many times to do the sample operation
     :param avoid_motifs: list of regex pattern specifiying sequence motifs to avoid
     :param white_positions: list of positions in the sequence where the avoid_motifs pattern should be ignored
-    :param return: mut_nos is the solution space we drew from
-    :param return: sample_count is how many times we sampled a solution from the dependency graph object (important for revert later)
+    :return: mut_nos is the solution space we drew from
+    :return: sample_count is how many times we sampled a solution from the dependency graph object (important for revert later)
     '''
     if avoid_motifs is None:
         avoid_motifs=[]
@@ -235,6 +242,7 @@ def sample_sequence(dg, design, mode, sample_steps=1, avoid_motifs=None, white_p
 def classic_optimization(dg, design, objective_function=calculate_objective, exit=1000, mode='sample', avoid_motifs=None, white_positions=None, progress=False):
     '''
     Takes a Design object and does a classic optimization of this sequence.
+    
     :param dg: RNAdesign DependencyGraph object
     :param design: Design object containing the sequence and structures
     :param objective_functions: array of functions which takes a design object and returns a score for evaluation
@@ -243,8 +251,8 @@ def classic_optimization(dg, design, objective_function=calculate_objective, exi
     :param avoid_motifs: list of regex pattern specifiying sequence motifs to avoid
     :param white_positions: list of positions in the sequence where the avoid_motifs pattern should be ignored
     :param progress: Whether or not to print the progress to the console
-    :param return: Optimization score reached for the final sequence
-    "param return: Number of samples neccessary to reach this result
+    :return: Optimization score reached for the final sequence
+    :return: Number of samples neccessary to reach this result
     '''
     if avoid_motifs is None:
         avoid_motifs=[]
@@ -297,6 +305,7 @@ def classic_optimization(dg, design, objective_function=calculate_objective, exi
 def constraint_generation_optimization(dg, design, objective_function=calculate_objective, exit=1000, mode='sample', num_neg_constraints=100, max_eos_diff=0, avoid_motifs=None, white_positions=None, progress=False):
     '''
     Takes a Design object and does a constraint generation optimization of this sequence.
+    
     :param dg: RNAdesign DependencyGraph object
     :param design: Design object containing the sequence and structures
     :param objective_functions: array of functions which takes a design object and returns a score for evaluation
@@ -307,8 +316,8 @@ def constraint_generation_optimization(dg, design, objective_function=calculate_
     :param avoid_motifs: list of regex pattern specifiying sequence motifs to avoid
     :param white_positions: list of positions in the sequence where the avoid_motifs pattern should be ignored
     :param progress: Whether or not to print the progress to the console
-    :param return: Optimization score reached for the final sequence
-    "param return: Number of samples neccessary to reach this result
+    :return: Optimization score reached for the final sequence
+    :return: Number of samples neccessary to reach this result
     '''
     if avoid_motifs is None:
         avoid_motifs=[]
@@ -408,6 +417,7 @@ def _sample_connected_components(dg, amount=1):
     We need this function to draw from the set of CCs without getting the same CC twice.
     Therefore the complete number of solutions if we sample these CCs new, is the product of the
     number of solutions for each CC.
+    
     :param dg: Dependency Graph object from the RNAdesig library
     :param amount: number of connected components to sample
     :return: list of connected component IDs which can be used for example for: dg.sample_global(ID)
@@ -437,6 +447,7 @@ def sample_count_unique_solutions(solution_space_size, sample_size):
     '''
     Calculates the expectancy value of how many time it is necessary to draw a 
     solution to gain a unique set of solutions with the given sample size
+    
     :param solution_space_size: The size of the complete solutions space to draw from
     :param sample_size: The size of the requested unique set
     :return: Expectancy value of how many times to draw from the solution space to gain this unique set
