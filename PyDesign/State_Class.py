@@ -405,6 +405,7 @@ def remove_cuts(input):
 def add_cuts(input, cut_points):
     '''
     Takes a string and add back the cut point characters at the positions stored in the cut points list
+
     :param input: string without cut point characters
     :return: string containing cut point characters
     '''
@@ -417,6 +418,7 @@ def create_bp_table(structure):
     '''
     Takes a structure in dot bracket notation and returns a base pair table.
     Unpaired positions are -1, otherwise the index of the adjacent bracket is listed
+
     :param structure: string with dot-bracket notation of the strcture
     :return bpt: base pair table
     '''

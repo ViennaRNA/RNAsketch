@@ -30,7 +30,7 @@ except ImportError, e:
 
 def read_inp_file(filename):
     '''
-    Reads a file in *.inp format and returns all neccessary information
+    Reads a file in .inp format and returns all neccessary information
 
     :param filename: Filename of the file to read
     :return: structures - List of structures in dot-bracket notation
