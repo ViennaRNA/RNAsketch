@@ -5,7 +5,6 @@
 
 __author__ = "Stefan Hammer"
 __copyright__ = "Copyright 2016"
-__version__ = "0.1"
 __maintainer__ = "Stefan Hammer"
 __email__ = "s.hammer@univie.ac.at"
 

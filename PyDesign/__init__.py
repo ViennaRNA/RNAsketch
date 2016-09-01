@@ -6,7 +6,6 @@
 
 __author__ = "Stefan Hammer"
 __copyright__ = "Copyright 2016"
-__version__ = "0.1"
 __maintainer__ = "Stefan Hammer"
 __email__ = "s.hammer@univie.ac.at"
 
@@ -20,13 +19,6 @@ from Design_Class import *
 '''
 Global variable:
 '''
-forgi_available = True
-
-try:
-    import forgi.graph.bulge_graph as fgb
-except ImportError, e:
-    forgi_available = False
-
 
 def read_inp_file(filename):
     '''
@@ -205,17 +197,6 @@ def sample_sequence(dg, design, mode, sample_steps=1, avoid_motifs=None, white_p
             for _ in range(0, sample_steps):
                 mut_nos *= dg.sample_local()
                 sample_count += 1
-        elif mode == 'sample_strelem':
-            if forgi_available:
-                # sample new sequences for structural elements
-                struct = remove_cuts(random.choice(design.structures))
-                bg = fgb.BulgeGraph(dotbracket_str=struct)
-                for s in bg.random_subgraph(sample_steps):
-                    for i in range(0, len(bg.defines[s]), 2):
-                        mut_nos *= dg.sample(bg.defines[s][i]-1, bg.defines[s][i+1]-1)
-                        sample_count += 1
-            else:
-                raise ImportError("Forgi Library not available!")
         else:
             raise ValueError("Wrong mode argument: " + mode + "\n")
         
@@ -358,16 +339,16 @@ def constraint_generation_optimization(dg, design, objective_function=calculate_
             for negc in reversed(neg_constraints):
                 # test if the newly sampled sequence is compatible to the neg constraint, if not -> Perfect!
                 if rbp.sequence_structure_compatible(design.sequence, [negc]):
-                    if design.classtype == 'vrnaDesign':
+                    if design.classtype == 'vrna':
                         neg_eos = RNA.energy_of_struct(design.sequence, negc)
-                    elif design.classtype == 'nupackDesign':
+                    elif design.classtype == 'nupack':
                         neg_eos = nupack.energy([design.sequence], negc, material = 'rna', pseudo = True)
                     else:
                         raise ValueError('Could not figure out the classtype of the Design object.')
                     # test if the newly sampled sequence eos for pos constraints is lower than
                     # the eos for all negative constraints, if not -> Perfect!
-                    for k in range(0, design.number_of_structures):
-                        if float(neg_eos) - float(design.eos[k]) < max_eos_diff:
+                    for eos in design.eos.values():
+                        if float(neg_eos) - float(eos) < max_eos_diff:
                             # this is no better solution, revert!
                             perfect = False
                             dg.revert_sequence(sample_count)
@@ -393,7 +374,7 @@ def constraint_generation_optimization(dg, design, objective_function=calculate_
             dg.revert_sequence(sample_count)
             design.sequence = dg.get_sequence()
         # else if current mfe is not in negative constraints, add to it
-        for mfe_str in design.mfe_structure:
+        for mfe_str in design.mfe_structure.values():
             if mfe_str not in design.structures:
                 if mfe_str not in neg_constraints:
                     neg_constraints.append(mfe_str)

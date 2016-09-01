@@ -12,14 +12,13 @@ import sys
 import time
 
 def main():
-    parser = argparse.ArgumentParser(description='Design a tri-stable example same to Hoehner 2013 paper.')
+    parser = argparse.ArgumentParser(description='Design a multi-stable riboswitch using a constraint generation optimization method.')
     parser.add_argument("-f", "--file", type = str, default=None, help='Read file in *.inp format')
     parser.add_argument("-i", "--input", default=False, action='store_true', help='Read custom structures and sequence constraints from stdin')
     parser.add_argument("-q", "--nupack", default=False, action='store_true', help='Use Nupack instead of the ViennaRNA package (for pseudoknots)')
     parser.add_argument("-n", "--number", type=int, default=4, help='Number of designs to generate')
-    parser.add_argument("-j", "--jump", type=int, default=300, help='Do random jumps in the solution space for the first (jump) trials.')
     parser.add_argument("-e", "--exit", type=int, default=500, help='Exit optimization run if no better solution is aquired after (exit) trials.')
-    parser.add_argument("-m", "--mode", type=str, default='sample_global', help='Mode for getting a new sequence: sample, sample_local, sample_global, sample_strelem')
+    parser.add_argument("-m", "--mode", type=str, default='random', help='Mode for getting a new sequence: sample, sample_local, sample_global, random')
     parser.add_argument("-x", "--max_eos_diff", type=float, default=0, help='Energy of Struct difference allowed during constrained generation')
     parser.add_argument("-s", "--size_constraint", type=int, default=100, help='Size of negative constraints container')
     parser.add_argument("-k", "--kill", type=int, default=0, help='Timeout value of graph construction in seconds. (default: infinite)')
@@ -29,7 +28,7 @@ def main():
     parser.add_argument("-d", "--debug", default=False, action='store_true', help='Show debug information of library')
     args = parser.parse_args()
 
-    print("# Options: number={0:d}, jump={1:d}, exit={2:d}, size_constraint={3:d}, mode={4:}, nupack={5:}".format(args.number, args.jump, args.exit, args.size_constraint, args.mode, str(args.nupack)))
+    print("# Options: number={0:d}, exit={1:d}, size_constraint={2:d}, mode={3:}, nupack={4:}".format(args.number, args.exit, args.size_constraint, args.mode, str(args.nupack)))
     rbp.initialize_library(args.debug, args.kill)
     # define structures
     structures = []
@@ -90,8 +89,7 @@ def main():
         
         # print header for csv file
         if (args.csv):
-            print(";".join(["jump",
-                        "exit",
+            print(";".join(["exit",
                         "mode",
                         "score",
                         "num_mutations",
@@ -109,22 +107,18 @@ def main():
                 design = vrnaDesign(structures, start_sequence)
             
             start = time.clock()
-            # do a complete sampling jump times
-            (score, number_of_jumps) = classic_optimization(dg, design, exit=args.jump, mode='sample', progress=args.progress)
             # now do the optimization based on the chose mode
             try:
                 (score, number_of_mutations) = constraint_generation_optimization(dg, design, exit=args.exit, mode=args.mode, 
                             num_neg_constraints=args.size_constraint, max_eos_diff=args.max_eos_diff, progress=args.progress)
-            except ValueError as e:
-                print (e.value)
+            except Exception as e:
+                print('Error: '+ str(e))
                 exit(1)
-            # sum up for a complete number of mutations
-            number_of_mutations += number_of_jumps
+            # stop the clock timer
             sample_time = time.clock() - start
             
             if (args.csv):
-                print(args.jump,
-                        args.exit,
+                print(args.exit,
                         "\"" + args.mode + "\"",
                         score,
                         number_of_mutations,
