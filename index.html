@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>PyDesign package &#8212; PyDesign 1.0 documentation</title>
+    <title>PyDesign package &#8212; PyDesign 1.0.0 documentation</title>
     
     <link rel="stylesheet" href="_static/classic.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '1.0',
+        VERSION:     '1.0.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="PyDesign 1.0 documentation" href="#" /> 
+    <link rel="top" title="PyDesign 1.0.0 documentation" href="#" /> 
   </head>
   <body role="document">
     <div class="related" role="navigation" aria-label="related navigation">
@@ -35,7 +35,7 @@
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="#">PyDesign 1.0 documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="#">PyDesign 1.0.0 documentation</a> &#187;</li> 
       </ul>
     </div>  
 
@@ -55,84 +55,155 @@ functions for all major RNAdesign operations.</p>
 <code class="descclassname">PyDesign.</code><code class="descname">calculate_objective</code><span class="sig-paren">(</span><em>design</em>, <em>weight=0.5</em><span class="sig-paren">)</span><a class="headerlink" href="#PyDesign.calculate_objective" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculates the objective function given a Design object containing the designed sequence and input structures.
 objective function (3 seqs):    (eos(1)+eos(2)+eos(3) - 3 * gibbs) / number_of_structures +
-weight * (eos(1)-eos(2))^2 + (eos(1)-eos(3))^2 + (eos(2)-eos(3))^2) * 2 / (number_of_structures * (number_of_structures-1))
-:param design: Design object containing the sequence and structures
-:type design: Object of type Design
-:param weight: To wheight the influence of the eos diffences
-:type weight: float
-:return score: score calculated by the objective function</p>
+weight * (eos(1)-eos(2))^2 + (eos(1)-eos(3))^2 + (eos(2)-eos(3))^2) * 2 / (number_of_structures * (number_of_structures-1))</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>design</strong> (<em>Object of type Design</em>) &#8211; Design object containing the sequence and structures</li>
+<li><strong>weight</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#float" title="(in Python v2.7)"><em>float</em></a>) &#8211; To wheight the influence of the eos diffences</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">score calculated by the objective function</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
 <dt id="PyDesign.calculate_objective_1">
 <code class="descclassname">PyDesign.</code><code class="descname">calculate_objective_1</code><span class="sig-paren">(</span><em>design</em><span class="sig-paren">)</span><a class="headerlink" href="#PyDesign.calculate_objective_1" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculates the objective function given a Design object containing the designed sequence and input structures.
-objective function (3 seqs):    (eos(1)+eos(2)+eos(3) - 3 * gibbs) / number_of_structures
-:param design: Design object containing the sequence and structures
-:type design: Object of type Design
-:return score: score calculated by the objective function</p>
+objective function (3 seqs):    (eos(1)+eos(2)+eos(3) - 3 * gibbs) / number_of_structures</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>design</strong> (<em>Object of type Design</em>) &#8211; Design object containing the sequence and structures</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">score calculated by the objective function</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
 <dt id="PyDesign.calculate_objective_2">
 <code class="descclassname">PyDesign.</code><code class="descname">calculate_objective_2</code><span class="sig-paren">(</span><em>design</em><span class="sig-paren">)</span><a class="headerlink" href="#PyDesign.calculate_objective_2" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculates the objective function given a Design object containing the designed sequence and input structures.
-objective function (3 seqs):    (eos(1)-eos(2))^2 + (eos(1)-eos(3))^2 + (eos(2)-eos(3))^2) * 2 / (number_of_structures * (number_of_structures-1))
-:param design: Design object containing the sequence and structures
-:return score: score calculated by the objective function</p>
+objective function (3 seqs):    (eos(1)-eos(2))^2 + (eos(1)-eos(3))^2 + (eos(2)-eos(3))^2) * 2 / (number_of_structures * (number_of_structures-1))</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>design</strong> &#8211; Design object containing the sequence and structures</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">score calculated by the objective function</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
 <dt id="PyDesign.classic_optimization">
 <code class="descclassname">PyDesign.</code><code class="descname">classic_optimization</code><span class="sig-paren">(</span><em>dg</em>, <em>design</em>, <em>objective_function=&lt;function calculate_objective&gt;</em>, <em>exit=1000</em>, <em>mode='sample'</em>, <em>avoid_motifs=None</em>, <em>white_positions=None</em>, <em>progress=False</em><span class="sig-paren">)</span><a class="headerlink" href="#PyDesign.classic_optimization" title="Permalink to this definition">¶</a></dt>
-<dd><p>Takes a Design object and does a classic optimization of this sequence.
-:param dg: RNAdesign DependencyGraph object
-:param design: Design object containing the sequence and structures
-:param objective_functions: array of functions which takes a design object and returns a score for evaluation
-:param exit: Number of unsuccessful new sequences before exiting the optimization
-:param mode: String defining the sampling mode: sample, sample_global, sample_local
-:param avoid_motifs: list of regex pattern specifiying sequence motifs to avoid
-:param white_positions: list of positions in the sequence where the avoid_motifs pattern should be ignored
-:param progress: Whether or not to print the progress to the console
-:param return: Optimization score reached for the final sequence
-&#8220;param return: Number of samples neccessary to reach this result</p>
+<dd><p>Takes a Design object and does a classic optimization of this sequence.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>dg</strong> &#8211; RNAdesign DependencyGraph object</li>
+<li><strong>design</strong> &#8211; Design object containing the sequence and structures</li>
+<li><strong>objective_functions</strong> &#8211; array of functions which takes a design object and returns a score for evaluation</li>
+<li><strong>exit</strong> &#8211; Number of unsuccessful new sequences before exiting the optimization</li>
+<li><strong>mode</strong> &#8211; String defining the sampling mode: sample, sample_global, sample_local</li>
+<li><strong>avoid_motifs</strong> &#8211; list of regex pattern specifiying sequence motifs to avoid</li>
+<li><strong>white_positions</strong> &#8211; list of positions in the sequence where the avoid_motifs pattern should be ignored</li>
+<li><strong>progress</strong> &#8211; Whether or not to print the progress to the console</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Optimization score reached for the final sequence</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Number of samples neccessary to reach this result</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
 <dt id="PyDesign.constraint_generation_optimization">
 <code class="descclassname">PyDesign.</code><code class="descname">constraint_generation_optimization</code><span class="sig-paren">(</span><em>dg</em>, <em>design</em>, <em>objective_function=&lt;function calculate_objective&gt;</em>, <em>exit=1000</em>, <em>mode='sample'</em>, <em>num_neg_constraints=100</em>, <em>max_eos_diff=0</em>, <em>avoid_motifs=None</em>, <em>white_positions=None</em>, <em>progress=False</em><span class="sig-paren">)</span><a class="headerlink" href="#PyDesign.constraint_generation_optimization" title="Permalink to this definition">¶</a></dt>
-<dd><p>Takes a Design object and does a constraint generation optimization of this sequence.
-:param dg: RNAdesign DependencyGraph object
-:param design: Design object containing the sequence and structures
-:param objective_functions: array of functions which takes a design object and returns a score for evaluation
-:param exit: Number of unsuccessful new sequences before exiting the optimization
-:param mode: String defining the sampling mode: sample, sample_global, sample_local
-:param num_neg_constraints: Maximal number of negative constraints to accumulate during the optimization process
-:param max_eos_diff: Maximal difference between eos of the negative and positive constraints
-:param avoid_motifs: list of regex pattern specifiying sequence motifs to avoid
-:param white_positions: list of positions in the sequence where the avoid_motifs pattern should be ignored
-:param progress: Whether or not to print the progress to the console
-:param return: Optimization score reached for the final sequence
-&#8220;param return: Number of samples neccessary to reach this result</p>
+<dd><p>Takes a Design object and does a constraint generation optimization of this sequence.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>dg</strong> &#8211; RNAdesign DependencyGraph object</li>
+<li><strong>design</strong> &#8211; Design object containing the sequence and structures</li>
+<li><strong>objective_functions</strong> &#8211; array of functions which takes a design object and returns a score for evaluation</li>
+<li><strong>exit</strong> &#8211; Number of unsuccessful new sequences before exiting the optimization</li>
+<li><strong>mode</strong> &#8211; String defining the sampling mode: sample, sample_global, sample_local</li>
+<li><strong>num_neg_constraints</strong> &#8211; Maximal number of negative constraints to accumulate during the optimization process</li>
+<li><strong>max_eos_diff</strong> &#8211; Maximal difference between eos of the negative and positive constraints</li>
+<li><strong>avoid_motifs</strong> &#8211; list of regex pattern specifiying sequence motifs to avoid</li>
+<li><strong>white_positions</strong> &#8211; list of positions in the sequence where the avoid_motifs pattern should be ignored</li>
+<li><strong>progress</strong> &#8211; Whether or not to print the progress to the console</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Optimization score reached for the final sequence</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Number of samples neccessary to reach this result</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
 <dt id="PyDesign.get_graph_properties">
 <code class="descclassname">PyDesign.</code><code class="descname">get_graph_properties</code><span class="sig-paren">(</span><em>dg</em><span class="sig-paren">)</span><a class="headerlink" href="#PyDesign.get_graph_properties" title="Permalink to this definition">¶</a></dt>
 <dd><p>Takes a RNAdesign DependencyGraph Object and constructs a dicionary with all the
-calculated properties.
-:param dg: RNAdesign DependencyGraph object
-:return properties: Dictionary containing all the graph properties</p>
+calculated properties.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>dg</strong> &#8211; RNAdesign DependencyGraph object</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">properties - Dictionary containing all the graph properties</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
 <dt id="PyDesign.read_inp_file">
 <code class="descclassname">PyDesign.</code><code class="descname">read_inp_file</code><span class="sig-paren">(</span><em>filename</em><span class="sig-paren">)</span><a class="headerlink" href="#PyDesign.read_inp_file" title="Permalink to this definition">¶</a></dt>
-<dd><p>Reads a file in <a href="#id1"><span class="problematic" id="id2">*</span></a>.inp format and returns all neccessary information
-:param filename: Filename of the file to read
-:return structures: List of structures in dot-bracket notation
-:return constraint: Sequence constraint
-:return sequence: Start sequence</p>
+<dd><p>Reads a file in .inp format and returns all neccessary information</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>filename</strong> &#8211; Filename of the file to read</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">structures - List of structures in dot-bracket notation</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">constraint - Sequence constraint</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">sequence - Start sequence</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
@@ -140,36 +211,72 @@ calculated properties.
 <code class="descclassname">PyDesign.</code><code class="descname">read_input</code><span class="sig-paren">(</span><em>content</em><span class="sig-paren">)</span><a class="headerlink" href="#PyDesign.read_input" title="Permalink to this definition">¶</a></dt>
 <dd><p>Reads some input and returns all neccessary information in the right container.
 Input is a string, lines separated by linebreaks. Content might be structures, 
-a sequence constraint and a start sequence
-:param filename: Filename of the file to read
-:return structures: List of structures in dot-bracket notation
-:return constraint: Sequence constraint
-:return sequence: Start sequence</p>
+a sequence constraint and a start sequence</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>filename</strong> &#8211; Filename of the file to read</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">structures - List of structures in dot-bracket notation</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">constraint - Sequence constraint</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">sequence - Start sequence</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
 <dt id="PyDesign.sample_count_unique_solutions">
 <code class="descclassname">PyDesign.</code><code class="descname">sample_count_unique_solutions</code><span class="sig-paren">(</span><em>solution_space_size</em>, <em>sample_size</em><span class="sig-paren">)</span><a class="headerlink" href="#PyDesign.sample_count_unique_solutions" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculates the expectancy value of how many time it is necessary to draw a 
-solution to gain a unique set of solutions with the given sample size
-:param solution_space_size: The size of the complete solutions space to draw from
-:param sample_size: The size of the requested unique set
-:return: Expectancy value of how many times to draw from the solution space to gain this unique set</p>
+solution to gain a unique set of solutions with the given sample size</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>solution_space_size</strong> &#8211; The size of the complete solutions space to draw from</li>
+<li><strong>sample_size</strong> &#8211; The size of the requested unique set</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Expectancy value of how many times to draw from the solution space to gain this unique set</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
 <dt id="PyDesign.sample_sequence">
 <code class="descclassname">PyDesign.</code><code class="descname">sample_sequence</code><span class="sig-paren">(</span><em>dg</em>, <em>design</em>, <em>mode</em>, <em>sample_steps=1</em>, <em>avoid_motifs=None</em>, <em>white_positions=None</em><span class="sig-paren">)</span><a class="headerlink" href="#PyDesign.sample_sequence" title="Permalink to this definition">¶</a></dt>
 <dd><p>This function samples a sequence with the given mode from the dependency graph object
-and writes it into the design object
-:param dg: RNAdesign dependency graph object
-:param design: design object
-:param mode: mode how to sample, this is a string
-:param sample_steps: count how many times to do the sample operation
-:param avoid_motifs: list of regex pattern specifiying sequence motifs to avoid
-:param white_positions: list of positions in the sequence where the avoid_motifs pattern should be ignored
-:param return: mut_nos is the solution space we drew from
-:param return: sample_count is how many times we sampled a solution from the dependency graph object (important for revert later)</p>
+and writes it into the design object</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>dg</strong> &#8211; RNAdesign dependency graph object</li>
+<li><strong>design</strong> &#8211; design object</li>
+<li><strong>mode</strong> &#8211; mode how to sample, this is a string</li>
+<li><strong>sample_steps</strong> &#8211; count how many times to do the sample operation</li>
+<li><strong>avoid_motifs</strong> &#8211; list of regex pattern specifiying sequence motifs to avoid</li>
+<li><strong>white_positions</strong> &#8211; list of positions in the sequence where the avoid_motifs pattern should be ignored</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">mut_nos is the solution space we drew from</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">sample_count is how many times we sampled a solution from the dependency graph object (important for revert later)</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 </div>
@@ -656,18 +763,34 @@ for this state.</p>
 <dl class="function">
 <dt id="PyDesign.State_Class.add_cuts">
 <code class="descclassname">PyDesign.State_Class.</code><code class="descname">add_cuts</code><span class="sig-paren">(</span><em>input</em>, <em>cut_points</em><span class="sig-paren">)</span><a class="headerlink" href="#PyDesign.State_Class.add_cuts" title="Permalink to this definition">¶</a></dt>
-<dd><p>Takes a string and add back the cut point characters at the positions stored in the cut points list
-:param input: string without cut point characters
-:return: string containing cut point characters</p>
+<dd><p>Takes a string and add back the cut point characters at the positions stored in the cut points list</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>input</strong> &#8211; string without cut point characters</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">string containing cut point characters</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
 <dt id="PyDesign.State_Class.create_bp_table">
 <code class="descclassname">PyDesign.State_Class.</code><code class="descname">create_bp_table</code><span class="sig-paren">(</span><em>structure</em><span class="sig-paren">)</span><a class="headerlink" href="#PyDesign.State_Class.create_bp_table" title="Permalink to this definition">¶</a></dt>
 <dd><p>Takes a structure in dot bracket notation and returns a base pair table.
-Unpaired positions are -1, otherwise the index of the adjacent bracket is listed
-:param structure: string with dot-bracket notation of the strcture
-:return bpt: base pair table</p>
+Unpaired positions are -1, otherwise the index of the adjacent bracket is listed</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>structure</strong> &#8211; string with dot-bracket notation of the strcture</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return bpt:</th><td class="field-body">base pair table</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="class">
@@ -749,7 +872,7 @@ Unpaired positions are -1, otherwise the index of the adjacent bracket is listed
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="#">PyDesign 1.0 documentation</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="#">PyDesign 1.0.0 documentation</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
