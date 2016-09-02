@@ -6,7 +6,7 @@ import sys
 import re
 
 def main():
-    parser = argparse.ArgumentParser(description='Display a graphml file with python.')
+    parser = argparse.ArgumentParser(description='Generate a graphml file with python given structural constraints.')
     parser.add_argument("-i", "--input", default=False, action='store_true', help='Read custom structures and sequence constraints from stdin')
     parser.add_argument("-f", "--file", type = str, default=None, help='Read file in *.inp format')
     parser.add_argument("-o", "--output", type=str, default=None, help='Write graphml file with the given filename.')

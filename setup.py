@@ -21,7 +21,7 @@ setup(
     test_suite="tests",
     install_requires=[
                     ],
-    scripts=['bin/classic_optimization.py'],
+    scripts=['bin/cofold_design.py',  'bin/generate_graphml.py', 'bin/multistate-riboswitch.py', 'bin/print_graphml.py'],
     long_description=read('README.md'),
     classifiers=[
         "Development Status :: 5 - Production/Stable",

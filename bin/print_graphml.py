@@ -24,7 +24,7 @@ def graph_from_input(structures, constraint):
     return g
 
 def main():
-    parser = argparse.ArgumentParser(description='Display a graphml file with python.')
+    parser = argparse.ArgumentParser(description='Display a Dependency Graph with python given structural constraints or a graphml file.')
     parser.add_argument("-g", "--graphml", type=str, default=None, help='Read graphml file with the given filename.')
     parser.add_argument("-i", "--input", default=False, action='store_true', help='Read custom structures and sequence constraints from stdin')
     parser.add_argument("-f", "--file", type = str, default=None, help='Read file in *.inp format')

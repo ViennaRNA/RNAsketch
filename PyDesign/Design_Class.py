@@ -54,7 +54,7 @@ class Design(object):
         '''
         create_bp_table(struct) #check for balanced brackets
         if not (isinstance(struct, basestring) and re.match(re.compile("[\(\)\.\+\&]"), struct)):
-            raise TypeError('Structure be a string in dot-bracket notation')
+            raise TypeError('Structure must be a string in dot-bracket notation')
         self.newState(str(key), struct)
     
     def newState(self, key, struct, temperature=37.0, ligand=None, constraint=None, enforce_constraint=False):

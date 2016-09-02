@@ -47,15 +47,37 @@ def read_input(content):
     :return: structures - List of structures in dot-bracket notation
     :return: constraint - Sequence constraint
     :return: sequence - Start sequence
+    :return: additions - List of additional information after the structures
+    '''
+    return read_input_additions(content)[:3]
+
+def read_input_additions(content):
+    '''
+    Reads some input and returns all neccessary information in the right container.
+    Input is a string, lines separated by linebreaks. Content might be structures, 
+    a sequence constraint and a start sequence. Additional information for the structural
+    states can be provided with any separator ;,: or whitespaces after the structure.
+    
+    :param filename: Filename of the file to read
+    :return: structures - List of structures in dot-bracket notation
+    :return: constraint - Sequence constraint
+    :return: sequence - Start sequence
+    :return: additions - List of additional information after the structures
     '''
     structures = []
     constraint = ''
     sequence = ''
+    additions = []
     
     lines = content.split("\n")
     for line in lines:
+        # strip additional information after the structure/sequence string
+        m = re.match(re.compile("^([^\s\;\,\:]+)[\s\;\,\:]*(.*)$"), line, flags=0)
+        if m:
+            line, addition = m.groups()
         if re.match(re.compile("^[\(\)\.\{\}\[\]\<\>\+\&]+$"), line, flags=0):
             structures.append(line.rstrip('\n'))
+            additions.append(addition.rstrip('\n'))
         elif re.match(re.compile("^[\ ACGTUWSMKRYBDHVN\&\+]+$"), line, flags=0):
             line = line.replace(" ", "N")
             if re.match(re.compile("^[ACGTU\&\+]+$"), line, flags=0) and sequence == '':
@@ -75,7 +97,7 @@ def read_input(content):
         if len(s) != checklength:
             raise ValueError('Structures must all have the same length!')
     
-    return structures, constraint, sequence
+    return structures, constraint, sequence, additions
 
 def get_graph_properties(dg):
     '''
