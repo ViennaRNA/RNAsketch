@@ -200,21 +200,24 @@ def sample_sequence(dg, design, mode, sample_steps=1, avoid_motifs=None, white_p
         # count how many samples we did to be able to revert this later
         sample_count = 0
         # sample a new sequence
+        # set the chosen mode for this run
+        chosen_mode = mode
         # if random choice is requested pick something new
         if mode == "random":
             modes = ['sample','sample_global','sample_local']
-            mode = random.choice(modes)
+            chosen_mode = random.choice(modes)
+        
         if sample_steps == 0:
             sample_steps = random.randrange(1, dg.number_of_connected_components())
 
-        if mode == 'sample':
+        if chosen_mode == 'sample':
             mut_nos = dg.sample()
             sample_count += 1
-        elif mode == 'sample_global':
+        elif chosen_mode == 'sample_global':
             for c in _sample_connected_components(dg, sample_steps):
                 mut_nos *= dg.sample_global(c)
                 sample_count += 1
-        elif mode == 'sample_local':
+        elif chosen_mode == 'sample_local':
             # TODO this local sampling is unfair this way and mut_nos is not calculated correctly!
             for _ in range(0, sample_steps):
                 mut_nos *= dg.sample_local()
