@@ -13,38 +13,34 @@ import time
 
 def main():
     parser = argparse.ArgumentParser(description='Design a cofold device.')
-    parser.add_argument("-f", "--file", type = str, default=None, help='Read file in *.inp format')
     parser.add_argument("-i", "--input", default=False, action='store_true', help='Read custom structures and sequence constraints from stdin')
     parser.add_argument("-q", "--nupack", default=False, action='store_true', help='Use Nupack instead of the ViennaRNA package (for pseudoknots)')
     parser.add_argument("-n", "--number", type=int, default=4, help='Number of designs to generate')
-    parser.add_argument("-j", "--jump", type=int, default=300, help='Do random jumps in the solution space for the first (jump) trials.')
     parser.add_argument("-e", "--exit", type=int, default=500, help='Exit optimization run if no better solution is aquired after (exit) trials.')
-    parser.add_argument("-s", "--strelem", type=int, default=1800, help='Optimize structural elements and exit after (strelem) unsucessful trials.')
-    parser.add_argument("-m", "--mode", type=str, default='sample_global', help='Mode for getting a new sequence: sample, sample_local, sample_global, sample_strelem')
+    parser.add_argument("-m", "--mode", type=str, default='random', help='Mode for getting a new sequence: sample, sample_local, sample_global, random')
     parser.add_argument("-k", "--kill", type=int, default=0, help='Timeout value of graph construction in seconds. (default: infinite)')
     parser.add_argument("-g", "--graphml", type=str, default=None, help='Write a graphml file with the given filename.')
     parser.add_argument("-c", "--csv", default=False, action='store_true', help='Write output as semi-colon csv file to stdout')
     parser.add_argument("-p", "--progress", default=False, action='store_true', help='Show progress of optimization')
     parser.add_argument("-d", "--debug", default=False, action='store_true', help='Show debug information of library')
+    parser.add_argument("-r", "--reporter", type = str, default='CGTAAGGGCGAAGAGCTTTTTACCGGTGTTGTGCCTATTCTCGTAGAGTTAGATGGCGACGTTAAT', help='The coding sequence context, excluding the start codon that should be part of the sequence constraint. Default are the first 66 nucleotides of eGFP.')
     args = parser.parse_args()
 
-    print("# Options: number={0:d}, jump={1:d}, exit={2:d}, strelem={3:d}, mode={4:}, nupack={5:}".format(args.number, args.jump, args.exit, args.strelem, args.mode, str(args.nupack)))
+    print("# Options: number={0:d}, exit={1:d}, mode={2:}, nupack={3:}".format(args.number, args.exit, args.mode, str(args.nupack)))
     rbp.initialize_library(args.debug, args.kill)
     # define structures
     structures = []
-    fold_constraints = []
+    fold_constraints = ['','']
     constraint = ''
     start_sequence = ''
-    
+    context = args.reporter
     if (args.input):
         data = ''
         for line in sys.stdin:
             data = data + '\n' + line
-        (structures, constraint, start_sequence) = read_input(data)
-    elif (args.file is not None):
-        print("# Input File: {0:}".format(args.file))
-        (structures, constraint, start_sequence) = read_inp_file(args.file)
+        (structures, constraint, start_sequence, fold_constraints) = read_input_additions(data)
     else:
+        # RNAblueprint paper input of sRNA:5UTR design
         structures = [
             '........................................((((((((((((((((((((((((((&.............................)))))))))))))))))))))))))).........(((((((((((((((......))))))))))))))).....',
             '..................................................................&................................................................(((((((((((((((......))))))))))))))).....']
@@ -55,6 +51,7 @@ def main():
             'GGGNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNAAGGAGNNNNNNNAUG&GGGNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNUAGCAUAACCCCUUGGGGCCUCUAAACGGGUCUUGAGGGGUUUUUUG'
         context = \
             'CGTAAGGGCGAAGAGCTTTTTACCGGTGTTGTGCCTATTCTCGTAGAGTTAGATGGCGACGTTAAT'
+
     #sequence motifs to avoid
     avoid_motifs = [
         "[A]{4,}",
@@ -66,11 +63,15 @@ def main():
         "[AG]{7,}",
         "[GC]{7,}",
         "[AU]{7,}",
-        "[CU]{7,}"
+        "[CU]{7,}",
+        "GAAUUC",#EcoRI
+        "UCUAGA",#XbaI
+        "ACUAGU",#SpeI
+        "CUGCAG" #PstI
     ]
-    
     white_positions = [[m.start(), m.end()] for m in re.finditer('[AUGCT]+', constraint)]
-    print(white_positions)
+    
+    print( "# Parsed Input:\n# =============\n# structures: %s\n# fold constraints: %s\n# sequence constraints: %s\n# reporter context: %s\n# avoid motifs: %s\n# ignored positions: %s\n#" % (structures, fold_constraints, constraint, context,avoid_motifs,white_positions), file=sys.stdout)
     
     # try to construct dependency graph, catch errors and timeouts
     dg = None
@@ -110,12 +111,10 @@ def main():
             design = nupackDesign(structures, start_sequence)
         else:
             design = vrnaDesign(structures, start_sequence)
-        
+       
         # print header for csv file
         if (args.csv):
-            print(";".join(["jump",
-                        "exit",
-                        "strelem",
+            print(";".join(["exit",
                         "mode",
                         "score",
                         "num_mutations",
@@ -131,35 +130,29 @@ def main():
                 design = nupackDesign(structures, start_sequence)
             else:
                 design = vrnaDesign(structures, start_sequence)
-            
+
             # set fold constraints
             design.foldconstraints = fold_constraints
             design.context = context
+            #to evaluate binding site in standard output
+            design.newState('binding', fold_constraints[0], constraint=fold_constraints[0])
+
+            if (start_sequence):
+                score=cofold_objective(design,printDetails=True)
+                print(design.write_out(score))
             
             start = time.clock()
-            # do a complete sampling jump times
-            (score, number_of_jumps) = classic_optimization(dg, design, objective_function=cofold_objective, exit=args.jump, mode='sample', avoid_motifs=avoid_motifs, white_positions=white_positions, progress=args.progress)
-            # now do the optimization based on the chose mode
+            # now do the optimization based on the chosen mode for args.exit iterations
             try:
                 (score, number_of_mutations) = classic_optimization(dg, design, objective_function=cofold_objective, exit=args.exit, mode=args.mode, avoid_motifs=avoid_motifs, white_positions=white_positions, progress=args.progress)
             except ValueError as e:
                 print (e.value)
                 exit(1)
-            # now do the optimization with mode strelem where we take structural elements and replace them a little
-            number_of_strelem = 0
-            if forgi_available:
-                (score, number_of_strelem) = classic_optimization(dg, design, objective_function=cofold_objective, exit=args.strelem, mode='sample_strelem', avoid_motifs=avoid_motifs, white_positions=white_positions, progress=args.progress)
-            else:
-                sys.stderr.write("-" * 60 + "\nWARNING: Strelem sampling not available!!!\nPlease install forgi https://github.com/pkerpedjiev/forgi\n" + "-" * 60 + "\n")
-                sys.stderr.flush() 
-            # sum up for a complete number of mutations
-            number_of_mutations += number_of_jumps + number_of_strelem
+            # stop time counter    
             sample_time = time.clock() - start
-            
+            score=cofold_objective(design,printDetails=True)
             if (args.csv):
-                print(args.jump,
-                        args.exit,
-                        args.strelem,
+                print(args.exit,
                         "\"" + args.mode + "\"",
                         score,
                         number_of_mutations,
@@ -168,12 +161,11 @@ def main():
                         design.write_csv(),
                         *graph_properties.values(), sep=";")
             else:
-                print(design.sequence)
                 print(design.write_out(score))
     else:
         print('# Construction time out reached!')
 
-def cofold_objective(design, weight1=1, weight2=1, weight3=1):
+def cofold_objective(design, weight1=1, weight2=1, weight3=1, printDetails=False):
     '''
     1 - [S AB ]/[A 0 ] + weight1 * P (RBS unpaired ) + weight2 * P(sRNA binding site unpaired) + weight3 * P(mRNA folds localy)
     1 - [AB] * e(-((Zsab/Zab')/(KT)))/ A0 + weight1 * P(RBS unpaired) + weight2 * P(sRNA binding site unpaired) + weight3 * P(mRNA folds localy)
@@ -255,10 +247,12 @@ def cofold_objective(design, weight1=1, weight2=1, weight3=1):
     (ext_pf_structure,ext_pf_energy) = getSaveConFold(extendedSeq,'','pf_fold')
     Pindividual = Z_from_G(con_mRNA_pf_energy+context_mRNA_pf_energy - ext_pf_energy)
     
-
-    print("1.0 - " + str(Csab) + "/" + str(Ca0) + "+" + str(weight1) + " * (1-" + str(PmRNAunpaired) + ") + " + str(weight2) + " * (1-" + str(PsRNAunpaired) + ") + " + str(weight3) + " * (1-" + str(Pindividual) + ")")
-    print(str(1.0 - (Csab/Ca0)) + " + " + str(1-PmRNAunpaired) + " + " + str(1-PsRNAunpaired) + " + " + str(1-Pindividual))
-    print(str(1.0 - Csab / Ca0 + weight1 * (1-PmRNAunpaired) + weight2 * (1-PsRNAunpaired) + weight3 * (1-Pindividual)))
+    if(printDetails):
+        print("Objective Details:\n=============\ncomplex concentration: %.2f P(5UTR_unpaired): %.2f P(sRNA_unpaired): %.2f P(mRNA_context): %.2f\n" % ((Csab / Ca0), PmRNAunpaired, PsRNAunpaired, Pindividual))
+        print("1.0 - " + str(Csab) + "/" + str(Ca0) + " + " + str(weight1) + " * (1-" + str(PmRNAunpaired) + ") + " + str(weight2) + " * (1-" + str(PsRNAunpaired) + ") + " + str(weight3) + " * (1-" + str(Pindividual) + ")")
+        print(str(1.0 - (Csab/Ca0)) + " + " + str(1-PmRNAunpaired) + " + " + str(1-PsRNAunpaired) + " + " + str(1-Pindividual))
+        print(str(1.0 - Csab / Ca0 + weight1 * (1-PmRNAunpaired) + weight2 * (1-PsRNAunpaired) + weight3 * (1-Pindividual)))
+    
     return 1.0 - Csab / Ca0 + weight1 * (1-PmRNAunpaired) + weight2 * (1-PsRNAunpaired) + weight3 * (1-Pindividual)
 
 def getSaveConFold(sequence, constraint='', mode='fold'):
