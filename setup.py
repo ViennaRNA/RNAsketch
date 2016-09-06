@@ -22,7 +22,7 @@ setup(
     install_requires=[
                     ],
     scripts=['bin/cofold_design.py',  'bin/generate_graphml.py', 'bin/multistate-riboswitch.py', 'bin/print_graphml.py'],
-    long_description=read('README.md'),
+    long_description=read('README.rst'),
     classifiers=[
         "Development Status :: 5 - Production/Stable",
         "Topic :: Scientific/Engineering :: Chemistry",

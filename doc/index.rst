@@ -1,5 +1,4 @@
-PyDesign package
-================
+.. include:: ../README.rst
 
 Module contents
 ---------------
