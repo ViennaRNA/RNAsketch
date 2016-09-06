@@ -13,7 +13,7 @@ import time
 import re
 
 def main():
-    parser = argparse.ArgumentParser(description='Design a multi-stable riboswitch similar to Hoehner 2013 paper.')
+    parser = argparse.ArgumentParser(description='Design a multi-stable thermoswitch as suggested in the Flamm 2001 paper.')
     parser.add_argument("-q", "--nupack", default=False, action='store_true', help='Use Nupack instead of the ViennaRNA package (for pseudoknots)')
     parser.add_argument("-n", "--number", type=int, default=4, help='Number of designs to generate')
     parser.add_argument("-e", "--exit", type=int, default=500, help='Exit optimization run if no better solution is aquired after (exit) trials.')
@@ -41,11 +41,11 @@ def main():
         structures, constraint, start_sequence, temperatures = read_input_additions(data)
         temperatures = [float(t) for t in temperatures]
     else:
-        structures = ['((((....))))....((((....))))........',
-            '........((((....((((....))))....))))',
-            '((((((((....))))((((....))))....))))']
-        constraint = 'NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN'
-        temperatures = [37.0, 37.0, 24.0]
+        structures = ['((((((((((....))))))))))',
+            '((((....))))((((....))))',
+            '((((....))))............']
+        constraint = ''
+        temperatures = [24.0, 37.0, 46.0]
     # try to construct dependency graph, catch errors and timeouts
     dg = None
     construction_time = 0.0
@@ -149,15 +149,15 @@ def temp_objective_2(design):
     :return: score calculated by the objective function
     '''
     objective_difference_part = 0
-    
+    # print (design.state.keys())
     for k in design.state.keys():
         # first iterate over all desired structures with their target temperature
         if re.match(re.compile("^[^\:]$"), k, flags=0):
             for kk in design.state.keys():
                 if re.match(re.compile("^[^" + k + "]\:" + str(design.state[k].temperature)), kk, flags=0):
                     objective_difference_part += (design.state[k].eos - design.state[kk].eos)
-                    print (" + ( " + k + " - " + kk + ")")
-    print ("\n\n")
+                    # print (" + ( " + k + " - " + kk + ")")
+    # print ("\n\n")
     if design.number_of_structures == 1:
         return objective_difference_part
     else:
