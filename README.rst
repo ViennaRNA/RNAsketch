@@ -25,14 +25,15 @@ Call these commands to build the html documentation::
 Provided Example Scripts
 ------------------------
 
-Design a Multistate Riboswitch
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-This simple script generates a multistate riboswitch, which is a RNA molecule that is able to fold into
+Design a Multistate Design
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This simple script generates a multistate design, which is a RNA molecule that is able to fold into
 all the given structural conformation. In case of a bistable molecule just call:
 
 .. code:: bash
 
-    echo -e '(((((....)))))....\n....(((((....)))))' | multistate-riboswitch.py -i -m random -e 500
+    echo -e '(((((....)))))....\n....(((((....)))))' | multistate-design.py -i -m random -e 500
 
 The program `barriers` can the be used to visualize the energy landscape to confirm the design goals:
 
