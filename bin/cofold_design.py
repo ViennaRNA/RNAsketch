@@ -124,7 +124,7 @@ def main():
                         graph_properties.keys()))
 
         # main loop from zero to number of solutions
-        for n in range(0, args.number):
+        for _ in range(0, args.number):
             # reset the design object
             if (args.nupack):
                 design = nupackDesign(structures, start_sequence)
@@ -167,85 +167,81 @@ def main():
 
 def cofold_objective(design, weight1=1, weight2=1, weight3=1, printDetails=False):
     '''
-    1 - [S AB ]/[A 0 ] + weight1 * P (RBS unpaired ) + weight2 * P(sRNA binding site unpaired) + weight3 * P(mRNA folds localy)
-    1 - [AB] * e(-((Zsab/Zab')/(KT)))/ A0 + weight1 * P(RBS unpaired) + weight2 * P(sRNA binding site unpaired) + weight3 * P(mRNA folds localy)
+    1 - [S AB ]/[A 0 ] + weight1 * P (RBS unpaired ) + weight2 * P(sRNA binding site unpaired) + weight3 * P(mRNA folds locally)
+    1 - [AB] * e(-((Zsab/Zab')/(KT)))/ A0 + weight1 * P(RBS unpaired) + weight2 * P(sRNA binding site unpaired) + weight3 * P(mRNA folds locally)
     
-    design object needs following inputexcept:
-                raise 
-    structure1 is the folded structure, in constraints we need only INTERmolecular pbs
-    structure2 is the open state, in constraints we need the unpaired region (rbs) marked with xxxxxx and only mRNA!
-    
+    :param design: object needs following input:
+        structure1 is the folded structure, in constraints we need only INTERmolecular pbs
+        structure2 is the open state, in constraints we need the unpaired region (rbs) marked with xxxxxx and only mRNA!
+    :type design: PyDesign.Design
+    :param weight1: Weight factor for objective part: P (RBS unpaired )
+    :type weight1: float
+    :param weight2: Weight factor for objective part: P(sRNA binding site unpaired)
+    :type weight2: float
+    :param weight3: Weight factor for objective part: P(mRNA folds locally)
+    :type weight3: float
+    :param printDetails: specify if some details should be printed to stdout
+    :type printDetails: bool
     '''
-
+    
     seqs = design.sequence.split('&')
-    constr = design.foldconstraints[1].split('&')
     Ca0 = 1e-05
-
-    # set RNA variables
-    RNA.cvar.dangles = 2
-    RNA.cvar.noLonelyPairs = 0
-    RNA.cvar.cut_point = len(seqs[0])+1;
+    # set folding model details for fold compound
+    md = RNA.md()
+    md.dangles = 2
+    md.noLonelyPairs = 0
     
-    # co_pf_fold = (structure, Gfe seq1, Gfe seq2, Gfe all INTER bp, Gfe all structs (dimers and monomers))
-    # ab hetero dimers
-    (x, ac, bc, fcab, cf) = RNA.co_pf_fold(seqs[0]+seqs[1]);
-    # aa homo dimers
-    (x, usel1, usel2, fcaa, usel3)= RNA.co_pf_fold(seqs[0]+seqs[0])
-    # bb homo dimers
-    RNA.cvar.cut_point = len(seqs[1])+1;
-    (x, usel1, usel2, fcbb, usel3)= RNA.co_pf_fold(seqs[1]+seqs[1])
+    # get a fold compound for the duplex and homodimers
+    abfc = RNA.fold_compound(design.sequence, md)
+    aafc = RNA.fold_compound(seqs[0]+'&'+seqs[0], md)
+    bbfc = RNA.fold_compound(seqs[1]+'&'+seqs[1], md)
 
+    # pf_dimer returns (string structure, float *FA, float *FB, float *FcAB, float *FAB)
+    # remember gibbs free energies (fa, fb, fcab)
+    _, Ea, Eb, Eab, _ = abfc.pf_dimer()
+    # get gibbs free energies of homodierms (fcaa, fcbb)
+    Eaa = aafc.pf_dimer()[3]
+    Ebb= bbfc.pf_dimer()[3]
+    
     # get concentration of Cab
-    (Cab, Caa, Cbb, Ca, Cb)=RNA.get_concentrations(fcab, fcaa, fcbb, ac, bc, Ca0, 1e-03)
-    RNA.cvar.cut_point = -1
-    # save energy of all structures that build duplexes
-    Eab = fcab
-    # save gibbs free energy of mrna and sRNA
-    Ea = ac
-    Eb = bc
-
-    # Get Energy of all structures that have our binding site Esab (constraint should look like: '....((((((.....&....))))))....')
+    # TODO: still old viennarna interface, need to adopt as soon as implemented
     RNA.cvar.cut_point = len(seqs[0])+1;
-    RNA.cvar.fold_constrained = 1
-    (const_x, const_ac, const_bc, const_fcab, conqst_cf) = RNA.co_pf_fold(seqs[0]+seqs[1], remove_cuts(design.foldconstraints[0]))
-    RNA.cvar.fold_constrained = 0
+    RNA.co_pf_fold(seqs[0]+seqs[1]);
+    Cab, Caa, Cbb, Ca, Cb = RNA.get_concentrations(Eab, Eaa, Ebb, Ea, Eb, Ca0, 1e-03)
     RNA.cvar.cut_point = -1
-    Esab = const_fcab
     
+    # Get Energy of all structures that have our binding site Esab (constraint should look like: '....((((((.....&....))))))....')
+    abfc.hc_add_from_db(remove_cuts(design.foldconstraints[0]))
+    Esab = abfc.pf_dimer()[3]
     # Get probability Psab of the duplex formed by the binding site
     Psab = Z_from_G(Esab-Eab)
-
     # Get concentration Csab of the duplex by multiplying Cab with the probability of Sab
     Csab = Cab * Psab
-
+    
     # get probabilty that mRNA follows the given constraint (e.g RBS is unpaired '..xxxxxxxx..........')
-    (con_str,con_energy)=getSaveConFold(seqs[0], constr[0],'pf_fold')
-    PmRNAunpaired = Z_from_G(con_energy-Ea)
+    constr = design.foldconstraints[1].split('&')
+    afc = RNA.fold_compound(seqs[0], md)
+    afc.hc_add_from_db(constr[0])
+    _, a_con_energy = afc.pf()
+    PmRNAunpaired = Z_from_G(a_con_energy - Ea)
     
     # get probabilty that sRNA follows the given constraint (e.g sRNA binding side is unpaired '..xxxxxxxx..........')
-    (con_str,con_energy)=getSaveConFold(seqs[1], constr[1],'pf_fold')
-    PsRNAunpaired = Z_from_G(con_energy-Eb)
-
-    # The designed 5'UTR sequence is extended at its 3' end by the
-    # context, e.g. part of an reporter gene and the probability that
-    # the mfe structure of the designed 5'UTR dominates the longer
-    # construct
-    (mRNA_structure,mRNA_energy) = getSaveConFold(seqs[0],constr[0],'fold')
-    extendedSeq = (seqs[0] + design.context)
-    extendedCon = (mRNA_structure.replace(".","x") + "."*len(design.context))
-    (ext_pf_structure,ext_pf_energy) = getSaveConFold(extendedSeq,'','pf_fold')
+    bfc = RNA.fold_compound(seqs[1], md)
+    bfc.hc_add_from_db(constr[1])
+    _, b_con_energy = bfc.pf()
+    PsRNAunpaired = Z_from_G(b_con_energy - Eb)
     
-    (con_str,con_energy)=getSaveConFold(extendedSeq, extendedCon,'pf_fold')
-    PdesignDominates = Z_from_G(con_energy-ext_pf_energy)
-
-    # calculate the probability that the 5'UTR structure and the
+    ## calculate the probability that the 5'UTR structure and the
     # context structure folded individually dominate the structure
     # ensemble of the concatenated sequence
-    (con_mRNA_pf_structure, con_mRNA_pf_energy) = getSaveConFold(seqs[0],constr[0],'pf_fold')
-    (context_pf_structure, context_mRNA_pf_energy) = getSaveConFold(design.context,'','pf_fold')
-    extendedSeq = (seqs[0] + design.context)
-    (ext_pf_structure,ext_pf_energy) = getSaveConFold(extendedSeq,'','pf_fold')
-    Pindividual = Z_from_G(con_mRNA_pf_energy+context_mRNA_pf_energy - ext_pf_energy)
+    
+    # get a fold compound for the context sequence
+    contextfc = RNA.fold_compound(design.context, md)
+    _, context_energy = contextfc.pf()
+    # get a fold compound for the mRNA sequence + context
+    extfc = RNA.fold_compound(seqs[0] + design.context, md)
+    _, ext_energy = extfc.pf()
+    Pindividual = Z_from_G(Ea + context_energy - ext_energy)
     
     if(printDetails):
         print("Objective Details:\n=============\ncomplex concentration: %.2f P(5UTR_unpaired): %.2f P(sRNA_unpaired): %.2f P(mRNA_context): %.2f\n" % ((Csab / Ca0), PmRNAunpaired, PsRNAunpaired, Pindividual))
@@ -255,51 +251,6 @@ def cofold_objective(design, weight1=1, weight2=1, weight3=1, printDetails=False
     
     return 1.0 - Csab / Ca0 + weight1 * (1-PmRNAunpaired) + weight2 * (1-PsRNAunpaired) + weight3 * (1-Pindividual)
 
-def getSaveConFold(sequence, constraint='', mode='fold'):
-    # set RNA variables
-    RNA.cvar.dangles = 2
-    RNA.cvar.noLonelyPairs = 0
-    RNA.cvar.fold_constrained = 1
-    # pf_fold overwrites the constraint -> Bernard solved it!!! relys
-    # on undefined behavior!!! we create a list from a string and then
-    # join it into an presumably other string
-    con = list(constraint)
-    con = "".join(con)
-    seq = list(sequence)
-    seq = "".join(seq)
-    
-    #get free energy and structure
-    (structure, energy) = ('',0.0)
-    if(mode == 'fold'):
-        (structure, energy) = RNA.fold(seq, con)
-    elif(mode == 'pf_fold'):
-        (structure, energy) = RNA.pf_fold(seq, con)
-    else:
-        print("Could not run getSaveConFold with mode" + mode, file=std.err)
-        exit
-    RNA.cvar.fold_constrained = 0
-    # return free energy and structure
-    return (structure, energy)
-
-
-def getProbOfConstraintStructure(sequence, constraint, energy):
-    # set RNA variables
-    RNA.cvar.dangles = 2
-    RNA.cvar.noLonelyPairs = 0
-    RNA.cvar.fold_constrained = 1
-    # pf_fold overwrites the constraint -> Bernard solved it!!! relys
-    # on undefined behavior!!! we create a list from a string and then
-    # join it into an presumably other string
-    con = list(constraint)
-    con = "".join(con)
-    seq = list(sequence)
-    seq = "".join(seq)
-    #get gibbs free energy and ensemble structure
-    (rna_x, rna_c) = RNA.pf_fold(seq, con)
-    RNA.cvar.fold_constrained = 0
-    # return the probability of the constraint being unpaired
-    return Z_from_G(rna_c-energy)
-
 def G_from_Z(Z):
     return - ((37.0 + 273.15)*1.98717)/1000.0 * math.log(Z)
 
@@ -308,5 +259,3 @@ def Z_from_G(G):
 
 if __name__ == "__main__":
     main()
-
-
