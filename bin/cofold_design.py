@@ -40,17 +40,17 @@ def main():
             data = data + '\n' + line
         (structures, constraint, start_sequence, fold_constraints) = read_input_additions(data)
     else:
-        # RNAblueprint paper input of sRNA:5UTR design
+        # simple example input of in form of 5UTR:sRNA
+        # sRNA will directly bind RBS and START codon to switch off translation
         structures = [
-            '........................................((((((((((((((((((((((((((&.............................)))))))))))))))))))))))))).........(((((((((((((((......))))))))))))))).....',
-            '..................................................................&................................................................(((((((((((((((......))))))))))))))).....']
+            #... RBS .......START&..binding site...terminator
+            '...(((((((((((((((((&)))))))))))))))))(((....)))',
+            '....................&.................(((....)))']
         fold_constraints = [
-            '........................................((((((((((((((((((((((((((&.............................))))))))))))))))))))))))))..................................................',
-            '.......................................xxxxxxxxxxxxxxxxxxxxxxxxxxx&............................xxxxxxxxxxxxxxxxxxxxxxxxxxxx<<<<<<<<.........................................']
+            '...(((((((((((((((((&)))))))))))))))))..........',
+            '...xxxxxxxxxxxxxxxxx&xxxxxxxxxxxxxxxxx..........']
         constraint = \
-            'GGGNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNAAGGAGNNNNNNNAUG&GGGNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNUAGCAUAACCCCUUGGGGCCUCUAAACGGGUCUUGAGGGGUUUUUUG'
-        context = \
-            'CGTAAGGGCGAAGAGCTTTTTACCGGTGTTGTGCCTATTCTCGTAGAGTTAGATGGCGACGTTAAT'
+            'NNNNAAGGAGNNNNNNNAUG&NNNNNNNNNNNNNNNNNNNNNNNNNNN'
 
     #sequence motifs to avoid
     avoid_motifs = [
@@ -69,7 +69,8 @@ def main():
         "ACUAGU",#SpeI
         "CUGCAG" #PstI
     ]
-    white_positions = [[m.start(), m.end()] for m in re.finditer('[AUGCT]+', constraint)]
+    # calculate the positions of hard sequence constraints
+    white_positions = [[m.start(), m.end()-1] for m in re.finditer('[AUGCT]+', constraint)]
     
     print( "# Parsed Input:\n# =============\n# structures: %s\n# fold constraints: %s\n# sequence constraints: %s\n# reporter context: %s\n# avoid motifs: %s\n# ignored positions: %s\n#" % (structures, fold_constraints, constraint, context,avoid_motifs,white_positions), file=sys.stdout)
     
@@ -148,7 +149,6 @@ def main():
             except ValueError as e:
                 print (e.value)
                 exit(1)
-            design.sequence='GGGAAGCACCAGUCGGUUUAUCACAAGCCGCUGGUGCUUAGAGUAAAGAUAAGGAGUAAUGAAAUG&GGGUCCUAGCGUCAUUCACGCGGACCCUUCAUUUCAUUACUCCUUAUCUUUAUUCACCUAGCAUAACCCCUUGGGGCCUCUAAACGGGUCUUGAGGGGUUUUUUG'
             # stop time counter    
             sample_time = time.clock() - start
             score=cofold_objective(design,printDetails=True)

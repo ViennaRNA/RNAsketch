@@ -185,7 +185,7 @@ def sample_sequence(dg, design, mode, sample_steps=1, avoid_motifs=None, white_p
     :param mode: mode how to sample, this is a string
     :param sample_steps: count how many times to do the sample operation
     :param avoid_motifs: list of regex pattern specifiying sequence motifs to avoid
-    :param white_positions: list of positions in the sequence where the avoid_motifs pattern should be ignored
+    :param white_positions: list of [start, end] positions in the sequence where the avoid_motifs pattern should be ignored
     :return: mut_nos is the solution space we drew from
     :return: sample_count is how many times we sampled a solution from the dependency graph object (important for revert later)
     '''
@@ -228,18 +228,25 @@ def sample_sequence(dg, design, mode, sample_steps=1, avoid_motifs=None, white_p
         # check if motifs to avoid are present, if so sample a new sequence, else return
         motiv_present = False
         seq = dg.get_sequence()
-        # remove hard sequence constraints for pattern matching
-        for pos in reversed(white_positions):
-            seq = seq[:pos[0]] + seq[pos[1]:]
-        # match motifs
+        # search for all motivs and ignore all hits inside any white_position
         for m in avoid_motifs:
-            if re.search(re.compile(m), seq, flags=0):
-                dg.revert_sequence(sample_count)
+            for f in re.finditer(re.compile(r'(?=('+m+'))'), seq, flags=0):
                 motiv_present = True
+                for white in white_positions:
+                    if ((white[0] <= f.start() <= white[1]) and (white[0] <= f.start()+len(f.group(1))-1 <= white[1])):
+                        motiv_present = False
+                        break
+                if motiv_present:
+                    break
+            if motiv_present:
                 break
+                
         # if the motivs are not present, exit while and return
         if not motiv_present:
             break
+        else:
+            # revert to previous sequence
+            dg.revert_sequence(sample_count)
             
     # assign sequence to design and return values
     design.sequence = dg.get_sequence()
@@ -255,7 +262,7 @@ def classic_optimization(dg, design, objective_function=calculate_objective, exi
     :param exit: Number of unsuccessful new sequences before exiting the optimization
     :param mode: String defining the sampling mode: sample, sample_global, sample_local
     :param avoid_motifs: list of regex pattern specifiying sequence motifs to avoid
-    :param white_positions: list of positions in the sequence where the avoid_motifs pattern should be ignored
+    :param white_positions: list of [start, end] positions in the sequence where the avoid_motifs pattern should be ignored
     :param progress: Whether or not to print the progress to the console
     :return: Optimization score reached for the final sequence
     :return: Number of samples neccessary to reach this result
@@ -266,8 +273,7 @@ def classic_optimization(dg, design, objective_function=calculate_objective, exi
         white_positions=[]
     # if the design has no sequence yet, sample one from scratch
     if not design.sequence:
-        dg.sample()
-        design.sequence = dg.get_sequence()
+        sample_sequence(dg, design, 'sample', avoid_motifs=avoid_motifs, white_positions=white_positions)
     else:
         dg.set_sequence(design.sequence)
     
@@ -320,7 +326,7 @@ def constraint_generation_optimization(dg, design, objective_function=calculate_
     :param num_neg_constraints: Maximal number of negative constraints to accumulate during the optimization process
     :param max_eos_diff: Maximal difference between eos of the negative and positive constraints
     :param avoid_motifs: list of regex pattern specifiying sequence motifs to avoid
-    :param white_positions: list of positions in the sequence where the avoid_motifs pattern should be ignored
+    :param white_positions: list of [start, end] positions in the sequence where the avoid_motifs pattern should be ignored
     :param progress: Whether or not to print the progress to the console
     :return: Optimization score reached for the final sequence
     :return: Number of samples neccessary to reach this result
@@ -334,8 +340,7 @@ def constraint_generation_optimization(dg, design, objective_function=calculate_
     
     # if the design has no sequence yet, sample one from scratch
     if not design.sequence:
-        dg.sample()
-        design.sequence = dg.get_sequence()
+        sample_sequence(dg, design, 'sample', avoid_motifs=avoid_motifs, white_positions=white_positions)
     else:
         dg.set_sequence(design.sequence)
     
