@@ -148,6 +148,7 @@ def main():
             except ValueError as e:
                 print (e.value)
                 exit(1)
+            design.sequence='GGGAAGCACCAGUCGGUUUAUCACAAGCCGCUGGUGCUUAGAGUAAAGAUAAGGAGUAAUGAAAUG&GGGUCCUAGCGUCAUUCACGCGGACCCUUCAUUUCAUUACUCCUUAUCUUUAUUCACCUAGCAUAACCCCUUGGGGCCUCUAAACGGGUCUUGAGGGGUUUUUUG'
             # stop time counter    
             sample_time = time.clock() - start
             score=cofold_objective(design,printDetails=True)
@@ -205,10 +206,9 @@ def cofold_objective(design, weight1=1, weight2=1, weight3=1, printDetails=False
     
     # get concentration of Cab
     # TODO: still old viennarna interface, need to adopt as soon as implemented
-    RNA.cvar.cut_point = len(seqs[0])+1;
-    RNA.co_pf_fold(seqs[0]+seqs[1]);
+    # need to calculate a nonsense partition function because of a bug in the old interface
+    RNA.co_pf_fold('A');
     Cab, Caa, Cbb, Ca, Cb = RNA.get_concentrations(Eab, Eaa, Ebb, Ea, Eb, Ca0, 1e-03)
-    RNA.cvar.cut_point = -1
     
     # Get Energy of all structures that have our binding site Esab (constraint should look like: '....((((((.....&....))))))....')
     abfc.hc_add_from_db(remove_cuts(design.foldconstraints[0]))
