@@ -33,7 +33,7 @@ all the given structural conformation. In case of a bistable molecule just call:
 
 .. code:: bash
 
-    echo -e '(((((....)))))....\n....(((((....)))))' | multistate-design.py -i -m random -e 500
+    echo -e '(((((....)))))....\n....(((((....)))))' | design-multistate.py -i -m random -e 500
 
 The program `barriers` can the be used to visualize the energy landscape to confirm the design goals:
 
@@ -58,14 +58,34 @@ The program `barriers` can the be used to visualize the energy landscape to conf
 Design a sRNA mediated translational regulation
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-:code:`TODO`: `cofold_design.py`
+.. code:: bash
+    
+    echo '...(((((((((((((((((&)))))))))))))))))((((....))));...(((((((((((((((((&)))))))))))))))))............
+    ....................&.................((((....))));...xxxxxxxxxxxxxxxxx&xxxxxxxxxxxxxxxxx............
+    NNNNAAGGAGNNNNNNNAUG&NNNNNNNNNNNNNNNNNNNNNNNNNNNNN' | design-cofold.py -n 1 -e 1000
 
-Design a simple Thermoswitch
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+This small example will design a simple device consisting of a 5'UTR region which can
+be translationally controlled by a sRNA molecule. In this case the sRNA will shut down
+translation by directly binding the RBS (Ribosome Binding Site) and the AUG start codon.
+
+`RNAcofold -a -p -d2` calculates three dot-plots showing the base pair probabilities in the ensemble of states which
+confirms the design objective:
+
+.. figure:: data/cofold.png
+    :width: 350px
+    
+    RNAcofold Dot-Plots, ViennaRNA v2.2.9, AAAUAAGGAGUAAAUGAAUG&CAUUCAUUUACUCCUUACCGCACUCGCGG
+    Plots were assembled in a single picture for better comparison. Only base pair probabilities
+    are shown in the plots.
+    
+    Score: 0.89; complex concentration: 1.00; P(5UTR unpaired): 0.97; P(sRNA unpaired): 0.99; P(mRNA context): 0.18
+
+Design a multistate Thermoswitch
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code:: bash
 
-    echo -e "((((((((((....)))))))))) 24.0\n((((....))))((((....)))) 37.0\n((((....))))............ 46.0" | multistate-thermoswitch.py -m random -e 1000
+    echo -e "((((((((((....)))))))))) 24.0\n((((....))))((((....)))) 37.0\n((((....))))............ 46.0" | design-thermoswitch.py -m random -e 1000
 
 This results e.g in a sequence like `GGGUUGAUACCCGAGUGUUGAUUC` which has the given MFE structures at the specified temperatures.
 Folding it at all Temeratures from 10 to 100 degree celsius shows, that the first structural change happens at 30.0 degree
@@ -87,14 +107,14 @@ Following example input is possible:
 
 .. code:: bash
    
-    echo -e '(((((....)))))....\n....(((((....)))))' | generate_graphml.py -i > dependency_graph.gml
-    print_graphml.py -g dependency_graph.gml -o dependency_graph.png
+    echo -e '(((((....)))))....\n....(((((....)))))' | design-generategraphml.py -i > dependency-graph.gml
+    design-printgraphml.py -g dependency-graph.gml -o dependency-graph.png
 
 Or use the second script directly:
 
 .. code:: bash
     
-    echo -e '(((((....)))))....\n....(((((....)))))\n(((((((....)))))))' | print_graphml.py -i
+    echo -e '(((((....)))))....\n....(((((....)))))\n(((((((....)))))))' | design-printgraphml.py -i
 
 This results in a nice representation of the dependency graph:
 

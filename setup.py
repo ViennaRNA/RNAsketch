@@ -21,7 +21,7 @@ setup(
     test_suite="tests",
     install_requires=[
                     ],
-    scripts=['bin/cofold_design.py',  'bin/generate_graphml.py', 'bin/multistate-design.py', 'bin/print_graphml.py'],
+    scripts=['bin/design-cofold.py','bin/design-generategraphml.py','bin/design-multistate.py','bin/design-printgraphml.py','bin/design-thermoswitch.py'],
     long_description=read('README.rst'),
     classifiers=[
         "Development Status :: 5 - Production/Stable",
