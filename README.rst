@@ -8,7 +8,7 @@ Simple use setuptools to install the module and the few sample scripts::
 
     python setup.py install
 
-I highly recommend to install the module locally into a direcory specified in your
+I highly recommend to install the module locally into a directory specified in your
 :code:`PYTHONPATH` variable. This can be achieved either by using the :code:`--prefix=$HOME/local_path` 
 argument, or in case :code:`PYTHONUSERBASE` is set, just use the :code:`--user` flag.
 
@@ -88,8 +88,8 @@ Design a multistate Thermoswitch
     echo -e "((((((((((....)))))))))) 24.0\n((((....))))((((....)))) 37.0\n((((....))))............ 46.0" | design-thermoswitch.py -m random -e 1000
 
 This results e.g in a sequence like `GGGUUGAUACCCGAGUGUUGAUUC` which has the given MFE structures at the specified temperatures.
-Folding it at all Temeratures from 10 to 100 degree celsius shows, that the first structural change happens at 30.0 degree
-celsius and the second one at 45 degrees. After 85 degrees, the sequence occurs only in the open chain conformation.
+Folding it at all Temeratures from 10 to 100 degree Celsius shows, that the first structural change happens at 30.0 degree
+Celsius and the second one at 45 degrees. After 85 degrees, the sequence occurs only in the open chain conformation.
 
 `RNAheat` further confirms that the designed sequence is indeed a three-stable thermoswitch:
 

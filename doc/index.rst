@@ -1,26 +1,10 @@
 .. include:: ../README.rst
+   
+Autodoc contents
+================
 
-Module contents
----------------
+.. toctree::
+    :maxdepth: 1
 
-.. automodule:: PyDesign
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-PyDesign.Design_Class
----------------------
-
-.. automodule:: PyDesign.Design_Class
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-PyDesign.State_Class
---------------------
-
-.. automodule:: PyDesign.State_Class
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
+    module.rst
+    classes.rst
