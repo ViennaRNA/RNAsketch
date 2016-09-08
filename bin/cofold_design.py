@@ -44,13 +44,13 @@ def main():
         # sRNA will directly bind RBS and START codon to switch off translation
         structures = [
             #... RBS .......START&..binding site...terminator
-            '...(((((((((((((((((&)))))))))))))))))(((....)))',
-            '....................&.................(((....)))']
+            '...(((((((((((((((((&)))))))))))))))))((((....))))',
+            '....................&.................((((....))))']
         fold_constraints = [
-            '...(((((((((((((((((&)))))))))))))))))..........',
-            '...xxxxxxxxxxxxxxxxx&xxxxxxxxxxxxxxxxx..........']
+            '...(((((((((((((((((&)))))))))))))))))............',
+            '...xxxxxxxxxxxxxxxxx&xxxxxxxxxxxxxxxxx............']
         constraint = \
-            'NNNNAAGGAGNNNNNNNAUG&NNNNNNNNNNNNNNNNNNNNNNNNNNN'
+            'NNNNAAGGAGNNNNNNNAUG&NNNNNNNNNNNNNNNNNNNNNNNNNNNNN'
 
     #sequence motifs to avoid
     avoid_motifs = [
