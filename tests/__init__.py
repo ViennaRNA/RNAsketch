@@ -21,7 +21,7 @@ class TestPyDesign(unittest.TestCase):
         fp = tempfile.NamedTemporaryFile(delete=True)
         fp.write(b'.....\n  C  \n;')
         fp.seek(0)
-        (structures, constraint, sequence) = read_inp_file(fp.name)
+        structures, constraint, sequence = read_inp_file(fp.name)
         self.assertEqual(structures, ['.....'])
         self.assertEqual(constraint, 'NNCNN')
         self.assertEqual(sequence, '')
@@ -35,8 +35,16 @@ class TestPyDesign(unittest.TestCase):
     
     def test_read_input(self):
         data = '.[].\n({})\nAGCC\nNNAC'
-        (structures, constraint, sequence) = read_input(data)
+        structures, constraint, sequence = read_input(data)
         self.assertEqual(structures, ['.[].','({})'])
+        self.assertEqual(constraint, 'NNAC')
+        self.assertEqual(sequence, 'AGCC')
+    
+    def test_read_input_additions(self):
+        data = '.[].;;5.,;5\n({})\t\nAGCC\t\t\nNNAC'
+        structures, constraint, sequence, additions = read_input_additions(data)
+        self.assertEqual(structures, ['.[].','({})'])
+        self.assertEqual(additions, ['5.,;5',''])
         self.assertEqual(constraint, 'NNAC')
         self.assertEqual(sequence, 'AGCC')
     

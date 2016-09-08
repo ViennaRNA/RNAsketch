@@ -6,7 +6,6 @@
 
 __author__ = "Stefan Hammer"
 __copyright__ = "Copyright 2016"
-__version__ = "0.1"
 __maintainer__ = "Stefan Hammer"
 __email__ = "s.hammer@univie.ac.at"
 
@@ -20,21 +19,15 @@ from Design_Class import *
 '''
 Global variable:
 '''
-forgi_available = True
-
-try:
-    import forgi.graph.bulge_graph as fgb
-except ImportError, e:
-    forgi_available = False
-
 
 def read_inp_file(filename):
     '''
-    Reads a file in *.inp format and returns all neccessary information
+    Reads a file in .inp format and returns all neccessary information
+
     :param filename: Filename of the file to read
-    :return structures: List of structures in dot-bracket notation
-    :return constraint: Sequence constraint
-    :return sequence: Start sequence
+    :return: structures - List of structures in dot-bracket notation
+    :return: constraint - Sequence constraint
+    :return: sequence - Start sequence
     '''
     
     with open(filename) as f:
@@ -49,19 +42,42 @@ def read_input(content):
     Reads some input and returns all neccessary information in the right container.
     Input is a string, lines separated by linebreaks. Content might be structures, 
     a sequence constraint and a start sequence
+    
     :param filename: Filename of the file to read
-    :return structures: List of structures in dot-bracket notation
-    :return constraint: Sequence constraint
-    :return sequence: Start sequence
+    :return: structures - List of structures in dot-bracket notation
+    :return: constraint - Sequence constraint
+    :return: sequence - Start sequence
+    :return: additions - List of additional information after the structures
+    '''
+    return read_input_additions(content)[:3]
+
+def read_input_additions(content):
+    '''
+    Reads some input and returns all neccessary information in the right container.
+    Input is a string, lines separated by linebreaks. Content might be structures, 
+    a sequence constraint and a start sequence. Additional information for the structural
+    states can be provided with any separator ;,: or whitespaces after the structure.
+    
+    :param filename: Filename of the file to read
+    :return: structures - List of structures in dot-bracket notation
+    :return: constraint - Sequence constraint
+    :return: sequence - Start sequence
+    :return: additions - List of additional information after the structures
     '''
     structures = []
     constraint = ''
     sequence = ''
+    additions = []
     
     lines = content.split("\n")
     for line in lines:
+        # strip additional information after the structure/sequence string
+        m = re.match(re.compile("^([^\s\;\,\:]+)[\s\;\,\:]*(.*)$"), line, flags=0)
+        if m:
+            line, addition = m.groups()
         if re.match(re.compile("^[\(\)\.\{\}\[\]\<\>\+\&]+$"), line, flags=0):
             structures.append(line.rstrip('\n'))
+            additions.append(addition.rstrip('\n'))
         elif re.match(re.compile("^[\ ACGTUWSMKRYBDHVN\&\+]+$"), line, flags=0):
             line = line.replace(" ", "N")
             if re.match(re.compile("^[ACGTU\&\+]+$"), line, flags=0) and sequence == '':
@@ -81,14 +97,15 @@ def read_input(content):
         if len(s) != checklength:
             raise ValueError('Structures must all have the same length!')
     
-    return structures, constraint, sequence
+    return structures, constraint, sequence, additions
 
 def get_graph_properties(dg):
     '''
     Takes a RNAdesign DependencyGraph Object and constructs a dicionary with all the
     calculated properties.
+    
     :param dg: RNAdesign DependencyGraph object
-    :return properties: Dictionary containing all the graph properties
+    :return: properties - Dictionary containing all the graph properties
     '''
     properties = {}
     special_ratios = []
@@ -119,11 +136,12 @@ def calculate_objective(design, weight=0.5):
     Calculates the objective function given a Design object containing the designed sequence and input structures.
     objective function (3 seqs):    (eos(1)+eos(2)+eos(3) - 3 * gibbs) / number_of_structures +
     weight * (eos(1)-eos(2))^2 + (eos(1)-eos(3))^2 + (eos(2)-eos(3))^2) * 2 / (number_of_structures * (number_of_structures-1))
+    
     :param design: Design object containing the sequence and structures
     :type design: Object of type Design
     :param weight: To wheight the influence of the eos diffences
     :type weight: float
-    :return score: score calculated by the objective function
+    :return: score calculated by the objective function
     '''
     return calculate_objective_1(design) + weight * calculate_objective_2(design)
 
@@ -131,9 +149,10 @@ def calculate_objective_1(design):
     '''
     Calculates the objective function given a Design object containing the designed sequence and input structures.
     objective function (3 seqs):    (eos(1)+eos(2)+eos(3) - 3 * gibbs) / number_of_structures
+    
     :param design: Design object containing the sequence and structures
     :type design: Object of type Design
-    :return score: score calculated by the objective function
+    :return: score calculated by the objective function
     '''
     return (sum(design.eos.values()) - sum(design.pf_energy.values())) / design.number_of_structures
 
@@ -141,8 +160,9 @@ def calculate_objective_2(design):
     '''
     Calculates the objective function given a Design object containing the designed sequence and input structures.
     objective function (3 seqs):    (eos(1)-eos(2))^2 + (eos(1)-eos(3))^2 + (eos(2)-eos(3))^2) * 2 / (number_of_structures * (number_of_structures-1))
+    
     :param design: Design object containing the sequence and structures
-    :return score: score calculated by the objective function
+    :return: score calculated by the objective function
     '''
     objective_difference_part = 0
     eos = design.eos.values()
@@ -159,14 +179,15 @@ def sample_sequence(dg, design, mode, sample_steps=1, avoid_motifs=None, white_p
     '''
     This function samples a sequence with the given mode from the dependency graph object
     and writes it into the design object
+    
     :param dg: RNAdesign dependency graph object
     :param design: design object
     :param mode: mode how to sample, this is a string
     :param sample_steps: count how many times to do the sample operation
     :param avoid_motifs: list of regex pattern specifiying sequence motifs to avoid
-    :param white_positions: list of positions in the sequence where the avoid_motifs pattern should be ignored
-    :param return: mut_nos is the solution space we drew from
-    :param return: sample_count is how many times we sampled a solution from the dependency graph object (important for revert later)
+    :param white_positions: list of [start, end] positions in the sequence where the avoid_motifs pattern should be ignored
+    :return: mut_nos is the solution space we drew from
+    :return: sample_count is how many times we sampled a solution from the dependency graph object (important for revert later)
     '''
     if avoid_motifs is None:
         avoid_motifs=[]
@@ -179,54 +200,53 @@ def sample_sequence(dg, design, mode, sample_steps=1, avoid_motifs=None, white_p
         # count how many samples we did to be able to revert this later
         sample_count = 0
         # sample a new sequence
+        # set the chosen mode for this run
+        chosen_mode = mode
         # if random choice is requested pick something new
         if mode == "random":
             modes = ['sample','sample_global','sample_local']
-            mode = random.choice(modes)
+            chosen_mode = random.choice(modes)
+        
         if sample_steps == 0:
             sample_steps = random.randrange(1, dg.number_of_connected_components())
 
-        if mode == 'sample':
+        if chosen_mode == 'sample':
             mut_nos = dg.sample()
             sample_count += 1
-        elif mode == 'sample_global':
+        elif chosen_mode == 'sample_global':
             for c in _sample_connected_components(dg, sample_steps):
                 mut_nos *= dg.sample_global(c)
                 sample_count += 1
-        elif mode == 'sample_local':
+        elif chosen_mode == 'sample_local':
             # TODO this local sampling is unfair this way and mut_nos is not calculated correctly!
             for _ in range(0, sample_steps):
                 mut_nos *= dg.sample_local()
                 sample_count += 1
-        elif mode == 'sample_strelem':
-            if forgi_available:
-                # sample new sequences for structural elements
-                struct = remove_cuts(random.choice(design.structures))
-                bg = fgb.BulgeGraph(dotbracket_str=struct)
-                for s in bg.random_subgraph(sample_steps):
-                    for i in range(0, len(bg.defines[s]), 2):
-                        mut_nos *= dg.sample(bg.defines[s][i]-1, bg.defines[s][i+1]-1)
-                        sample_count += 1
-            else:
-                raise ImportError("Forgi Library not available!")
         else:
             raise ValueError("Wrong mode argument: " + mode + "\n")
         
         # check if motifs to avoid are present, if so sample a new sequence, else return
         motiv_present = False
         seq = dg.get_sequence()
-        # remove hard sequence constraints for pattern matching
-        for pos in reversed(white_positions):
-            seq = seq[:pos[0]] + seq[pos[1]:]
-        # match motifs
+        # search for all motivs and ignore all hits inside any white_position
         for m in avoid_motifs:
-            if re.search(re.compile(m), seq, flags=0):
-                dg.revert_sequence(sample_count)
+            for f in re.finditer(re.compile(r'(?=('+m+'))'), seq, flags=0):
                 motiv_present = True
+                for white in white_positions:
+                    if ((white[0] <= f.start() <= white[1]) and (white[0] <= f.start()+len(f.group(1))-1 <= white[1])):
+                        motiv_present = False
+                        break
+                if motiv_present:
+                    break
+            if motiv_present:
                 break
+                
         # if the motivs are not present, exit while and return
         if not motiv_present:
             break
+        else:
+            # revert to previous sequence
+            dg.revert_sequence(sample_count)
             
     # assign sequence to design and return values
     design.sequence = dg.get_sequence()
@@ -235,16 +255,17 @@ def sample_sequence(dg, design, mode, sample_steps=1, avoid_motifs=None, white_p
 def classic_optimization(dg, design, objective_function=calculate_objective, exit=1000, mode='sample', avoid_motifs=None, white_positions=None, progress=False):
     '''
     Takes a Design object and does a classic optimization of this sequence.
+    
     :param dg: RNAdesign DependencyGraph object
     :param design: Design object containing the sequence and structures
     :param objective_functions: array of functions which takes a design object and returns a score for evaluation
     :param exit: Number of unsuccessful new sequences before exiting the optimization
     :param mode: String defining the sampling mode: sample, sample_global, sample_local
     :param avoid_motifs: list of regex pattern specifiying sequence motifs to avoid
-    :param white_positions: list of positions in the sequence where the avoid_motifs pattern should be ignored
+    :param white_positions: list of [start, end] positions in the sequence where the avoid_motifs pattern should be ignored
     :param progress: Whether or not to print the progress to the console
-    :param return: Optimization score reached for the final sequence
-    "param return: Number of samples neccessary to reach this result
+    :return: Optimization score reached for the final sequence
+    :return: Number of samples neccessary to reach this result
     '''
     if avoid_motifs is None:
         avoid_motifs=[]
@@ -252,8 +273,7 @@ def classic_optimization(dg, design, objective_function=calculate_objective, exi
         white_positions=[]
     # if the design has no sequence yet, sample one from scratch
     if not design.sequence:
-        dg.sample()
-        design.sequence = dg.get_sequence()
+        sample_sequence(dg, design, 'sample', avoid_motifs=avoid_motifs, white_positions=white_positions)
     else:
         dg.set_sequence(design.sequence)
     
@@ -297,6 +317,7 @@ def classic_optimization(dg, design, objective_function=calculate_objective, exi
 def constraint_generation_optimization(dg, design, objective_function=calculate_objective, exit=1000, mode='sample', num_neg_constraints=100, max_eos_diff=0, avoid_motifs=None, white_positions=None, progress=False):
     '''
     Takes a Design object and does a constraint generation optimization of this sequence.
+    
     :param dg: RNAdesign DependencyGraph object
     :param design: Design object containing the sequence and structures
     :param objective_functions: array of functions which takes a design object and returns a score for evaluation
@@ -305,10 +326,10 @@ def constraint_generation_optimization(dg, design, objective_function=calculate_
     :param num_neg_constraints: Maximal number of negative constraints to accumulate during the optimization process
     :param max_eos_diff: Maximal difference between eos of the negative and positive constraints
     :param avoid_motifs: list of regex pattern specifiying sequence motifs to avoid
-    :param white_positions: list of positions in the sequence where the avoid_motifs pattern should be ignored
+    :param white_positions: list of [start, end] positions in the sequence where the avoid_motifs pattern should be ignored
     :param progress: Whether or not to print the progress to the console
-    :param return: Optimization score reached for the final sequence
-    "param return: Number of samples neccessary to reach this result
+    :return: Optimization score reached for the final sequence
+    :return: Number of samples neccessary to reach this result
     '''
     if avoid_motifs is None:
         avoid_motifs=[]
@@ -319,8 +340,7 @@ def constraint_generation_optimization(dg, design, objective_function=calculate_
     
     # if the design has no sequence yet, sample one from scratch
     if not design.sequence:
-        dg.sample()
-        design.sequence = dg.get_sequence()
+        sample_sequence(dg, design, 'sample', avoid_motifs=avoid_motifs, white_positions=white_positions)
     else:
         dg.set_sequence(design.sequence)
     
@@ -349,16 +369,16 @@ def constraint_generation_optimization(dg, design, objective_function=calculate_
             for negc in reversed(neg_constraints):
                 # test if the newly sampled sequence is compatible to the neg constraint, if not -> Perfect!
                 if rbp.sequence_structure_compatible(design.sequence, [negc]):
-                    if design.classtype == 'vrnaDesign':
+                    if design.classtype == 'vrna':
                         neg_eos = RNA.energy_of_struct(design.sequence, negc)
-                    elif design.classtype == 'nupackDesign':
+                    elif design.classtype == 'nupack':
                         neg_eos = nupack.energy([design.sequence], negc, material = 'rna', pseudo = True)
                     else:
                         raise ValueError('Could not figure out the classtype of the Design object.')
                     # test if the newly sampled sequence eos for pos constraints is lower than
                     # the eos for all negative constraints, if not -> Perfect!
-                    for k in range(0, design.number_of_structures):
-                        if float(neg_eos) - float(design.eos[k]) < max_eos_diff:
+                    for eos in design.eos.values():
+                        if float(neg_eos) - float(eos) < max_eos_diff:
                             # this is no better solution, revert!
                             perfect = False
                             dg.revert_sequence(sample_count)
@@ -384,7 +404,7 @@ def constraint_generation_optimization(dg, design, objective_function=calculate_
             dg.revert_sequence(sample_count)
             design.sequence = dg.get_sequence()
         # else if current mfe is not in negative constraints, add to it
-        for mfe_str in design.mfe_structure:
+        for mfe_str in design.mfe_structure.values():
             if mfe_str not in design.structures:
                 if mfe_str not in neg_constraints:
                     neg_constraints.append(mfe_str)
@@ -408,6 +428,7 @@ def _sample_connected_components(dg, amount=1):
     We need this function to draw from the set of CCs without getting the same CC twice.
     Therefore the complete number of solutions if we sample these CCs new, is the product of the
     number of solutions for each CC.
+    
     :param dg: Dependency Graph object from the RNAdesig library
     :param amount: number of connected components to sample
     :return: list of connected component IDs which can be used for example for: dg.sample_global(ID)
@@ -437,6 +458,7 @@ def sample_count_unique_solutions(solution_space_size, sample_size):
     '''
     Calculates the expectancy value of how many time it is necessary to draw a 
     solution to gain a unique set of solutions with the given sample size
+    
     :param solution_space_size: The size of the complete solutions space to draw from
     :param sample_size: The size of the requested unique set
     :return: Expectancy value of how many times to draw from the solution space to gain this unique set

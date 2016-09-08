@@ -10,7 +10,7 @@ def read(fname):
 
 setup(
     name = "PyDesign",
-    version = "1.0",
+    version = "1.1",
     author = "Stefan Hammer",
     author_email = "s.hammer@univie.ac.at",
     description = ("A wrapper framework to design RNA molecules."),
@@ -21,8 +21,8 @@ setup(
     test_suite="tests",
     install_requires=[
                     ],
-    scripts=['bin/classic_optimization.py'],
-    long_description=read('README.md'),
+    scripts=['bin/design-cofold.py','bin/design-generategraphml.py','bin/design-multistate.py','bin/design-printgraphml.py','bin/design-thermoswitch.py'],
+    long_description=read('README.rst'),
     classifiers=[
         "Development Status :: 5 - Production/Stable",
         "Topic :: Scientific/Engineering :: Chemistry",

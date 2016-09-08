@@ -237,6 +237,8 @@ class State(object):
     @property
     def pf_energy(self):
         '''
+        In case of a dimer cofold calculation with viennarna, the function returns the energy of true hybrid states only.
+        
         :return: Partition function energy value given all the properties of this state (constraints, temperature,...)
         '''
         if not self._pf_energy and self._parent.sequence:
@@ -329,7 +331,8 @@ if vrna_available:
             if self.multifold == 0:
                 (structure, energie) = fc.pf()
             if self.multifold == 1:
-                (structure, energie) = fc.pf_dimer()
+                # returns (string structure, float *FA, float *FB, float *FcAB, float *FAB)
+                (structure, _, _, energie, _) = fc.pf_dimer()
                 structure = add_cuts(structure, self.cut_points)
             elif self.multifold > 1:
                 raise NotImplementedError
@@ -405,6 +408,7 @@ def remove_cuts(input):
 def add_cuts(input, cut_points):
     '''
     Takes a string and add back the cut point characters at the positions stored in the cut points list
+
     :param input: string without cut point characters
     :return: string containing cut point characters
     '''
@@ -417,6 +421,7 @@ def create_bp_table(structure):
     '''
     Takes a structure in dot bracket notation and returns a base pair table.
     Unpaired positions are -1, otherwise the index of the adjacent bracket is listed
+
     :param structure: string with dot-bracket notation of the strcture
     :return bpt: base pair table
     '''

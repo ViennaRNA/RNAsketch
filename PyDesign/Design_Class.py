@@ -42,6 +42,10 @@ class Design(object):
         
         self.sequence = sequence
         
+    @property
+    def classtype(self):
+        return None
+    
     def _parseStructures(self, key, struct):
         '''
         Function to create a new state given the state-name and the structure in dot-bracket notation
@@ -50,7 +54,7 @@ class Design(object):
         '''
         create_bp_table(struct) #check for balanced brackets
         if not (isinstance(struct, basestring) and re.match(re.compile("[\(\)\.\+\&]"), struct)):
-            raise TypeError('Structure be a string in dot-bracket notation')
+            raise TypeError('Structure must be a string in dot-bracket notation')
         self.newState(str(key), struct)
     
     def newState(self, key, struct, temperature=37.0, ligand=None, constraint=None, enforce_constraint=False):
@@ -239,9 +243,17 @@ class Design(object):
         return len(self.sequence)
 
 class vrnaDesign(Design):
+    @property
+    def classtype(self):
+        return 'vrna'
+    
     def newState(self, key, struct, temperature=37.0, ligand=None, constraint=None, enforce_constraint=False):
         self.state[key] = vrnaState(self, structure=struct, temperature=temperature, ligand=ligand, constraint=constraint, enforce_constraint=enforce_constraint)
 
 class nupackDesign(Design):
+    @property
+    def classtype(self):
+        return 'nupack'
+    
     def newState(self, key, struct, temperature=37.0, ligand=None, constraint=None, enforce_constraint=False):
         self.state[key] = nupackState(self, structure=struct, temperature=temperature, ligand=ligand, constraint=constraint, enforce_constraint=enforce_constraint)
