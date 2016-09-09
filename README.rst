@@ -4,7 +4,7 @@ PyDesign Library for designing RNA molecules
 Installation
 ------------
 
-Simple use setuptools to install the module and the few sample scripts::
+Download the lastes PyDesign package from https://github.com/ribonets/PyDesign/releases/latest, exctract and simply use setuptools to install the module and the few sample scripts::
 
     python setup.py install
 
