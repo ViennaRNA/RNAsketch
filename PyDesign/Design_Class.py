@@ -23,7 +23,7 @@ class Design(object):
     '''
     def __init__(self, structures, sequence=''):
         '''
-        Construct a new State object.
+        Construct a new Design object.
         
         :param structures:
         :param sequence:

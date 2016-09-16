@@ -47,7 +47,6 @@ def read_input(content):
     :return: structures - List of structures in dot-bracket notation
     :return: constraint - Sequence constraint
     :return: sequence - Start sequence
-    :return: additions - List of additional information after the structures
     '''
     return read_input_additions(content)[:3]
 
@@ -71,6 +70,9 @@ def read_input_additions(content):
     
     lines = content.split("\n")
     for line in lines:
+        # if line begins with a semicolon ; stop parsing
+        if re.match(re.compile("^\;"), line, flags=0):
+            break
         # strip additional information after the structure/sequence string
         m = re.match(re.compile("^([^\s\;\,\:]+)[\s\;\,\:]*(.*)$"), line, flags=0)
         if m:

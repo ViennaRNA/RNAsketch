@@ -14,7 +14,8 @@ import time
 def main():
     parser = argparse.ArgumentParser(description='Design a cofold device.')
     parser.add_argument("-i", "--input", default=False, action='store_true', help='Read custom structures and sequence constraints from stdin')
-    parser.add_argument("-q", "--nupack", default=False, action='store_true', help='Use Nupack instead of the ViennaRNA package (for pseudoknots)')
+    parser.add_argument("-q", "--package", type=str, default='vrna', help='Chose the calculation package: nupack (for pseudoknots) or ViennaRNA (default: vrna)')
+    parser.add_argument("-T", "--temperature", type=float, default=37.0, help='Temperature of the energy calculations.')
     parser.add_argument("-n", "--number", type=int, default=4, help='Number of designs to generate')
     parser.add_argument("-e", "--exit", type=int, default=500, help='Exit optimization run if no better solution is aquired after (exit) trials.')
     parser.add_argument("-m", "--mode", type=str, default='random', help='Mode for getting a new sequence: sample, sample_local, sample_global, random')
@@ -26,7 +27,7 @@ def main():
     parser.add_argument("-r", "--reporter", type = str, default='CGTAAGGGCGAAGAGCTTTTTACCGGTGTTGTGCCTATTCTCGTAGAGTTAGATGGCGACGTTAAT', help='The coding sequence context, excluding the start codon that should be part of the sequence constraint. Default are the first 66 nucleotides of eGFP.')
     args = parser.parse_args()
 
-    print("# Options: number={0:d}, exit={1:d}, mode={2:}, nupack={3:}".format(args.number, args.exit, args.mode, str(args.nupack)))
+    print("# Options: number={0:d}, exit={1:d}, mode={2:}, package={3:}, temperature={4:}".format(args.number, args.exit, args.mode, args.package, args.temperature))
     rbp.initialize_library(args.debug, args.kill)
     # define structures
     structures = []
@@ -108,7 +109,7 @@ def main():
         # remember general DG values
         graph_properties = get_graph_properties(dg)
         # create a initial design object
-        if (args.nupack):
+        if (args.package is 'nupack'):
             design = nupackDesign(structures, start_sequence)
         else:
             design = vrnaDesign(structures, start_sequence)
@@ -127,17 +128,20 @@ def main():
         # main loop from zero to number of solutions
         for _ in range(0, args.number):
             # reset the design object
-            if (args.nupack):
+            if (args.package is 'nupack'):
                 design = nupackDesign(structures, start_sequence)
             else:
                 design = vrnaDesign(structures, start_sequence)
-
+            # set the given temperature for all states
+            for state in design.state.values():
+                state.temperature = args.temperature
+            
             # set fold constraints
             design.foldconstraints = fold_constraints
             design.context = context
             #to evaluate binding site in standard output
-            design.newState('binding', fold_constraints[0], constraint=fold_constraints[0])
-
+            design.newState('binding', fold_constraints[0], constraint=fold_constraints[0], temperature=args.temperature)
+            
             if (start_sequence):
                 score=cofold_objective(design,printDetails=True)
                 print(design.write_out(score))
