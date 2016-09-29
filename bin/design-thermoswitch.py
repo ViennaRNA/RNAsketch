@@ -105,20 +105,22 @@ def main():
             else:
                 design = vrnaDesign(structures, start_sequence)
             
+            keys = design.state.keys();
+            
             for i, t in enumerate(temperatures): 
                 design.state[str(i)].temperature = t
                 
-                for j, s in enumerate(design.structures):
-                    if j != i:
-                        design.newState(str(j) + ':' + str(t), s, temperature=t)
+                for key in keys:
+                    if key != str(i):
+                        design.newState(key + ':' + str(t), design.state[key].structure, temperature=t)
             
             start = time.clock()
             
             # now do the optimization based on the chose mode for args.exit iterations
             try:
                 (score, number_of_mutations) = classic_optimization(dg, design, objective_function=temp_objective, exit=args.exit, mode=args.mode, progress=args.progress)
-            except ValueError as e:
-                print (e.value)
+            except Exception as e:
+                print (e)
                 exit(1)
             # stop time counter
             sample_time = time.clock() - start
@@ -143,7 +145,7 @@ def temp_objective(design, weight=0.5):
 def temp_objective_2(design):
     '''
     Calculates the objective function given a Design object containing the designed sequence and input structures.
-    objective function (3 seqs):    (eos(1)-eos(2))^2 + (eos(1)-eos(3))^2 + (eos(2)-eos(3))^2) * 2 / (number_of_structures * (number_of_structures-1))
+    objective function (3 seqs):    TODO!
     
     :param design: Design object containing the sequence and structures
     :return: score calculated by the objective function
