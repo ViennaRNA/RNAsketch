@@ -139,7 +139,7 @@ def main():
     else:
         print('# Construction time out reached!')
 
-def temp_objective(design, weight=0.5):
+def temp_objective(design, weight=1):
     return calculate_objective_1(design) + weight * temp_objective_2(design)
 
 def temp_objective_2(design):
