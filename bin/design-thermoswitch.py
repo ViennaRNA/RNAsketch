@@ -81,10 +81,7 @@ def main():
         # remember general DG values
         graph_properties = get_graph_properties(dg)
         # create a initial design object
-        if (args.package is 'nupack'):
-            design = nupackDesign(structures, start_sequence)
-        else:
-            design = vrnaDesign(structures, start_sequence)
+        design = build_molecule(structures, start_sequence, temperatures, args.package) 
         
         # print header for csv file
         if (args.csv):
@@ -100,20 +97,7 @@ def main():
         # main loop from zero to number of solutions
         for n in range(0, args.number):
             # reset the design object
-            if (args.package is 'nupack'):
-                design = nupackDesign(structures, start_sequence)
-            else:
-                design = vrnaDesign(structures, start_sequence)
-            
-            keys = design.state.keys();
-            
-            for i, t in enumerate(temperatures): 
-                design.state[str(i)].temperature = t
-                
-                for key in keys:
-                    if key != str(i):
-                        design.newState(key + ':' + str(t), design.state[key].structure, temperature=t)
-            
+            design = build_molecule(structures, start_sequence, temperatures, args.package) 
             start = time.clock()
             
             # now do the optimization based on the chose mode for args.exit iterations
@@ -138,6 +122,22 @@ def main():
                 print(design.write_out(score))
     else:
         print('# Construction time out reached!')
+
+def build_molecule(structures, start_sequence, temperatures, package):
+    if (package is 'nupack'):
+        design = nupackDesign(structures, start_sequence)
+    else:
+        design = vrnaDesign(structures, start_sequence)
+    
+    keys = design.state.keys();
+    
+    for i, t in enumerate(temperatures): 
+        design.state[str(i)].temperature = t
+        
+        for key in keys:
+            if key != str(i):
+                design.newState(key + ':' + str(t), design.state[key].structure, temperature=t)
+    return design
 
 def temp_objective(design, weight=1):
     return calculate_objective_1(design) + weight * temp_objective_2(design)
