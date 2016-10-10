@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 '''
-    PyDesign.py: A small module containing all the important helpers and 
+    PyDesign.py: A small module containing all the important helpers and
     functions for all major RNAdesign operations.
 '''
 
@@ -29,20 +29,20 @@ def read_inp_file(filename):
     :return: constraint - Sequence constraint
     :return: sequence - Start sequence
     '''
-    
+
     with open(filename) as f:
         data = f.read()
         (structures, constraint, sequence) = read_input(data)
-    
+
     constraint = constraint.replace(" ", "N")
     return structures, constraint, sequence
 
 def read_input(content):
     '''
     Reads some input and returns all neccessary information in the right container.
-    Input is a string, lines separated by linebreaks. Content might be structures, 
+    Input is a string, lines separated by linebreaks. Content might be structures,
     a sequence constraint and a start sequence
-    
+
     :param filename: Filename of the file to read
     :return: structures - List of structures in dot-bracket notation
     :return: constraint - Sequence constraint
@@ -53,10 +53,10 @@ def read_input(content):
 def read_input_additions(content):
     '''
     Reads some input and returns all neccessary information in the right container.
-    Input is a string, lines separated by linebreaks. Content might be structures, 
+    Input is a string, lines separated by linebreaks. Content might be structures,
     a sequence constraint and a start sequence. Additional information for the structural
     states can be provided with any separator ;,: or whitespaces after the structure.
-    
+
     :param filename: Filename of the file to read
     :return: structures - List of structures in dot-bracket notation
     :return: constraint - Sequence constraint
@@ -67,7 +67,7 @@ def read_input_additions(content):
     constraint = ''
     sequence = ''
     additions = []
-    
+
     lines = content.split("\n")
     for line in lines:
         # if line begins with a semicolon ; stop parsing
@@ -88,24 +88,24 @@ def read_input_additions(content):
                 constraint = line.rstrip('\n')
             else:
                 raise ValueError('Too many constraints or start sequences: ' + line)
-    
+
     checklength = len(structures[0])
     if constraint != '' and len(constraint) != checklength:
         raise ValueError('Structures and the sequence constraint must have the same length!')
     elif sequence != '' and len(sequence) != checklength:
         raise ValueError('Structures and the start sequence must have the same length!')
-    
+
     for s in structures:
         if len(s) != checklength:
             raise ValueError('Structures must all have the same length!')
-    
+
     return structures, constraint, sequence, additions
 
 def get_graph_properties(dg):
     '''
     Takes a RNAdesign DependencyGraph Object and constructs a dicionary with all the
     calculated properties.
-    
+
     :param dg: RNAdesign DependencyGraph object
     :return: properties - Dictionary containing all the graph properties
     '''
@@ -113,10 +113,10 @@ def get_graph_properties(dg):
     special_ratios = []
     max_specials = 0
     max_component_vertices = 0
-    
+
     properties['num_cc'] = dg.number_of_connected_components()
     properties['nos'] = dg.number_of_sequences()
-    
+
     for cc in range(0, properties['num_cc']):
         cv = len(dg.component_vertices(cc))
         sv = len(dg.special_vertices(cc))
@@ -125,12 +125,12 @@ def get_graph_properties(dg):
             max_specials = sv
         if (max_component_vertices < cv):
             max_component_vertices = cv
-    
+
     properties['max_specials'] = max_specials
     properties['max_component_vertices'] = max_component_vertices
     properties['max_special_ratio'] = max(special_ratios)
     properties['mean_special_ratio'] = sum(special_ratios) / len(special_ratios)
-        
+
     return properties
 
 def calculate_objective(design, weight=0.5):
@@ -138,7 +138,7 @@ def calculate_objective(design, weight=0.5):
     Calculates the objective function given a Design object containing the designed sequence and input structures.
     objective function (3 seqs):    (eos(1)+eos(2)+eos(3) - 3 * gibbs) / number_of_structures +
     weight * (eos(1)-eos(2))^2 + (eos(1)-eos(3))^2 + (eos(2)-eos(3))^2) * 2 / (number_of_structures * (number_of_structures-1))
-    
+
     :param design: Design object containing the sequence and structures
     :type design: Object of type Design
     :param weight: To wheight the influence of the eos diffences
@@ -151,7 +151,7 @@ def calculate_objective_1(design):
     '''
     Calculates the objective function given a Design object containing the designed sequence and input structures.
     objective function (3 seqs):    (eos(1)+eos(2)+eos(3) - 3 * gibbs) / number_of_structures
-    
+
     :param design: Design object containing the sequence and structures
     :type design: Object of type Design
     :return: score calculated by the objective function
@@ -161,8 +161,8 @@ def calculate_objective_1(design):
 def calculate_objective_2(design):
     '''
     Calculates the objective function given a Design object containing the designed sequence and input structures.
-    objective function (3 seqs):    (eos(1)-eos(2))^2 + (eos(1)-eos(3))^2 + (eos(2)-eos(3))^2) * 2 / (number_of_structures * (number_of_structures-1))
-    
+    objective function (3 seqs):    |eos(1)-eos(2)| + |eos(1)-eos(3)| + |eos(2)-eos(3))| * 2 / (number_of_structures * (number_of_structures-1))
+
     :param design: Design object containing the sequence and structures
     :return: score calculated by the objective function
     '''
@@ -171,17 +171,37 @@ def calculate_objective_2(design):
     for i, eos1 in enumerate(eos):
         for eos2 in eos[i+1:]:
             objective_difference_part += math.fabs(eos1 - eos2)
-    
+
     if design.number_of_structures == 1:
         return objective_difference_part
     else:
         return objective_difference_part * 2 / (design.number_of_structures * (design.number_of_structures-1))
 
+def calculate_objective_2_squared(design):
+    '''
+    Calculates the objective function given a Design object containing the designed sequence and input structures.
+    objective function (3 seqs):    (eos(1)-eos(2))^2 + (eos(1)-eos(3))^2 + (eos(2)-eos(3))^2) * 2 / (number_of_structures * (number_of_structures-1))
+
+    :param design: Design object containing the sequence and structures
+    :return: score calculated by the objective function
+    '''
+    objective_difference_part = 0
+    eos = design.eos.values()
+    for i, eos1 in enumerate(eos):
+        for eos2 in eos[i+1:]:
+            objective_difference_part += (eos1 - eos2) ** 2
+
+    if design.number_of_structures == 1:
+        return objective_difference_part
+    else:
+        return objective_difference_part * 2 / (design.number_of_structures * (design.number_of_structures-1))
+
+
 def sample_sequence(dg, design, mode, sample_steps=1, avoid_motifs=None, white_positions=None):
     '''
     This function samples a sequence with the given mode from the dependency graph object
     and writes it into the design object
-    
+
     :param dg: RNAdesign dependency graph object
     :param design: design object
     :param mode: mode how to sample, this is a string
@@ -208,7 +228,7 @@ def sample_sequence(dg, design, mode, sample_steps=1, avoid_motifs=None, white_p
         if mode == "random":
             modes = ['sample','sample_global','sample_local']
             chosen_mode = random.choice(modes)
-        
+
         if sample_steps == 0:
             sample_steps = random.randrange(1, dg.number_of_connected_components())
 
@@ -226,7 +246,7 @@ def sample_sequence(dg, design, mode, sample_steps=1, avoid_motifs=None, white_p
                 sample_count += 1
         else:
             raise ValueError("Wrong mode argument: " + mode + "\n")
-        
+
         # check if motifs to avoid are present, if so sample a new sequence, else return
         motiv_present = False
         seq = dg.get_sequence()
@@ -242,14 +262,14 @@ def sample_sequence(dg, design, mode, sample_steps=1, avoid_motifs=None, white_p
                     break
             if motiv_present:
                 break
-                
+
         # if the motivs are not present, exit while and return
         if not motiv_present:
             break
         else:
             # revert to previous sequence
             dg.revert_sequence(sample_count)
-            
+
     # assign sequence to design and return values
     design.sequence = dg.get_sequence()
     return (mut_nos, sample_count)
@@ -257,7 +277,7 @@ def sample_sequence(dg, design, mode, sample_steps=1, avoid_motifs=None, white_p
 def classic_optimization(dg, design, objective_function=calculate_objective, exit=1000, mode='sample', avoid_motifs=None, white_positions=None, progress=False):
     '''
     Takes a Design object and does a classic optimization of this sequence.
-    
+
     :param dg: RNAdesign DependencyGraph object
     :param design: Design object containing the sequence and structures
     :param objective_functions: array of functions which takes a design object and returns a score for evaluation
@@ -278,25 +298,25 @@ def classic_optimization(dg, design, objective_function=calculate_objective, exi
         sample_sequence(dg, design, 'sample', avoid_motifs=avoid_motifs, white_positions=white_positions)
     else:
         dg.set_sequence(design.sequence)
-    
+
     score = objective_function(design)
     # count for exit condition
     count = 0
     # remember how may mutations were done
     number_of_samples = 0
-    
-    # main optimization loop 
+
+    # main optimization loop
     while exit:
         # count up the mutations
         number_of_samples += 1
         # sample a new sequence
         (mut_nos, sample_count) = sample_sequence(dg, design, mode, avoid_motifs=avoid_motifs, white_positions=white_positions)
-        
+
         # write progress
         if progress:
             sys.stderr.write("\rMutate: {0:7.0f}/{1:5.0f} | Score: {2:5.2f} | NOS: {3:.5e} | Mode: {4:s}".format(number_of_samples, count, score, mut_nos, mode) + " " * 20)
             sys.stderr.flush()
-        
+
         this_score = objective_function(design)
         # evaluate
         if (this_score < score):
@@ -308,7 +328,7 @@ def classic_optimization(dg, design, objective_function=calculate_objective, exi
             count += 1
             if count > exit:
                 break
-        
+
     # clear the console
     if (progress):
         sys.stderr.write("\r" + " " * 60 + "\r")
@@ -319,7 +339,7 @@ def classic_optimization(dg, design, objective_function=calculate_objective, exi
 def constraint_generation_optimization(dg, design, objective_function=calculate_objective, exit=1000, mode='sample', num_neg_constraints=100, max_eos_diff=0, avoid_motifs=None, white_positions=None, progress=False):
     '''
     Takes a Design object and does a constraint generation optimization of this sequence.
-    
+
     :param dg: RNAdesign DependencyGraph object
     :param design: Design object containing the sequence and structures
     :param objective_functions: array of functions which takes a design object and returns a score for evaluation
@@ -339,19 +359,19 @@ def constraint_generation_optimization(dg, design, objective_function=calculate_
         white_positions=[]
     dg.set_history_size(100)
     neg_constraints = collections.deque(maxlen=num_neg_constraints)
-    
+
     # if the design has no sequence yet, sample one from scratch
     if not design.sequence:
         sample_sequence(dg, design, 'sample', avoid_motifs=avoid_motifs, white_positions=white_positions)
     else:
         dg.set_sequence(design.sequence)
-    
+
     score = objective_function(design)
     # count for exit condition
     count = 0
     # remember how may mutations were done
     number_of_samples = 0
-    
+
     # main optimization loop
     while exit:
         # constraint generation loop
@@ -360,7 +380,7 @@ def constraint_generation_optimization(dg, design, objective_function=calculate_
             number_of_samples += 1
             # sample a new sequence
             (mut_nos, sample_count) = sample_sequence(dg, design, mode, avoid_motifs=avoid_motifs, white_positions=white_positions)
-            
+
             # write progress
             if progress:
                 sys.stderr.write("\rMutate: {0:7.0f}/{1:5.0f} | EOS-Diff: {2:4.2f} | Score: {3:5.2f} | NOS: {4:.5e} | Mode: {5:s}".format(number_of_samples, count, max_eos_diff, score, mut_nos, mode))
@@ -392,7 +412,7 @@ def constraint_generation_optimization(dg, design, objective_function=calculate_
             # if solution is perfect, stop the optimization and go down to score calculation
             if perfect:
                 break
-        
+
         # count this as a solution to analyse
         count += 1
         # calculate objective
@@ -415,7 +435,7 @@ def constraint_generation_optimization(dg, design, objective_function=calculate_
         # exit condition
         if count > exit:
             break
-        
+
     # clear the console
     if (progress):
         sys.stderr.write("\r" + " " * 60 + "\r")
@@ -430,21 +450,21 @@ def _sample_connected_components(dg, amount=1):
     We need this function to draw from the set of CCs without getting the same CC twice.
     Therefore the complete number of solutions if we sample these CCs new, is the product of the
     number of solutions for each CC.
-    
+
     :param dg: Dependency Graph object from the RNAdesig library
     :param amount: number of connected components to sample
     :return: list of connected component IDs which can be used for example for: dg.sample_global(ID)
     '''
     result = []
     noslist = {}
-        
+
     for c in range(0, dg.number_of_connected_components()):
         #if dg.number_of_sequences(c) != 1:
         noslist[c] = dg.number_of_sequences(c)
-    
+
     if amount > len(noslist):
         amount = len(noslist)
-    
+
     for _ in range(0, amount):
         rand = random.randint(0, sum(noslist.values())-1)
         keys = []
@@ -458,9 +478,9 @@ def _sample_connected_components(dg, amount=1):
 
 def sample_count_unique_solutions(solution_space_size, sample_size):
     '''
-    Calculates the expectancy value of how many time it is necessary to draw a 
+    Calculates the expectancy value of how many time it is necessary to draw a
     solution to gain a unique set of solutions with the given sample size
-    
+
     :param solution_space_size: The size of the complete solutions space to draw from
     :param sample_size: The size of the requested unique set
     :return: Expectancy value of how many times to draw from the solution space to gain this unique set
@@ -469,4 +489,3 @@ def sample_count_unique_solutions(solution_space_size, sample_size):
     for k in xrange(int(solution_space_size) - int(sample_size) + 1, int(solution_space_size) + 1):
         sum += float(solution_space_size) / float(k)
     return float(sum)
-

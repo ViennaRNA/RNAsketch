@@ -16,6 +16,7 @@ def main():
     parser.add_argument("-f", "--file", type = str, default=None, help='Read file in *.inp format')
     parser.add_argument("-i", "--input", default=False, action='store_true', help='Read custom structures and sequence constraints from stdin')
     parser.add_argument("-q", "--package", type=str, default='vrna', help='Chose the calculation package: nupack (for pseudoknots) or ViennaRNA (default: vrna)')
+    parser.add_argument("-j", "--objective", type=str, default='1', help='Chose the objective function: 1 for abs differences and 2 for squared (default: 1)')
     parser.add_argument("-T", "--temperature", type=float, default=37.0, help='Temperature of the energy calculations.')
     parser.add_argument("-n", "--number", type=int, default=4, help='Number of designs to generate')
     parser.add_argument("-e", "--exit", type=int, default=500, help='Exit optimization run if no better solution is aquired after (exit) trials.')
@@ -33,7 +34,7 @@ def main():
     structures = []
     constraint = ''
     start_sequence = ''
-    
+
     if (args.input):
         data = ''
         for line in sys.stdin:
@@ -51,7 +52,7 @@ def main():
     dg = None
     construction_time = 0.0
     sample_time = 0.0
-        
+
     # construct dependency graph with these structures
     try:
         start = time.clock()
@@ -59,17 +60,17 @@ def main():
         construction_time = time.clock() - start
     except Exception as e:
         print( "Error: %s" % e , file=sys.stderr)
-    
+
     # general DG values
     print("# " + "\n# ".join(structures) + "\n# " + constraint)
 
     if (dg is not None):
-        
+
         # if requested write out a graphml file
         if args.graphml is not None:
             with open(args.graphml, 'w') as f:
                 f.write(dg.get_graphml() + "\n")
-        
+
         # print the amount of solutions
         print('# Maximal number of solutions: ' + str(dg.number_of_sequences()))
         # print the amount of connected components
@@ -77,7 +78,7 @@ def main():
         print('# Number of Connected Components: ' + str(number_of_components))
         for i in range(0, number_of_components):
             print('# [' + str(i) + ']' + str(dg.component_vertices(i)))
-        
+
         # remember general DG values
         graph_properties = get_graph_properties(dg)
         # create a initial design object
@@ -85,7 +86,7 @@ def main():
             design = nupackDesign(structures, start_sequence)
         else:
             design = vrnaDesign(structures, start_sequence)
-        
+
         # print header for csv file
         if (args.csv):
             print(";".join(["exit",
@@ -104,22 +105,26 @@ def main():
                 design = nupackDesign(structures, start_sequence)
             else:
                 design = vrnaDesign(structures, start_sequence)
-            
+
             # Set the given temperature for all states
             for state in design.state.values():
                 state.temperature = args.temperature
-            
+
             start = time.clock()
-            
+
             # now do the optimization based on the chose mode for args.exit iterations
+            objective = calculate_objective
+            if (args.objective == 2):
+                objective = squared_objective
+
             try:
-                (score, number_of_mutations) = classic_optimization(dg, design, exit=args.exit, mode=args.mode, progress=args.progress)
+                (score, number_of_mutations) = classic_optimization(dg, design, objective_function=objective, exit=args.exit, mode=args.mode, progress=args.progress)
             except ValueError as e:
                 print (e.value)
                 exit(1)
             # stop time counter
             sample_time = time.clock() - start
-            
+
             if (args.csv):
                 print(args.exit,
                         "\"" + args.mode + "\"",
@@ -134,7 +139,9 @@ def main():
     else:
         print('# Construction time out reached!')
 
+def squared_objective(design, weight=0.5):
+    return calculate_objective_1(design) + weight * calculate_objective_2_squared(design)
+
+
 if __name__ == "__main__":
     main()
-
-
