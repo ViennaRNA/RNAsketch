@@ -130,7 +130,7 @@ def get_graph_properties(dg):
     properties['max_component_vertices'] = max_component_vertices
     properties['max_special_ratio'] = max(special_ratios)
     properties['mean_special_ratio'] = sum(special_ratios) / len(special_ratios)
-    properties['max_number_of_dimensions'] = dg.max_number_of_dimensions()
+    properties['max_dimensions'] = dg.max_number_of_dimensions()
 
     return properties
 
