@@ -77,7 +77,7 @@ def main():
         number_of_components = dg.number_of_connected_components()
         print('# Number of Connected Components: ' + str(number_of_components))
         for i in range(0, number_of_components):
-            print('# [' + str(i) + ']' + str(dg.component_vertices(i)))
+            print('# [' + str(i) + ']' + str(dg.component_vertices(i)) + ' -> ' + str(dg.number_of_sequences(i)) + ' solutions')
 
         # remember general DG values
         graph_properties = get_graph_properties(dg)
