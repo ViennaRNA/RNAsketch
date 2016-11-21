@@ -25,7 +25,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -133,7 +133,7 @@
        maskUnits="userSpaceOnUse"
        id="mask6376">
       <ellipse
-         style="opacity:1;fill:#cccccc;fill-opacity:1;stroke:#cccccc;stroke-width:3.60921311;stroke-linecap:square;stroke-linejoin:bevel;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.80000006"
+         style="opacity:1;fill:#bbbbbb;fill-opacity:1;stroke:#bbbbbb;stroke-width:3.60921311;stroke-linecap:square;stroke-linejoin:bevel;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.80000006"
          id="circle6378"
          cx="-191.86253"
          cy="135.54494"
@@ -348,7 +348,7 @@
          cy="135.54494"
          cx="-191.86253"
          id="circle6378-8"
-         style="opacity:1;fill:#cccccc;fill-opacity:1;stroke:#cccccc;stroke-width:3.60921311;stroke-linecap:square;stroke-linejoin:bevel;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.80000006" />
+         style="opacity:1;fill:#bbbbbb;fill-opacity:1;stroke:#bbbbbb;stroke-width:3.60921311;stroke-linecap:square;stroke-linejoin:bevel;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.80000006" />
     </mask>
     <clipPath
        id="clipPath4918-9"
@@ -477,7 +477,7 @@
     </mask>
   </defs>
   <sodipodi:namedview
-     pagecolor="#cccccc"
+     pagecolor="#bbbbbb"
      bordercolor="#666666"
      borderopacity="1"
      objecttolerance="10"
@@ -486,14 +486,14 @@
      inkscape:pageopacity="0"
      inkscape:pageshadow="2"
      inkscape:window-width="1920"
-     inkscape:window-height="1016"
+     inkscape:window-height="1043"
      id="namedview1910"
      showgrid="false"
-     inkscape:zoom="2.1050419"
-     inkscape:cx="25.194757"
-     inkscape:cy="100.25495"
-     inkscape:window-x="0"
-     inkscape:window-y="27"
+     inkscape:zoom="2.4989447"
+     inkscape:cx="117.84041"
+     inkscape:cy="102.26983"
+     inkscape:window-x="1920"
+     inkscape:window-y="0"
      inkscape:window-maximized="1"
      inkscape:current-layer="plotting-area"
      fit-margin-top="0"
@@ -795,7 +795,7 @@
       </line>
       <line
          id="line186"
-         style="stroke:#9d99ff;stroke-width:3.97217202px;stroke-opacity:0.80000007"
+         style="stroke:#8681ff;stroke-width:3.97217202px;stroke-opacity:1"
          pointer-events="all"
          link_type="real"
          y2="188.60844"
@@ -808,7 +808,7 @@
       </line>
       <line
          id="line190"
-         style="stroke:#9d99ff;stroke-width:3.97217202px;stroke-opacity:0.80000007"
+         style="stroke:#8681ff;stroke-width:3.97217202px;stroke-opacity:1"
          pointer-events="all"
          link_type="real"
          y2="170.22504"
@@ -821,7 +821,7 @@
       </line>
       <line
          id="line194"
-         style="stroke:#9d99ff;stroke-width:3.97217202px;stroke-opacity:0.80000007"
+         style="stroke:#8681ff;stroke-width:3.97217202px;stroke-opacity:1"
          pointer-events="all"
          link_type="real"
          y2="133.85353"
@@ -834,7 +834,7 @@
       </line>
       <line
          id="line198"
-         style="stroke:#9d99ff;stroke-width:3.97217202px;stroke-opacity:0.80000007"
+         style="stroke:#8681ff;stroke-width:3.97217202px;stroke-opacity:1"
          pointer-events="all"
          link_type="real"
          y2="110.38096"
@@ -912,7 +912,7 @@
       </line>
       <line
          id="line222"
-         style="stroke:#9d99ff;stroke-width:3.97217202px;stroke-opacity:0.80000007"
+         style="stroke:#8681ff;stroke-width:3.97217202px;stroke-opacity:1"
          pointer-events="all"
          link_type="real"
          y2="201.99654"
@@ -925,7 +925,7 @@
       </line>
       <line
          id="line226"
-         style="stroke:#9d99ff;stroke-width:3.97217202px;stroke-opacity:0.80000007"
+         style="stroke:#8681ff;stroke-width:3.97217202px;stroke-opacity:1"
          pointer-events="all"
          link_type="real"
          y2="220.35213"
@@ -964,7 +964,7 @@
       </line>
       <line
          id="line306"
-         style="stroke:#cccccc;stroke-width:3.25720119px;stroke-opacity:0.80000006"
+         style="stroke:#bbbbbb;stroke-width:3.25720119px;stroke-opacity:1"
          pointer-events="all"
          link_type="real"
          y2="154.048"
@@ -1081,7 +1081,7 @@
       </line>
       <line
          id="line894"
-         style="stroke:#ff5353;stroke-width:3.97217202px;stroke-opacity:0.80000007"
+         style="stroke:#ff4c4c;stroke-width:3.97217202px;stroke-opacity:1"
          pointer-events="all"
          link_type="real"
          y2="220.35213"
@@ -1094,7 +1094,7 @@
       </line>
       <line
          id="line906"
-         style="stroke:#ff5353;stroke-width:3.97217202px;stroke-opacity:0.80000007"
+         style="stroke:#ff4c4c;stroke-width:3.97217202px;stroke-opacity:1"
          pointer-events="all"
          link_type="real"
          y2="201.99654"
@@ -1131,7 +1131,7 @@
          class="node"
          r="6"
          node_type="nucleotide"
-         style="fill:#ffffff;fill-opacity:1;stroke:#a0a0a0;stroke-width:0.80001274;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none"
+         style="fill:#ffffff;fill-opacity:1;stroke:#8c8c8c;stroke-width:0.80001274;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none"
          id="circle1530"
          cx="0"
          cy="0"
@@ -1146,14 +1146,14 @@
          y="210.64793"
          class="node-label"
          id="text1534"
-         style="font-weight:bold;font-size:15.88868809px;text-anchor:middle;fill:#cccccc;fill-opacity:1">G<title
+         style="font-weight:bold;font-size:15.88868809px;text-anchor:middle;fill:#8a8a8a;fill-opacity:1;">G<title
    id="title1536">45</title>
 </text>
       <circle
          class="node"
          r="6"
          node_type="nucleotide"
-         style="fill:#ffffff;fill-opacity:1;stroke:#a0a0a0;stroke-width:0.80001274;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none"
+         style="fill:#ffffff;fill-opacity:1;stroke:#8c8c8c;stroke-width:0.80001274;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none"
          id="circle1540"
          cx="0"
          cy="0"
@@ -1168,14 +1168,14 @@
          y="193.57368"
          class="node-label"
          id="text1544"
-         style="font-weight:bold;font-size:15.88868809px;text-anchor:middle;fill:#cccccc;fill-opacity:1">A<title
+         style="font-weight:bold;font-size:15.88868809px;text-anchor:middle;fill:#8a8a8a;fill-opacity:1;">A<title
    id="title1546">46</title>
 </text>
       <circle
          class="node"
          r="6"
          node_type="nucleotide"
-         style="fill:#ffffff;fill-opacity:1;stroke:#a0a0a0;stroke-width:0.80001274;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none"
+         style="fill:#ffffff;fill-opacity:1;stroke:#8c8c8c;stroke-width:0.80001274;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none"
          id="circle1550"
          cx="0"
          cy="0"
@@ -1190,14 +1190,14 @@
          y="175.19025"
          class="node-label"
          id="text1554"
-         style="font-weight:bold;font-size:15.88868809px;text-anchor:middle;fill:#cccccc;fill-opacity:1">G<title
+         style="font-weight:bold;font-size:15.88868809px;text-anchor:middle;fill:#8a8a8a;fill-opacity:1;">G<title
    id="title1556">47</title>
 </text>
       <circle
          class="node"
          r="6"
          node_type="nucleotide"
-         style="fill:#ffffff;fill-opacity:1;stroke:#a0a0a0;stroke-width:0.80001274;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none"
+         style="fill:#ffffff;fill-opacity:1;stroke:#8c8c8c;stroke-width:0.80001274;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none"
          id="circle1570"
          cx="0"
          cy="0"
@@ -1212,7 +1212,7 @@
          y="115.34615"
          class="node-label"
          id="text1574"
-         style="font-weight:bold;font-size:15.88868809px;text-anchor:middle;fill:#cccccc;fill-opacity:1">C<title
+         style="font-weight:bold;font-size:15.88868809px;text-anchor:middle;fill:#8a8a8a;fill-opacity:1;">C<title
    id="title1576">49</title>
 </text>
       <circle
@@ -1308,7 +1308,7 @@
          class="node"
          r="6"
          node_type="nucleotide"
-         style="fill:#ffffff;fill-opacity:1;stroke:#a0a0a0;stroke-width:0.80001274;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none"
+         style="fill:#ffffff;fill-opacity:1;stroke:#8c8c8c;stroke-width:0.80001274;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none"
          id="circle1620"
          cx="0"
          cy="0">
@@ -1329,7 +1329,7 @@
          class="node"
          r="6"
          node_type="nucleotide"
-         style="fill:#ffffff;fill-opacity:1;stroke:#a0a0a0;stroke-width:0.80001274;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none"
+         style="fill:#ffffff;fill-opacity:1;stroke:#8c8c8c;stroke-width:0.80001274;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none"
          id="circle1630"
          cx="0"
          cy="0"
@@ -1344,14 +1344,14 @@
          y="206.96176"
          class="node-label"
          id="text1634"
-         style="font-weight:bold;font-size:15.88868809px;text-anchor:middle;fill:#cccccc;fill-opacity:1">C<title
+         style="font-weight:bold;font-size:15.88868809px;text-anchor:middle;fill:#8a8a8a;fill-opacity:1;">C<title
    id="title1636">55</title>
 </text>
       <circle
          class="node"
          r="6"
          node_type="nucleotide"
-         style="fill:#ffffff;fill-opacity:1;stroke:#a0a0a0;stroke-width:0.80001274;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none"
+         style="fill:#ffffff;fill-opacity:1;stroke:#8c8c8c;stroke-width:0.80001274;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none"
          id="circle1640"
          cx="0"
          cy="0"
@@ -1366,7 +1366,7 @@
          y="225.31735"
          class="node-label"
          id="text1644"
-         style="font-weight:bold;font-size:15.88868809px;text-anchor:middle;fill:#cccccc;fill-opacity:1">U<title
+         style="font-weight:bold;font-size:15.88868809px;text-anchor:middle;fill:#8a8a8a;fill-opacity:1;">U<title
    id="title1646">56</title>
 </text>
       <circle
@@ -1420,10 +1420,10 @@
          y="151.65012"
          class="node-label"
          id="text1844"
-         style="font-weight:bold;font-size:15.88868809px;text-anchor:middle;fill:#cccccc;fill-opacity:1">
+         style="font-weight:bold;font-size:15.88868809px;text-anchor:middle;fill:#bbbbbb;fill-opacity:1">
         <tspan
            id="tspan5086"
-           style="fill:#cccccc;fill-opacity:1">50</tspan>
+           style="fill:#bbbbbb;fill-opacity:1">50</tspan>
         <title
            id="title1846">75</title>
       </text>
@@ -1434,7 +1434,7 @@
          cy="0"
          cx="0"
          id="circle1560"
-         style="fill:#ffffff;fill-opacity:1;stroke:#a0a0a0;stroke-width:0.80001273;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none"
+         style="fill:#ffffff;fill-opacity:1;stroke:#8c8c8c;stroke-width:0.80001273;stroke-opacity:1;stroke-miterlimit:4;stroke-dasharray:none"
          node_type="nucleotide"
          r="6"
          class="node"
@@ -1443,7 +1443,7 @@
            id="title1562">48</title>
       </circle>
       <text
-         style="font-weight:bold;font-size:39.06250381px;text-anchor:middle;fill:#cccccc;fill-opacity:1"
+         style="font-weight:bold;font-size:39.06250381px;text-anchor:middle;fill:#8a8a8a;fill-opacity:1;"
          id="text1644-5"
          class="node-label"
          y="60.687981"
