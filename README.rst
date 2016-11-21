@@ -1,10 +1,10 @@
-PyDesign Library for designing RNA molecules
+RNAsketch Library for designing RNA molecules
 ============================================
 
 Installation
 ------------
 
-Download the lastes PyDesign package from https://github.com/ribonets/PyDesign/releases/latest, exctract and simply use setuptools to install the module and the few sample scripts::
+Download the lastes RNAsketch package from https://github.com/ribonets/RNAsketch/releases/latest, exctract and simply use setuptools to install the module and the few sample scripts::
 
     python setup.py install
 
@@ -15,7 +15,7 @@ argument, or in case :code:`PYTHONUSERBASE` is set, just use the :code:`--user` 
 Build the documentation
 -----------------------
 
-Documentation available online: http://ribonets.github.io/PyDesign
+Documentation available online: http://ribonets.github.io/RNAsketch
 
 Call these commands to build the html documentation::
 

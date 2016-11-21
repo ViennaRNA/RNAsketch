@@ -13,7 +13,7 @@ __email__ = "s.hammer@univie.ac.at"
 
 
 import re
-from State_Class import *
+from State import *
 
 class Design(object):
     '''

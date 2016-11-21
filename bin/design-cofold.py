@@ -1,7 +1,7 @@
 from __future__ import print_function
 
 try:
-    from PyDesign import *
+    from RNAsketch import *
 except ImportError, e:
     print(e.message)
     exit(1)
@@ -178,7 +178,7 @@ def cofold_objective(design, weight1=1, weight2=1, weight3=1, printDetails=False
     :param design: object needs following input:
         structure1 is the folded structure, in constraints we need only INTERmolecular pbs
         structure2 is the open state, in constraints we need the unpaired region (rbs) marked with xxxxxx and only mRNA!
-    :type design: PyDesign.Design
+    :type design: RNAsketch.Design
     :param weight1: Weight factor for objective part: P (RBS unpaired )
     :type weight1: float
     :param weight2: Weight factor for objective part: P(sRNA binding site unpaired)

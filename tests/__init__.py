@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 '''
-    test_PyDesign.py: UNIT tests for PyDesign.py
+    test_RNAsketch.py: UNIT tests for RNAsketch.py
 '''
 
 __author__ = "Stefan Hammer"
@@ -9,13 +9,13 @@ __version__ = "0.1"
 __maintainer__ = "Stefan Hammer"
 __email__ = "s.hammer@univie.ac.at"
 
-from PyDesign import *
+from RNAsketch import *
 from test_State_Class import TestStateClass
 from test_Design_Class import TestDesignClass
 import tempfile
 import unittest
 
-class TestPyDesign(unittest.TestCase):
+class TestRNAsketch(unittest.TestCase):
     
     def test_read_inp_file(self):
         fp = tempfile.NamedTemporaryFile(delete=True)

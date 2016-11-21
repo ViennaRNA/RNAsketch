@@ -1,7 +1,7 @@
 from __future__ import print_function
 
 try:
-    from PyDesign import *
+    from RNAsketch import *
 except ImportError, e:
     print(e.message)
     exit(1)

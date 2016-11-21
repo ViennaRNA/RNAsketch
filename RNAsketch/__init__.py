@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 '''
-    PyDesign.py: A small module containing all the important helpers and
+    RNAsketch.py: A small module containing all the important helpers and
     functions for all major RNAdesign operations.
 '''
 
@@ -14,7 +14,7 @@ import random
 import collections
 
 import RNAblueprint as rbp
-from Design_Class import *
+from Design import *
 
 '''
 Global variable:
