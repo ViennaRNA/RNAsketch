@@ -227,7 +227,7 @@ def sample_sequence(dg, design, mode, sample_steps=1, avoid_motifs=None, white_p
         chosen_mode = mode
         # if random choice is requested pick something new
         if mode == "random":
-            modes = ['sample','sample_global','sample_local']
+            modes = ['sample','sample_clocal','sample_plocal']
             chosen_mode = random.choice(modes)
 
         if sample_steps == 0:
@@ -236,14 +236,14 @@ def sample_sequence(dg, design, mode, sample_steps=1, avoid_motifs=None, white_p
         if chosen_mode == 'sample':
             mut_nos = dg.sample()
             sample_count += 1
-        elif chosen_mode == 'sample_global':
+        elif chosen_mode == 'sample_clocal':
             for c in _sample_connected_components(dg, sample_steps):
-                mut_nos *= dg.sample_global(c)
+                mut_nos *= dg.sample_clocal(c)
                 sample_count += 1
-        elif chosen_mode == 'sample_local':
+        elif chosen_mode == 'sample_plocal':
             # TODO this local sampling is unfair this way and mut_nos is not calculated correctly!
             for _ in range(0, sample_steps):
-                mut_nos *= dg.sample_local()
+                mut_nos *= dg.sample_plocal()
                 sample_count += 1
         else:
             raise ValueError("Wrong mode argument: " + mode + "\n")
@@ -283,7 +283,7 @@ def classic_optimization(dg, design, objective_function=calculate_objective, exi
     :param design: Design object containing the sequence and structures
     :param objective_functions: array of functions which takes a design object and returns a score for evaluation
     :param exit: Number of unsuccessful new sequences before exiting the optimization
-    :param mode: String defining the sampling mode: sample, sample_global, sample_local
+    :param mode: String defining the sampling mode: sample, sample_clocal, sample_plocal
     :param avoid_motifs: list of regex pattern specifiying sequence motifs to avoid
     :param white_positions: list of [start, end] positions in the sequence where the avoid_motifs pattern should be ignored
     :param progress: Whether or not to print the progress to the console
@@ -345,7 +345,7 @@ def constraint_generation_optimization(dg, design, objective_function=calculate_
     :param design: Design object containing the sequence and structures
     :param objective_functions: array of functions which takes a design object and returns a score for evaluation
     :param exit: Number of unsuccessful new sequences before exiting the optimization
-    :param mode: String defining the sampling mode: sample, sample_global, sample_local
+    :param mode: String defining the sampling mode: sample, sample_clocal, sample_plocal
     :param num_neg_constraints: Maximal number of negative constraints to accumulate during the optimization process
     :param max_eos_diff: Maximal difference between eos of the negative and positive constraints
     :param avoid_motifs: list of regex pattern specifiying sequence motifs to avoid
@@ -454,7 +454,7 @@ def _sample_connected_components(dg, amount=1):
 
     :param dg: Dependency Graph object from the RNAdesig library
     :param amount: number of connected components to sample
-    :return: list of connected component IDs which can be used for example for: dg.sample_global(ID)
+    :return: list of connected component IDs which can be used for example for: dg.sample_clocal(ID)
     '''
     result = []
     noslist = {}
