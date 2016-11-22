@@ -275,14 +275,14 @@ def sample_sequence(dg, design, mode, sample_steps=1, avoid_motifs=None, white_p
     design.sequence = dg.get_sequence()
     return (mut_nos, sample_count)
 
-def classic_optimization(dg, design, objective_function=calculate_objective, exit=1000, mode='sample', avoid_motifs=None, white_positions=None, progress=False):
+def classic_optimization(dg, design, objective_function=calculate_objective, stop=1000, mode='sample', avoid_motifs=None, white_positions=None, progress=False):
     '''
     Takes a Design object and does a classic optimization of this sequence.
 
     :param dg: RNAdesign DependencyGraph object
     :param design: Design object containing the sequence and structures
     :param objective_functions: array of functions which takes a design object and returns a score for evaluation
-    :param exit: Number of unsuccessful new sequences before exiting the optimization
+    :param stop: Number of unsuccessful new sequences before stoping the optimization
     :param mode: String defining the sampling mode: sample, sample_clocal, sample_plocal
     :param avoid_motifs: list of regex pattern specifiying sequence motifs to avoid
     :param white_positions: list of [start, end] positions in the sequence where the avoid_motifs pattern should be ignored
@@ -301,13 +301,13 @@ def classic_optimization(dg, design, objective_function=calculate_objective, exi
         dg.set_sequence(design.sequence)
 
     score = objective_function(design)
-    # count for exit condition
+    # count for stop condition
     count = 0
     # remember how may mutations were done
     number_of_samples = 0
 
     # main optimization loop
-    while exit:
+    while stop:
         # count up the mutations
         number_of_samples += 1
         # sample a new sequence
@@ -327,7 +327,7 @@ def classic_optimization(dg, design, objective_function=calculate_objective, exi
             dg.revert_sequence(sample_count)
             design.sequence = dg.get_sequence()
             count += 1
-            if count > exit:
+            if count > stop:
                 break
 
     # clear the console
@@ -337,14 +337,14 @@ def classic_optimization(dg, design, objective_function=calculate_objective, exi
     # finally return the result
     return score, number_of_samples
 
-def constraint_generation_optimization(dg, design, objective_function=calculate_objective, exit=1000, mode='sample', num_neg_constraints=100, max_eos_diff=0, avoid_motifs=None, white_positions=None, progress=False):
+def constraint_generation_optimization(dg, design, objective_function=calculate_objective, stop=1000, mode='sample', num_neg_constraints=100, max_eos_diff=0, avoid_motifs=None, white_positions=None, progress=False):
     '''
     Takes a Design object and does a constraint generation optimization of this sequence.
 
     :param dg: RNAdesign DependencyGraph object
     :param design: Design object containing the sequence and structures
     :param objective_functions: array of functions which takes a design object and returns a score for evaluation
-    :param exit: Number of unsuccessful new sequences before exiting the optimization
+    :param stop: Number of unsuccessful new sequences before stoping the optimization
     :param mode: String defining the sampling mode: sample, sample_clocal, sample_plocal
     :param num_neg_constraints: Maximal number of negative constraints to accumulate during the optimization process
     :param max_eos_diff: Maximal difference between eos of the negative and positive constraints
@@ -368,13 +368,13 @@ def constraint_generation_optimization(dg, design, objective_function=calculate_
         dg.set_sequence(design.sequence)
 
     score = objective_function(design)
-    # count for exit condition
+    # count for stop condition
     count = 0
     # remember how may mutations were done
     number_of_samples = 0
 
     # main optimization loop
-    while exit:
+    while stop:
         # constraint generation loop
         while True:
             # count up the mutations
@@ -433,8 +433,8 @@ def constraint_generation_optimization(dg, design, objective_function=calculate_
                     neg_constraints.append(mfe_str)
                     #print('\n'+'\n'.join(neg_constraints))
 
-        # exit condition
-        if count > exit:
+        # stop condition
+        if count > stop:
             break
 
     # clear the console
