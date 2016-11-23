@@ -56,7 +56,7 @@ class TestRNAsketch(unittest.TestCase):
         score = calculate_objective(a)
         self.assertEqual(score, 0.107421875)
     
-    def test_classic_optimization(self):
+    def test_adaptive_walk_optimization(self):
         pass
     
     def test_constraint_generation_optimization(self):

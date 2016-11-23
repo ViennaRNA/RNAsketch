@@ -275,9 +275,9 @@ def sample_sequence(dg, design, mode, sample_steps=1, avoid_motifs=None, white_p
     design.sequence = dg.get_sequence()
     return (mut_nos, sample_count)
 
-def classic_optimization(dg, design, objective_function=calculate_objective, stop=1000, mode='sample', avoid_motifs=None, white_positions=None, progress=False):
+def adaptive_walk_optimization(dg, design, objective_function=calculate_objective, stop=1000, mode='sample', avoid_motifs=None, white_positions=None, progress=False):
     '''
-    Takes a Design object and does a classic optimization of this sequence.
+    Takes a Design object and does a adaptive walk optimization of this sequence.
 
     :param dg: RNAdesign DependencyGraph object
     :param design: Design object containing the sequence and structures
