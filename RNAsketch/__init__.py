@@ -12,6 +12,8 @@ __email__ = "s.hammer@univie.ac.at"
 import sys
 import random
 import collections
+import numpy as np
+import math
 
 import RNAblueprint as rbp
 from Design import *
@@ -329,6 +331,86 @@ def adaptive_walk_optimization(dg, design, objective_function=calculate_objectiv
             count += 1
             if count > stop:
                 break
+
+    # clear the console
+    if (progress):
+        sys.stderr.write("\r" + " " * 60 + "\r")
+        sys.stderr.flush()
+    # finally return the result
+    return score, number_of_samples
+
+def simulated_annealing_optimization(dg, design, objective_function=calculate_objective, temperature_gradient=None, cooling_step=50, mode='sample', avoid_motifs=None, white_positions=None, progress=False):
+    '''
+    Takes a Design object and does a simulated annealing optimization of this sequence.
+
+    :param dg: RNAdesign DependencyGraph object
+    :param design: Design object containing the sequence and structures
+    :param objective_functions: array of functions which takes a design object and returns a score for evaluation
+    :param temperature_gradient: Iterable containing the temperatures in descend order
+    :param cooling_steps: Use the current temperature that many times before cooling down
+    :param mode: String defining the sampling mode: sample, sample_clocal, sample_plocal
+    :param avoid_motifs: list of regex pattern specifiying sequence motifs to avoid
+    :param white_positions: list of [start, end] positions in the sequence where the avoid_motifs pattern should be ignored
+    :param progress: Whether or not to print the progress to the console
+    :return: Optimization score reached for the final sequence
+    :return: Number of samples neccessary to reach this result
+    '''
+    if avoid_motifs is None:
+        avoid_motifs=[]
+    if white_positions is None:
+        white_positions=[]
+    if temperature_gradient is None:
+        temperature_gradient=np.arange(1,0,-0.0002)
+    # generate iterator (can call next() on it)
+    temp_iter = iter(temperature_gradient)
+    temperature = temp_iter.next()
+
+    # if the design has no sequence yet, sample one from scratch
+    if not design.sequence:
+        sample_sequence(dg, design, 'sample', avoid_motifs=avoid_motifs, white_positions=white_positions)
+    else:
+        dg.set_sequence(design.sequence)
+
+    score = objective_function(design)
+    # remember how may mutations were done
+    number_of_samples = 0
+    # remember how often we used the temperature already
+    number_of_same_temp = 0
+    
+    # main optimization loop
+    while True:
+        # check if we have to cool down
+        number_of_same_temp += 1
+        if number_of_same_temp > cooling_step:
+            number_of_same_temp = 0
+            try:
+                temperature = temp_iter.next()
+            except StopIteration:
+                # end of temperature scale reached... stop optimization
+                break
+
+        # count up the mutations
+        number_of_samples += 1
+        # sample a new sequence
+        (mut_nos, sample_count) = sample_sequence(dg, design, mode, avoid_motifs=avoid_motifs, white_positions=white_positions)
+
+        # write progress
+        if progress:
+            sys.stderr.write("\rMutate: {0:7.0f}/{1:5.0f} | Score: {2:5.2f} | NOS: {3:.5e} | Mode: {4:s} | Temp: {5:5.2f}".format(number_of_samples, number_of_same_temp, score, mut_nos, mode, temperature) + " " * 20)
+            sys.stderr.flush()
+
+        this_score = objective_function(design)
+        # evaluate probability
+        rand = random.uniform(0, 1)
+        prob = math.exp(-1*(this_score-score)/temperature)
+        # compare and make decision
+        if (rand <= prob):
+            score = this_score
+            # go to next temperature step
+            number_of_same_temp = cooling_step+1
+        else:
+            dg.revert_sequence(sample_count)
+            design.sequence = dg.get_sequence()
 
     # clear the console
     if (progress):
