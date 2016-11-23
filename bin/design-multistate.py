@@ -118,7 +118,7 @@ def main():
                 objective = squared_objective
 
             try:
-                (score, number_of_mutations) = classic_optimization(dg, design, objective_function=objective, stop=args.stop, mode=args.mode, progress=args.progress)
+                (score, number_of_mutations) = adaptive_walk_optimization(dg, design, objective_function=objective, stop=args.stop, mode=args.mode, progress=args.progress)
             except ValueError as e:
                 print (e.value)
                 exit(1)

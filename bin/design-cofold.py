@@ -149,7 +149,7 @@ def main():
             start = time.clock()
             # now do the optimization based on the chosen mode for args.stop iterations
             try:
-                (score, number_of_mutations) = classic_optimization(dg, design, objective_function=cofold_objective, stop=args.stop, mode=args.mode, avoid_motifs=avoid_motifs, white_positions=white_positions, progress=args.progress)
+                (score, number_of_mutations) = adaptive_walk_optimization(dg, design, objective_function=cofold_objective, stop=args.stop, mode=args.mode, avoid_motifs=avoid_motifs, white_positions=white_positions, progress=args.progress)
             except ValueError as e:
                 print (e.value)
                 exit(1)

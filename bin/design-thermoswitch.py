@@ -102,7 +102,7 @@ def main():
             
             # now do the optimization based on the chose mode for args.stop iterations
             try:
-                (score, number_of_mutations) = classic_optimization(dg, design, objective_function=temp_objective, stop=args.stop, mode=args.mode, progress=args.progress)
+                (score, number_of_mutations) = adaptive_walk_optimization(dg, design, objective_function=temp_objective, stop=args.stop, mode=args.mode, progress=args.progress)
             except Exception as e:
                 print (e)
                 exit(1)
