@@ -360,7 +360,7 @@ def simulated_annealing_optimization(dg, design, objective_function=calculate_ob
     if white_positions is None:
         white_positions=[]
     if temperature_gradient is None:
-        temperature_gradient=np.arange(1,0,-0.0002)
+        temperature_gradient=np.concatenate([np.arange(1,0,-0.0002),[1e-15]*100])
     # generate iterator (can call next() on it)
     temp_iter = iter(temperature_gradient)
     temperature = temp_iter.next()
@@ -396,13 +396,16 @@ def simulated_annealing_optimization(dg, design, objective_function=calculate_ob
 
         # write progress
         if progress:
-            sys.stderr.write("\rMutate: {0:7.0f}/{1:5.0f} | Score: {2:5.2f} | NOS: {3:.5e} | Mode: {4:s} | Temp: {5:5.2f}".format(number_of_samples, number_of_same_temp, score, mut_nos, mode, temperature) + " " * 20)
+            sys.stderr.write("\rMutate: {0:7.0f}/{1:5.0f} | Score: {2:5.2f} | NOS: {3:.5e} | Mode: {4:s} | Temp: {5:5.8f}".format(number_of_samples, number_of_same_temp, score, mut_nos, mode, temperature) + " " * 20)
             sys.stderr.flush()
 
         this_score = objective_function(design)
         # evaluate probability
         rand = random.uniform(0, 1)
-        prob = math.exp(-1*(this_score-score)/temperature)
+        if (this_score-score) < 0:
+            prob = 1
+        else:
+            prob = math.exp(-1*(this_score-score)/temperature)
         # compare and make decision
         if (rand <= prob):
             score = this_score
