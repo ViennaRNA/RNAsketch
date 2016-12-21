@@ -9,15 +9,15 @@ def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
 
 setup(
-    name = "PyDesign",
-    version = "1.1",
+    name = "RNAsketch",
+    version = "1.2",
     author = "Stefan Hammer",
     author_email = "s.hammer@univie.ac.at",
     description = ("A wrapper framework to design RNA molecules."),
     license = "GPLv3",
     keywords = "RNA design synthetic biology",
-    url = "http://github.com/ribonets/PyDesign",
-    packages=['PyDesign'],
+    url = "http://github.com/ribonets/RNAsketch",
+    packages=['RNAsketch'],
     test_suite="tests",
     install_requires=[
                     ],

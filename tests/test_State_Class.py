@@ -8,7 +8,7 @@ __copyright__ = "Copyright 2016"
 __maintainer__ = "Stefan Hammer"
 __email__ = "s.hammer@univie.ac.at"
 
-from PyDesign import *
+from RNAsketch import *
 import unittest
 
 class TestStateClass(unittest.TestCase):

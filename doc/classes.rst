@@ -1,18 +1,18 @@
 Classes
 =======
 
-PyDesign.Design_Class
+RNAsketch.Design
 ---------------------
 
-.. automodule:: PyDesign.Design_Class
+.. automodule:: RNAsketch.Design
     :members:
     :undoc-members:
     :show-inheritance:
 
-PyDesign.State_Class
+RNAsketch.State
 --------------------
 
-.. automodule:: PyDesign.State_Class
+.. automodule:: RNAsketch.State
     :members:
     :undoc-members:
     :show-inheritance:

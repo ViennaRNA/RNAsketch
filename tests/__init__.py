@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 '''
-    test_PyDesign.py: UNIT tests for PyDesign.py
+    test_RNAsketch.py: UNIT tests for RNAsketch.py
 '''
 
 __author__ = "Stefan Hammer"
@@ -9,13 +9,13 @@ __version__ = "0.1"
 __maintainer__ = "Stefan Hammer"
 __email__ = "s.hammer@univie.ac.at"
 
-from PyDesign import *
+from RNAsketch import *
 from test_State_Class import TestStateClass
 from test_Design_Class import TestDesignClass
 import tempfile
 import unittest
 
-class TestPyDesign(unittest.TestCase):
+class TestRNAsketch(unittest.TestCase):
     
     def test_read_inp_file(self):
         fp = tempfile.NamedTemporaryFile(delete=True)
@@ -56,7 +56,7 @@ class TestPyDesign(unittest.TestCase):
         score = calculate_objective(a)
         self.assertEqual(score, 0.107421875)
     
-    def test_classic_optimization(self):
+    def test_adaptive_walk_optimization(self):
         pass
     
     def test_constraint_generation_optimization(self):

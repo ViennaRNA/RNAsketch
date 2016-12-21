@@ -76,7 +76,7 @@ def main():
     palette=igraph.RainbowPalette(n=max_ear+1)
     for c in range(0, max_ear+1):
         ear_dict.append(palette.get(c))
-    igraph.plot(g, args.output, layout = layout, vertex_size=30, edge_width=5, margin=20, bbox=(800, 800), edge_color=[ear_dict[int(ear)] for ear in g.es["ear"]], vertex_color=[bool_dict[special] for special in g.vs["special"]])
+    igraph.plot(g, args.output, layout = layout, vertex_size=30, edge_width=5, margin=20, bbox=(800, 800), edge_color=[ear_dict[int(ear)] for ear in g.es["ear"]], vertex_color=[bool_dict[articulation] for articulation in g.vs["articulation"]])
     
     
 if __name__ == "__main__":

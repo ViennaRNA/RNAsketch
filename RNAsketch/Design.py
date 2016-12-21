@@ -13,7 +13,7 @@ __email__ = "s.hammer@univie.ac.at"
 
 
 import re
-from State_Class import *
+from State import *
 
 class Design(object):
     '''
@@ -23,7 +23,7 @@ class Design(object):
     '''
     def __init__(self, structures, sequence=''):
         '''
-        Construct a new State object.
+        Construct a new Design object.
         
         :param structures:
         :param sequence:

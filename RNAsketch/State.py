@@ -342,9 +342,9 @@ if vrna_available:
             #TODO finish implementation with pairing matrix. need to ask ronny how it is done now or use old interface
             fc = self._get_fold_compound(sequence, temperature, ligand)
             if self.multifold == 0:
-                (structure, energie) = fc.pf()
+                _,_ = fc.pf()
             if self.multifold == 1:
-                (structure, energie) = fc.pf_dimer()
+                _,_ = fc.pf_dimer()
                 structure = add_cuts(structure, self.cut_points)
             elif self.multifold > 1:
                 raise NotImplementedError

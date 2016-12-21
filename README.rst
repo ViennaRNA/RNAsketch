@@ -1,10 +1,10 @@
-PyDesign Library for designing RNA molecules
+RNAsketch Library for designing RNA molecules
 ============================================
 
 Installation
 ------------
 
-Download the lastes PyDesign package from https://github.com/ribonets/PyDesign/releases/latest, exctract and simply use setuptools to install the module and the few sample scripts::
+Download the lastes RNAsketch package from https://github.com/ribonets/RNAsketch/releases/latest, exctract and simply use setuptools to install the module and the few sample scripts::
 
     python setup.py install
 
@@ -15,7 +15,7 @@ argument, or in case :code:`PYTHONUSERBASE` is set, just use the :code:`--user` 
 Build the documentation
 -----------------------
 
-Documentation available online: http://ribonets.github.io/PyDesign
+Documentation available online: http://ribonets.github.io/RNAsketch
 
 Call these commands to build the html documentation::
 
@@ -51,6 +51,8 @@ The program `barriers` can the be used to visualize the energy landscape to conf
 
 .. figure:: data/barriers.png
     :width: 350px
+.. figure:: doc/data/barriers.png
+    :width: 350px
 
     Barriers Tree showing the two desired states as deep minima (1, 2) and the open chain (3) as neighbouring
     minimum.
@@ -73,6 +75,8 @@ confirms the design objective:
 
 .. figure:: data/cofold.png
     :width: 350px
+.. figure:: doc/data/cofold.png
+    :width: 350px
     
     RNAcofold Dot-Plots, ViennaRNA v2.2.9, AAAUAAGGAGUAAAUGAAUG&CAUUCAUUUACUCCUUACCGCACUCGCGG
     Plots were assembled in a single picture for better comparison. Only base pair probabilities
@@ -85,18 +89,20 @@ Design a multistate Thermoswitch
 
 .. code:: bash
 
-    echo -e "((((((((((....)))))))))) 24.0\n((((....))))((((....)))) 37.0\n((((....))))............ 46.0" | design-thermoswitch.py -m random -e 1000
+    echo -e "(((((((((((((....))))))))))))) 5.0\n(((((.....)))))(((((.....))))) 10.0\n(((((.....)))))............... 37.0" | design-thermoswitch.py -m random -e 1000
 
-This results e.g in a sequence like `GGGUUGAUACCCGAGUGUUGAUUC` which has the given MFE structures at the specified temperatures.
-Folding it at all Temeratures from 10 to 100 degree Celsius shows, that the first structural change happens at 30.0 degree
-Celsius and the second one at 45 degrees. After 85 degrees, the sequence occurs only in the open chain conformation.
+This results e.g in a sequence like `GAUCUGUGUGGGGUCGAUUUUGUGUGGGUU` which has the given MFE structures at the specified temperatures (lower plot).
+Folding it at all Temeratures from 10 to 100 degree Celsius shows, that the first structural change happens at ~7.0 degree
+Celsius and the second one at ~26 degrees. After _72 degrees, the sequence occurs only in the open chain conformation.
 
 `RNAheat` further confirms that the designed sequence is indeed a three-stable thermoswitch:
 
-.. figure:: data/RNAheat.png
+.. figure:: data/thermoswitch.png
+    :width: 350px
+.. figure:: doc/data/thermoswitch.png
     :width: 350px
     
-    RNAheat Plot, ViennaRNA v2.2.9, GGGUUGAUACCCGAGUGUUGAUUC
+    RNAheat Plot, ViennaRNA v2.2.9, GAUCUGUGUGGGGUCGAUUUUGUGUGGGUU
 
 Display the Dependency Graph
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -119,6 +125,8 @@ Or use the second script directly:
 This results in a nice representation of the dependency graph:
 
 .. figure:: data/graph.png
+    :width: 350px
+.. figure:: doc/data/graph.png
     :width: 350px
     
     Very simple dependency graph visualized using igraph.

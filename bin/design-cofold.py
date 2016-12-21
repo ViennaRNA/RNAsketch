@@ -1,7 +1,7 @@
 from __future__ import print_function
 
 try:
-    from PyDesign import *
+    from RNAsketch import *
 except ImportError, e:
     print(e.message)
     exit(1)
@@ -14,10 +14,11 @@ import time
 def main():
     parser = argparse.ArgumentParser(description='Design a cofold device.')
     parser.add_argument("-i", "--input", default=False, action='store_true', help='Read custom structures and sequence constraints from stdin')
-    parser.add_argument("-q", "--nupack", default=False, action='store_true', help='Use Nupack instead of the ViennaRNA package (for pseudoknots)')
+    parser.add_argument("-q", "--package", type=str, default='vrna', help='Chose the calculation package: nupack (for pseudoknots) or ViennaRNA (default: vrna)')
+    parser.add_argument("-T", "--temperature", type=float, default=37.0, help='Temperature of the energy calculations.')
     parser.add_argument("-n", "--number", type=int, default=4, help='Number of designs to generate')
-    parser.add_argument("-e", "--exit", type=int, default=500, help='Exit optimization run if no better solution is aquired after (exit) trials.')
-    parser.add_argument("-m", "--mode", type=str, default='random', help='Mode for getting a new sequence: sample, sample_local, sample_global, random')
+    parser.add_argument("-s", "--stop", type=int, default=500, help='Stop optimization run if no better solution is aquired after (stop) trials.')
+    parser.add_argument("-m", "--mode", type=str, default='random', help='Mode for getting a new sequence: sample, sample_plocal, sample_clocal, random')
     parser.add_argument("-k", "--kill", type=int, default=0, help='Timeout value of graph construction in seconds. (default: infinite)')
     parser.add_argument("-g", "--graphml", type=str, default=None, help='Write a graphml file with the given filename.')
     parser.add_argument("-c", "--csv", default=False, action='store_true', help='Write output as semi-colon csv file to stdout')
@@ -26,7 +27,7 @@ def main():
     parser.add_argument("-r", "--reporter", type = str, default='CGTAAGGGCGAAGAGCTTTTTACCGGTGTTGTGCCTATTCTCGTAGAGTTAGATGGCGACGTTAAT', help='The coding sequence context, excluding the start codon that should be part of the sequence constraint. Default are the first 66 nucleotides of eGFP.')
     args = parser.parse_args()
 
-    print("# Options: number={0:d}, exit={1:d}, mode={2:}, nupack={3:}".format(args.number, args.exit, args.mode, str(args.nupack)))
+    print("# Options: number={0:d}, stop={1:d}, mode={2:}, package={3:}, temperature={4:}".format(args.number, args.stop, args.mode, args.package, args.temperature))
     rbp.initialize_library(args.debug, args.kill)
     # define structures
     structures = []
@@ -108,14 +109,14 @@ def main():
         # remember general DG values
         graph_properties = get_graph_properties(dg)
         # create a initial design object
-        if (args.nupack):
+        if (args.package is 'nupack'):
             design = nupackDesign(structures, start_sequence)
         else:
             design = vrnaDesign(structures, start_sequence)
        
         # print header for csv file
         if (args.csv):
-            print(";".join(["exit",
+            print(";".join(["stop",
                         "mode",
                         "score",
                         "num_mutations",
@@ -127,25 +128,28 @@ def main():
         # main loop from zero to number of solutions
         for _ in range(0, args.number):
             # reset the design object
-            if (args.nupack):
+            if (args.package is 'nupack'):
                 design = nupackDesign(structures, start_sequence)
             else:
                 design = vrnaDesign(structures, start_sequence)
-
+            # set the given temperature for all states
+            for state in design.state.values():
+                state.temperature = args.temperature
+            
             # set fold constraints
             design.foldconstraints = fold_constraints
             design.context = context
             #to evaluate binding site in standard output
-            design.newState('binding', fold_constraints[0], constraint=fold_constraints[0])
-
+            design.newState('binding', fold_constraints[0], constraint=fold_constraints[0], temperature=args.temperature)
+            
             if (start_sequence):
                 score=cofold_objective(design,printDetails=True)
                 print(design.write_out(score))
             
             start = time.clock()
-            # now do the optimization based on the chosen mode for args.exit iterations
+            # now do the optimization based on the chosen mode for args.stop iterations
             try:
-                (score, number_of_mutations) = classic_optimization(dg, design, objective_function=cofold_objective, exit=args.exit, mode=args.mode, avoid_motifs=avoid_motifs, white_positions=white_positions, progress=args.progress)
+                (score, number_of_mutations) = adaptive_walk_optimization(dg, design, objective_function=cofold_objective, stop=args.stop, mode=args.mode, avoid_motifs=avoid_motifs, white_positions=white_positions, progress=args.progress)
             except ValueError as e:
                 print (e.value)
                 exit(1)
@@ -153,7 +157,7 @@ def main():
             sample_time = time.clock() - start
             score=cofold_objective(design,printDetails=True)
             if (args.csv):
-                print(args.exit,
+                print(args.stop,
                         "\"" + args.mode + "\"",
                         score,
                         number_of_mutations,
@@ -174,7 +178,7 @@ def cofold_objective(design, weight1=1, weight2=1, weight3=1, printDetails=False
     :param design: object needs following input:
         structure1 is the folded structure, in constraints we need only INTERmolecular pbs
         structure2 is the open state, in constraints we need the unpaired region (rbs) marked with xxxxxx and only mRNA!
-    :type design: PyDesign.Design
+    :type design: RNAsketch.Design
     :param weight1: Weight factor for objective part: P (RBS unpaired )
     :type weight1: float
     :param weight2: Weight factor for objective part: P(sRNA binding site unpaired)

@@ -1,7 +1,7 @@
 from __future__ import print_function
 
 try:
-    from PyDesign import *
+    from RNAsketch import *
 except ImportError, e:
     print(e.message)
     exit(1)
@@ -14,10 +14,10 @@ import re
 
 def main():
     parser = argparse.ArgumentParser(description='Design a multi-stable thermoswitch as suggested in the Flamm 2001 paper.')
-    parser.add_argument("-q", "--nupack", default=False, action='store_true', help='Use Nupack instead of the ViennaRNA package (for pseudoknots)')
+    parser.add_argument("-q", "--package", type=str, default='vrna', help='Chose the calculation package: nupack (for pseudoknots) or ViennaRNA (default: vrna)')
     parser.add_argument("-n", "--number", type=int, default=4, help='Number of designs to generate')
-    parser.add_argument("-e", "--exit", type=int, default=500, help='Exit optimization run if no better solution is aquired after (exit) trials.')
-    parser.add_argument("-m", "--mode", type=str, default='random', help='Mode for getting a new sequence: sample, sample_local, sample_global, random')
+    parser.add_argument("-e", "--stop", type=int, default=500, help='Stop optimization run if no better solution is aquired after (stop) trials.')
+    parser.add_argument("-m", "--mode", type=str, default='random', help='Mode for getting a new sequence: sample, sample_plocal, sample_clocal, random')
     parser.add_argument("-k", "--kill", type=int, default=0, help='Timeout value of graph construction in seconds. (default: infinite)')
     parser.add_argument("-g", "--graphml", type=str, default=None, help='Write a graphml file with the given filename.')
     parser.add_argument("-c", "--csv", default=False, action='store_true', help='Write output as semi-colon csv file to stdout')
@@ -25,7 +25,7 @@ def main():
     parser.add_argument("-d", "--debug", default=False, action='store_true', help='Show debug information of library')
     args = parser.parse_args()
 
-    print("# Options: number={0:d}, exit={1:d}, mode={2:}, nupack={3:}".format(args.number, args.exit, args.mode, str(args.nupack)))
+    print("# Options: number={0:d}, stop={1:d}, mode={2:}, package={3:}".format(args.number, args.stop, args.mode, args.package))
     rbp.initialize_library(args.debug, args.kill)
     # define structures
     structures = []
@@ -81,14 +81,11 @@ def main():
         # remember general DG values
         graph_properties = get_graph_properties(dg)
         # create a initial design object
-        if (args.nupack):
-            design = nupackDesign(structures, start_sequence)
-        else:
-            design = vrnaDesign(structures, start_sequence)
+        design = build_molecule(structures, start_sequence, temperatures, args.package) 
         
         # print header for csv file
         if (args.csv):
-            print(";".join(["exit",
+            print(";".join(["stop",
                         "mode",
                         "score",
                         "num_mutations",
@@ -100,31 +97,20 @@ def main():
         # main loop from zero to number of solutions
         for n in range(0, args.number):
             # reset the design object
-            if (args.nupack):
-                design = nupackDesign(structures, start_sequence)
-            else:
-                design = vrnaDesign(structures, start_sequence)
-            
-            for i, t in enumerate(temperatures): 
-                design.state[str(i)].temperature = t
-                
-                for j, s in enumerate(design.structures):
-                    if j != i:
-                        design.newState(str(j) + ':' + str(t), s, temperature=t)
-            
+            design = build_molecule(structures, start_sequence, temperatures, args.package) 
             start = time.clock()
             
-            # now do the optimization based on the chose mode for args.exit iterations
+            # now do the optimization based on the chose mode for args.stop iterations
             try:
-                (score, number_of_mutations) = classic_optimization(dg, design, objective_function=temp_objective, exit=args.exit, mode=args.mode, progress=args.progress)
-            except ValueError as e:
-                print (e.value)
+                (score, number_of_mutations) = adaptive_walk_optimization(dg, design, objective_function=temp_objective, stop=args.stop, mode=args.mode, progress=args.progress)
+            except Exception as e:
+                print (e)
                 exit(1)
             # stop time counter
             sample_time = time.clock() - start
             
             if (args.csv):
-                print(args.exit,
+                print(args.stop,
                         "\"" + args.mode + "\"",
                         score,
                         number_of_mutations,
@@ -137,13 +123,29 @@ def main():
     else:
         print('# Construction time out reached!')
 
-def temp_objective(design, weight=0.5):
+def build_molecule(structures, start_sequence, temperatures, package):
+    if (package is 'nupack'):
+        design = nupackDesign(structures, start_sequence)
+    else:
+        design = vrnaDesign(structures, start_sequence)
+    
+    keys = design.state.keys();
+    
+    for i, t in enumerate(temperatures): 
+        design.state[str(i)].temperature = t
+        
+        for key in keys:
+            if key != str(i):
+                design.newState(key + ':' + str(t), design.state[key].structure, temperature=t)
+    return design
+
+def temp_objective(design, weight=1):
     return calculate_objective_1(design) + weight * temp_objective_2(design)
 
 def temp_objective_2(design):
     '''
     Calculates the objective function given a Design object containing the designed sequence and input structures.
-    objective function (3 seqs):    (eos(1)-eos(2))^2 + (eos(1)-eos(3))^2 + (eos(2)-eos(3))^2) * 2 / (number_of_structures * (number_of_structures-1))
+    objective function (3 seqs):    TODO!
     
     :param design: Design object containing the sequence and structures
     :return: score calculated by the objective function
