@@ -112,8 +112,8 @@ def get_graph_properties(dg):
     :return: properties - Dictionary containing all the graph properties
     '''
     properties = {}
-    special_ratios = []
-    max_specials = 0
+    articulation_ratios = []
+    max_articulations = 0
     max_component_vertices = 0
 
     properties['num_cc'] = dg.number_of_connected_components()
@@ -121,17 +121,17 @@ def get_graph_properties(dg):
 
     for cc in range(0, properties['num_cc']):
         cv = len(dg.component_vertices(cc))
-        sv = len(dg.special_vertices(cc))
-        special_ratios.append(float(sv)/float(cv))
-        if (max_specials < sv):
-            max_specials = sv
+        sv = len(dg.articulation_vertices(cc))
+        articulation_ratios.append(float(sv)/float(cv))
+        if (max_articulations < sv):
+            max_articulations = sv
         if (max_component_vertices < cv):
             max_component_vertices = cv
 
-    properties['max_specials'] = max_specials
+    properties['max_articulations'] = max_articulations
     properties['max_component_vertices'] = max_component_vertices
-    properties['max_special_ratio'] = max(special_ratios)
-    properties['mean_special_ratio'] = sum(special_ratios) / len(special_ratios)
+    properties['max_articulation_ratio'] = max(articulation_ratios)
+    properties['mean_articulation_ratio'] = sum(articulation_ratios) / len(articulation_ratios)
     properties['max_dimensions'] = dg.max_number_of_dimensions()
 
     return properties

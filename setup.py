@@ -10,7 +10,7 @@ def read(fname):
 
 setup(
     name = "RNAsketch",
-    version = "1.1",
+    version = "1.2",
     author = "Stefan Hammer",
     author_email = "s.hammer@univie.ac.at",
     description = ("A wrapper framework to design RNA molecules."),
