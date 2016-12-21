@@ -1,20 +1,22 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html>
 
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>PyDesign package &#8212; PyDesign 0.1.0 documentation</title>
+    <title>RNAsketch Library for designing RNA molecules &#8212; RNAsketch 1.1.0 documentation</title>
     
-    <link rel="stylesheet" href="_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="_static/basic.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="_static/bootstrap-3.3.6/css/bootstrap.min.css" type="text/css" />
+    <link rel="stylesheet" href="_static/bootstrap-3.3.6/css/bootstrap-theme.min.css" type="text/css" />
+    <link rel="stylesheet" href="_static/bootstrap-sphinx.css" type="text/css" />
     
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.1.0',
+        VERSION:     '1.1.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,738 +25,260 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="PyDesign 0.1.0 documentation" href="#" /> 
+    <script type="text/javascript" src="_static/js/jquery-1.11.0.min.js"></script>
+    <script type="text/javascript" src="_static/js/jquery-fix.js"></script>
+    <script type="text/javascript" src="_static/bootstrap-3.3.6/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="_static/bootstrap-sphinx.js"></script>
+    <link rel="top" title="RNAsketch 1.1.0 documentation" href="#" />
+    <link rel="next" title="Module content" href="module.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+
   </head>
   <body role="document">
-    <div class="related" role="navigation" aria-label="related navigation">
-      <h3>Navigation</h3>
-      <ul>
-        <li class="right" style="margin-right: 10px">
-          <a href="genindex.html" title="General Index"
-             accesskey="I">index</a></li>
-        <li class="right" >
-          <a href="py-modindex.html" title="Python Module Index"
-             >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="#">PyDesign 0.1.0 documentation</a> &#187;</li> 
-      </ul>
-    </div>  
 
-    <div class="document">
-      <div class="documentwrapper">
-        <div class="bodywrapper">
-          <div class="body" role="main">
-            
-  <div class="section" id="pydesign-package">
-<h1>PyDesign package<a class="headerlink" href="#pydesign-package" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="module-PyDesign">
-<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-PyDesign" title="Permalink to this headline">¶</a></h2>
-<p>PyDesign.py: A small module containing all the important helpers and 
-functions for all major RNAdesign operations.</p>
-<dl class="function">
-<dt id="PyDesign.calculate_objective">
-<code class="descclassname">PyDesign.</code><code class="descname">calculate_objective</code><span class="sig-paren">(</span><em>design</em>, <em>weight=0.5</em><span class="sig-paren">)</span><a class="headerlink" href="#PyDesign.calculate_objective" title="Permalink to this definition">¶</a></dt>
-<dd><p>Calculates the objective function given a Design object containing the designed sequence and input structures.
-objective function (3 seqs):    (eos(1)+eos(2)+eos(3) - 3 * gibbs) / number_of_structures +
-weight * (eos(1)-eos(2))^2 + (eos(1)-eos(3))^2 + (eos(2)-eos(3))^2) * 2 / (number_of_structures * (number_of_structures-1))
-:param design: Design object containing the sequence and structures
-:type design: Object of type Design
-:param weight: To wheight the influence of the eos diffences
-:type weight: float
-:return score: score calculated by the objective function</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="PyDesign.calculate_objective_1">
-<code class="descclassname">PyDesign.</code><code class="descname">calculate_objective_1</code><span class="sig-paren">(</span><em>design</em><span class="sig-paren">)</span><a class="headerlink" href="#PyDesign.calculate_objective_1" title="Permalink to this definition">¶</a></dt>
-<dd><p>Calculates the objective function given a Design object containing the designed sequence and input structures.
-objective function (3 seqs):    (eos(1)+eos(2)+eos(3) - 3 * gibbs) / number_of_structures
-:param design: Design object containing the sequence and structures
-:type design: Object of type Design
-:return score: score calculated by the objective function</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="PyDesign.calculate_objective_2">
-<code class="descclassname">PyDesign.</code><code class="descname">calculate_objective_2</code><span class="sig-paren">(</span><em>design</em><span class="sig-paren">)</span><a class="headerlink" href="#PyDesign.calculate_objective_2" title="Permalink to this definition">¶</a></dt>
-<dd><p>Calculates the objective function given a Design object containing the designed sequence and input structures.
-objective function (3 seqs):    (eos(1)-eos(2))^2 + (eos(1)-eos(3))^2 + (eos(2)-eos(3))^2) * 2 / (number_of_structures * (number_of_structures-1))
-:param design: Design object containing the sequence and structures
-:return score: score calculated by the objective function</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="PyDesign.classic_optimization">
-<code class="descclassname">PyDesign.</code><code class="descname">classic_optimization</code><span class="sig-paren">(</span><em>dg</em>, <em>design</em>, <em>objective_function=&lt;function calculate_objective&gt;</em>, <em>exit=1000</em>, <em>mode='sample'</em>, <em>avoid_motifs=None</em>, <em>white_positions=None</em>, <em>progress=False</em><span class="sig-paren">)</span><a class="headerlink" href="#PyDesign.classic_optimization" title="Permalink to this definition">¶</a></dt>
-<dd><p>Takes a Design object and does a classic optimization of this sequence.
-:param dg: RNAdesign DependencyGraph object
-:param design: Design object containing the sequence and structures
-:param objective_functions: array of functions which takes a design object and returns a score for evaluation
-:param exit: Number of unsuccessful new sequences before exiting the optimization
-:param mode: String defining the sampling mode: sample, sample_global, sample_local
-:param avoid_motifs: list of regex pattern specifiying sequence motifs to avoid
-:param white_positions: list of positions in the sequence where the avoid_motifs pattern should be ignored
-:param progress: Whether or not to print the progress to the console
-:param return: Optimization score reached for the final sequence
-&#8220;param return: Number of samples neccessary to reach this result</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="PyDesign.constraint_generation_optimization">
-<code class="descclassname">PyDesign.</code><code class="descname">constraint_generation_optimization</code><span class="sig-paren">(</span><em>dg</em>, <em>design</em>, <em>objective_function=&lt;function calculate_objective&gt;</em>, <em>exit=1000</em>, <em>mode='sample'</em>, <em>num_neg_constraints=100</em>, <em>max_eos_diff=0</em>, <em>avoid_motifs=None</em>, <em>white_positions=None</em>, <em>progress=False</em><span class="sig-paren">)</span><a class="headerlink" href="#PyDesign.constraint_generation_optimization" title="Permalink to this definition">¶</a></dt>
-<dd><p>Takes a Design object and does a constraint generation optimization of this sequence.
-:param dg: RNAdesign DependencyGraph object
-:param design: Design object containing the sequence and structures
-:param objective_functions: array of functions which takes a design object and returns a score for evaluation
-:param exit: Number of unsuccessful new sequences before exiting the optimization
-:param mode: String defining the sampling mode: sample, sample_global, sample_local
-:param num_neg_constraints: Maximal number of negative constraints to accumulate during the optimization process
-:param max_eos_diff: Maximal difference between eos of the negative and positive constraints
-:param avoid_motifs: list of regex pattern specifiying sequence motifs to avoid
-:param white_positions: list of positions in the sequence where the avoid_motifs pattern should be ignored
-:param progress: Whether or not to print the progress to the console
-:param return: Optimization score reached for the final sequence
-&#8220;param return: Number of samples neccessary to reach this result</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="PyDesign.get_graph_properties">
-<code class="descclassname">PyDesign.</code><code class="descname">get_graph_properties</code><span class="sig-paren">(</span><em>dg</em><span class="sig-paren">)</span><a class="headerlink" href="#PyDesign.get_graph_properties" title="Permalink to this definition">¶</a></dt>
-<dd><p>Takes a RNAdesign DependencyGraph Object and constructs a dicionary with all the
-calculated properties.
-:param dg: RNAdesign DependencyGraph object
-:return properties: Dictionary containing all the graph properties</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="PyDesign.read_inp_file">
-<code class="descclassname">PyDesign.</code><code class="descname">read_inp_file</code><span class="sig-paren">(</span><em>filename</em><span class="sig-paren">)</span><a class="headerlink" href="#PyDesign.read_inp_file" title="Permalink to this definition">¶</a></dt>
-<dd><p>Reads a file in <a href="#id1"><span class="problematic" id="id2">*</span></a>.inp format and returns all neccessary information
-:param filename: Filename of the file to read
-:return structures: List of structures in dot-bracket notation
-:return constraint: Sequence constraint
-:return sequence: Start sequence</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="PyDesign.read_input">
-<code class="descclassname">PyDesign.</code><code class="descname">read_input</code><span class="sig-paren">(</span><em>content</em><span class="sig-paren">)</span><a class="headerlink" href="#PyDesign.read_input" title="Permalink to this definition">¶</a></dt>
-<dd><p>Reads some input and returns all neccessary information in the right container.
-Input is a string, lines separated by linebreaks. Content might be structures, 
-a sequence constraint and a start sequence
-:param filename: Filename of the file to read
-:return structures: List of structures in dot-bracket notation
-:return constraint: Sequence constraint
-:return sequence: Start sequence</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="PyDesign.sample_count_unique_solutions">
-<code class="descclassname">PyDesign.</code><code class="descname">sample_count_unique_solutions</code><span class="sig-paren">(</span><em>solution_space_size</em>, <em>sample_size</em><span class="sig-paren">)</span><a class="headerlink" href="#PyDesign.sample_count_unique_solutions" title="Permalink to this definition">¶</a></dt>
-<dd><p>Calculates the expectancy value of how many time it is necessary to draw a 
-solution to gain a unique set of solutions with the given sample size
-:param solution_space_size: The size of the complete solutions space to draw from
-:param sample_size: The size of the requested unique set
-:return: Expectancy value of how many times to draw from the solution space to gain this unique set</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="PyDesign.sample_sequence">
-<code class="descclassname">PyDesign.</code><code class="descname">sample_sequence</code><span class="sig-paren">(</span><em>dg</em>, <em>design</em>, <em>mode</em>, <em>sample_steps=1</em>, <em>avoid_motifs=None</em>, <em>white_positions=None</em><span class="sig-paren">)</span><a class="headerlink" href="#PyDesign.sample_sequence" title="Permalink to this definition">¶</a></dt>
-<dd><p>This function samples a sequence with the given mode from the dependency graph object
-and writes it into the design object
-:param dg: RNAdesign dependency graph object
-:param design: design object
-:param mode: mode how to sample, this is a string
-:param sample_steps: count how many times to do the sample operation
-:param avoid_motifs: list of regex pattern specifiying sequence motifs to avoid
-:param white_positions: list of positions in the sequence where the avoid_motifs pattern should be ignored
-:param return: mut_nos is the solution space we drew from
-:param return: sample_count is how many times we sampled a solution from the dependency graph object (important for revert later)</p>
-</dd></dl>
-
-</div>
-<div class="section" id="module-PyDesign.Design_Class">
-<span id="pydesign-design-class"></span><h2>PyDesign.Design_Class<a class="headerlink" href="#module-PyDesign.Design_Class" title="Permalink to this headline">¶</a></h2>
-<p>Design_Class.py: Class as wrapper for ViennaRNA and Nupack
-functions to design an RNA molecule
-This implements the core class which holds all the states of a riboswitch</p>
-<dl class="class">
-<dt id="PyDesign.Design_Class.Design">
-<em class="property">class </em><code class="descclassname">PyDesign.Design_Class.</code><code class="descname">Design</code><span class="sig-paren">(</span><em>structures</em>, <em>sequence=''</em><span class="sig-paren">)</span><a class="headerlink" href="#PyDesign.Design_Class.Design" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/2/library/functions.html#object" title="(in Python v2.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
-<p>Design contains all neccessary information to generate a RNA device
-or to return a solution. It is used as a container between the different
-functions.</p>
-<dl class="attribute">
-<dt id="PyDesign.Design_Class.Design.ensemble_defect">
-<code class="descname">ensemble_defect</code><a class="headerlink" href="#PyDesign.Design_Class.Design.ensemble_defect" title="Permalink to this definition">¶</a></dt>
-<dd><table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Dict of ensemble defect values of all states with state names as keys</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="PyDesign.Design_Class.Design.eos">
-<code class="descname">eos</code><a class="headerlink" href="#PyDesign.Design_Class.Design.eos" title="Permalink to this definition">¶</a></dt>
-<dd><table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Dict of energy of structure values of all states with state names as keys</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="PyDesign.Design_Class.Design.eos_diff_mfe">
-<code class="descname">eos_diff_mfe</code><a class="headerlink" href="#PyDesign.Design_Class.Design.eos_diff_mfe" title="Permalink to this definition">¶</a></dt>
-<dd><table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Dict of energy of structure to MFE difference values of all states with state names as keys</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="PyDesign.Design_Class.Design.eos_reached_mfe">
-<code class="descname">eos_reached_mfe</code><a class="headerlink" href="#PyDesign.Design_Class.Design.eos_reached_mfe" title="Permalink to this definition">¶</a></dt>
-<dd><table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Dict of booleans telling if the energy of struct equals the mfe energy of all states with state names as keys</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="PyDesign.Design_Class.Design.length">
-<code class="descname">length</code><a class="headerlink" href="#PyDesign.Design_Class.Design.length" title="Permalink to this definition">¶</a></dt>
-<dd><table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Length of the designed sequence</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="PyDesign.Design_Class.Design.mfe_energy">
-<code class="descname">mfe_energy</code><a class="headerlink" href="#PyDesign.Design_Class.Design.mfe_energy" title="Permalink to this definition">¶</a></dt>
-<dd><table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Dict of mfe values of all states with state names as keys</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="PyDesign.Design_Class.Design.mfe_structure">
-<code class="descname">mfe_structure</code><a class="headerlink" href="#PyDesign.Design_Class.Design.mfe_structure" title="Permalink to this definition">¶</a></dt>
-<dd><table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Dict of mfe structures of all states with state names as keys</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="PyDesign.Design_Class.Design.newState">
-<code class="descname">newState</code><span class="sig-paren">(</span><em>key</em>, <em>struct</em>, <em>temperature=37.0</em>, <em>ligand=None</em>, <em>constraint=None</em>, <em>enforce_constraint=False</em><span class="sig-paren">)</span><a class="headerlink" href="#PyDesign.Design_Class.Design.newState" title="Permalink to this definition">¶</a></dt>
-<dd><p>Creates a new state of the given subclass.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="PyDesign.Design_Class.Design.number_of_structures">
-<code class="descname">number_of_structures</code><a class="headerlink" href="#PyDesign.Design_Class.Design.number_of_structures" title="Permalink to this definition">¶</a></dt>
-<dd><table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Number of uniq structures of all states</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="PyDesign.Design_Class.Design.pf_energy">
-<code class="descname">pf_energy</code><a class="headerlink" href="#PyDesign.Design_Class.Design.pf_energy" title="Permalink to this definition">¶</a></dt>
-<dd><table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Dict of partition function energy values of all states with state names as keys</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="PyDesign.Design_Class.Design.pf_structure">
-<code class="descname">pf_structure</code><a class="headerlink" href="#PyDesign.Design_Class.Design.pf_structure" title="Permalink to this definition">¶</a></dt>
-<dd><table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Dict of partition function consensus structures of all states with state names as keys</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="PyDesign.Design_Class.Design.pos">
-<code class="descname">pos</code><a class="headerlink" href="#PyDesign.Design_Class.Design.pos" title="Permalink to this definition">¶</a></dt>
-<dd><table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Dict of probability of structure values of all states with state names as keys</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="PyDesign.Design_Class.Design.sequence">
-<code class="descname">sequence</code><a class="headerlink" href="#PyDesign.Design_Class.Design.sequence" title="Permalink to this definition">¶</a></dt>
-<dd><table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Sequence of this design object</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="PyDesign.Design_Class.Design.structures">
-<code class="descname">structures</code><a class="headerlink" href="#PyDesign.Design_Class.Design.structures" title="Permalink to this definition">¶</a></dt>
-<dd><table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">List containing the structures of all states</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="PyDesign.Design_Class.Design.write_csv">
-<code class="descname">write_csv</code><span class="sig-paren">(</span><em>separator=';'</em><span class="sig-paren">)</span><a class="headerlink" href="#PyDesign.Design_Class.Design.write_csv" title="Permalink to this definition">¶</a></dt>
-<dd><p>Generates a csv version of all values of this design separated by the given separator
-:param separator: separator for the values
-:return: string containing all values of this design separated by the given separator</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="PyDesign.Design_Class.Design.write_csv_header">
-<code class="descname">write_csv_header</code><span class="sig-paren">(</span><em>separator=';'</em><span class="sig-paren">)</span><a class="headerlink" href="#PyDesign.Design_Class.Design.write_csv_header" title="Permalink to this definition">¶</a></dt>
-<dd><p>Generates a csv header for all values of this design separated by the given separator
-:param separator: separator for the values
-:return: string containing a csv header for this design separated by the given separator</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="PyDesign.Design_Class.Design.write_out">
-<code class="descname">write_out</code><span class="sig-paren">(</span><em>score=0</em><span class="sig-paren">)</span><a class="headerlink" href="#PyDesign.Design_Class.Design.write_out" title="Permalink to this definition">¶</a></dt>
-<dd><p>Generates a nice human readable version of all values of this design
-:param score: optimization score for this design
-:return: string containing a nicely formatted version of all design values</p>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="class">
-<dt id="PyDesign.Design_Class.nupackDesign">
-<em class="property">class </em><code class="descclassname">PyDesign.Design_Class.</code><code class="descname">nupackDesign</code><span class="sig-paren">(</span><em>structures</em>, <em>sequence=''</em><span class="sig-paren">)</span><a class="headerlink" href="#PyDesign.Design_Class.nupackDesign" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#PyDesign.Design_Class.Design" title="PyDesign.Design_Class.Design"><code class="xref py py-class docutils literal"><span class="pre">PyDesign.Design_Class.Design</span></code></a></p>
-<dl class="method">
-<dt id="PyDesign.Design_Class.nupackDesign.newState">
-<code class="descname">newState</code><span class="sig-paren">(</span><em>key</em>, <em>struct</em>, <em>temperature=37.0</em>, <em>ligand=None</em>, <em>constraint=None</em>, <em>enforce_constraint=False</em><span class="sig-paren">)</span><a class="headerlink" href="#PyDesign.Design_Class.nupackDesign.newState" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="class">
-<dt id="PyDesign.Design_Class.vrnaDesign">
-<em class="property">class </em><code class="descclassname">PyDesign.Design_Class.</code><code class="descname">vrnaDesign</code><span class="sig-paren">(</span><em>structures</em>, <em>sequence=''</em><span class="sig-paren">)</span><a class="headerlink" href="#PyDesign.Design_Class.vrnaDesign" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#PyDesign.Design_Class.Design" title="PyDesign.Design_Class.Design"><code class="xref py py-class docutils literal"><span class="pre">PyDesign.Design_Class.Design</span></code></a></p>
-<dl class="method">
-<dt id="PyDesign.Design_Class.vrnaDesign.newState">
-<code class="descname">newState</code><span class="sig-paren">(</span><em>key</em>, <em>struct</em>, <em>temperature=37.0</em>, <em>ligand=None</em>, <em>constraint=None</em>, <em>enforce_constraint=False</em><span class="sig-paren">)</span><a class="headerlink" href="#PyDesign.Design_Class.vrnaDesign.newState" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-</div>
-<div class="section" id="module-PyDesign.State_Class">
-<span id="pydesign-state-class"></span><h2>PyDesign.State_Class<a class="headerlink" href="#module-PyDesign.State_Class" title="Permalink to this headline">¶</a></h2>
-<p>State_Class.py: Class as wrapper for ViennaRNA and Nupack
-functions to design an RNA molecule.
-This implements the various states of a riboswitch.</p>
-<dl class="class">
-<dt id="PyDesign.State_Class.State">
-<em class="property">class </em><code class="descclassname">PyDesign.State_Class.</code><code class="descname">State</code><span class="sig-paren">(</span><em>parent</em>, <em>structure=None</em>, <em>temperature=37.0</em>, <em>ligand=None</em>, <em>constraint=None</em>, <em>enforce_constraint=False</em><span class="sig-paren">)</span><a class="headerlink" href="#PyDesign.State_Class.State" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/2/library/functions.html#object" title="(in Python v2.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
-<p>State object holds structure, ligand, constraints and calculates all values
-for this state.</p>
-<dl class="attribute">
-<dt id="PyDesign.State_Class.State.classtype">
-<code class="descname">classtype</code><a class="headerlink" href="#PyDesign.State_Class.State.classtype" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="PyDesign.State_Class.State.constraint">
-<code class="descname">constraint</code><a class="headerlink" href="#PyDesign.State_Class.State.constraint" title="Permalink to this definition">¶</a></dt>
-<dd><table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Structural constraint of this state (hard constraint)</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="PyDesign.State_Class.State.cut_points">
-<code class="descname">cut_points</code><a class="headerlink" href="#PyDesign.State_Class.State.cut_points" title="Permalink to this definition">¶</a></dt>
-<dd><table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">List containing the positions of the cut points (&amp; or +) in the sequence</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="PyDesign.State_Class.State.enforce_constraint">
-<code class="descname">enforce_constraint</code><a class="headerlink" href="#PyDesign.State_Class.State.enforce_constraint" title="Permalink to this definition">¶</a></dt>
-<dd><table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Boolean whether to enforce the hard constraint or not</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="PyDesign.State_Class.State.ensemble_defect">
-<code class="descname">ensemble_defect</code><a class="headerlink" href="#PyDesign.State_Class.State.ensemble_defect" title="Permalink to this definition">¶</a></dt>
-<dd><table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Ensemble defect value given all the properties of this state (constraints, temperature,...)</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="PyDesign.State_Class.State.eos">
-<code class="descname">eos</code><a class="headerlink" href="#PyDesign.State_Class.State.eos" title="Permalink to this definition">¶</a></dt>
-<dd><table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Energy of structure given all the properties of this state (constraints, temperature,...)</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="PyDesign.State_Class.State.eos_diff_mfe">
-<code class="descname">eos_diff_mfe</code><a class="headerlink" href="#PyDesign.State_Class.State.eos_diff_mfe" title="Permalink to this definition">¶</a></dt>
-<dd><table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Energy difference of structure to mfe given all the properties of this state (constraints, temperature,...)</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="PyDesign.State_Class.State.eos_reached_mfe">
-<code class="descname">eos_reached_mfe</code><a class="headerlink" href="#PyDesign.State_Class.State.eos_reached_mfe" title="Permalink to this definition">¶</a></dt>
-<dd><table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Boolean defining whether the eos reached the mfe energy</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="PyDesign.State_Class.State.length">
-<code class="descname">length</code><a class="headerlink" href="#PyDesign.State_Class.State.length" title="Permalink to this definition">¶</a></dt>
-<dd><table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Length of the design sequence if available, otherwise of the stuctural input</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="PyDesign.State_Class.State.ligand">
-<code class="descname">ligand</code><a class="headerlink" href="#PyDesign.State_Class.State.ligand" title="Permalink to this definition">¶</a></dt>
-<dd><table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Ligand binding definitions for this state; List with sequence pattern, structure pattern and binding energy (soft constraint)</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="PyDesign.State_Class.State.mfe_energy">
-<code class="descname">mfe_energy</code><a class="headerlink" href="#PyDesign.State_Class.State.mfe_energy" title="Permalink to this definition">¶</a></dt>
-<dd><table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">MFE value given all the properties of this state (constraints, temperature,...)</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="PyDesign.State_Class.State.mfe_structure">
-<code class="descname">mfe_structure</code><a class="headerlink" href="#PyDesign.State_Class.State.mfe_structure" title="Permalink to this definition">¶</a></dt>
-<dd><table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">MFE structure given all the properties of this state (constraints, temperature,...)</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="PyDesign.State_Class.State.multifold">
-<code class="descname">multifold</code><a class="headerlink" href="#PyDesign.State_Class.State.multifold" title="Permalink to this definition">¶</a></dt>
-<dd><table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Number of cut points to specify if it is a cofold or multifold problem</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="PyDesign.State_Class.State.pf_energy">
-<code class="descname">pf_energy</code><a class="headerlink" href="#PyDesign.State_Class.State.pf_energy" title="Permalink to this definition">¶</a></dt>
-<dd><table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Partition function energy value given all the properties of this state (constraints, temperature,...)</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="PyDesign.State_Class.State.pf_structure">
-<code class="descname">pf_structure</code><a class="headerlink" href="#PyDesign.State_Class.State.pf_structure" title="Permalink to this definition">¶</a></dt>
-<dd><table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Partition function consensus structure given all the properties of this state (constraints, temperature,...)</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="PyDesign.State_Class.State.pos">
-<code class="descname">pos</code><a class="headerlink" href="#PyDesign.State_Class.State.pos" title="Permalink to this definition">¶</a></dt>
-<dd><table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Probability of structure given all the properties of this state (constraints, temperature,...)</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="PyDesign.State_Class.State.reset">
-<code class="descname">reset</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#PyDesign.State_Class.State.reset" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="PyDesign.State_Class.State.structure">
-<code class="descname">structure</code><a class="headerlink" href="#PyDesign.State_Class.State.structure" title="Permalink to this definition">¶</a></dt>
-<dd><table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Dot-bracket structure as constraint for this state</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="PyDesign.State_Class.State.temperature">
-<code class="descname">temperature</code><a class="headerlink" href="#PyDesign.State_Class.State.temperature" title="Permalink to this definition">¶</a></dt>
-<dd><table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Temperature of this state</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="function">
-<dt id="PyDesign.State_Class.add_cuts">
-<code class="descclassname">PyDesign.State_Class.</code><code class="descname">add_cuts</code><span class="sig-paren">(</span><em>input</em>, <em>cut_points</em><span class="sig-paren">)</span><a class="headerlink" href="#PyDesign.State_Class.add_cuts" title="Permalink to this definition">¶</a></dt>
-<dd><p>Takes a string and add back the cut point characters at the positions stored in the cut points list
-:param input: string without cut point characters
-:return: string containing cut point characters</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="PyDesign.State_Class.create_bp_table">
-<code class="descclassname">PyDesign.State_Class.</code><code class="descname">create_bp_table</code><span class="sig-paren">(</span><em>structure</em><span class="sig-paren">)</span><a class="headerlink" href="#PyDesign.State_Class.create_bp_table" title="Permalink to this definition">¶</a></dt>
-<dd><p>Takes a structure in dot bracket notation and returns a base pair table.
-Unpaired positions are -1, otherwise the index of the adjacent bracket is listed
-:param structure: string with dot-bracket notation of the strcture
-:return bpt: base pair table</p>
-</dd></dl>
-
-<dl class="class">
-<dt id="PyDesign.State_Class.nupackState">
-<em class="property">class </em><code class="descclassname">PyDesign.State_Class.</code><code class="descname">nupackState</code><span class="sig-paren">(</span><em>parent</em>, <em>structure=None</em>, <em>temperature=37.0</em>, <em>ligand=None</em>, <em>constraint=None</em>, <em>enforce_constraint=False</em><span class="sig-paren">)</span><a class="headerlink" href="#PyDesign.State_Class.nupackState" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#PyDesign.State_Class.State" title="PyDesign.State_Class.State"><code class="xref py py-class docutils literal"><span class="pre">PyDesign.State_Class.State</span></code></a></p>
-<dl class="attribute">
-<dt id="PyDesign.State_Class.nupackState.classtype">
-<code class="descname">classtype</code><a class="headerlink" href="#PyDesign.State_Class.nupackState.classtype" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="function">
-<dt id="PyDesign.State_Class.remove_cuts">
-<code class="descclassname">PyDesign.State_Class.</code><code class="descname">remove_cuts</code><span class="sig-paren">(</span><em>input</em><span class="sig-paren">)</span><a class="headerlink" href="#PyDesign.State_Class.remove_cuts" title="Permalink to this definition">¶</a></dt>
-<dd><p>Takes a string and removes all cut characters (+&amp;) from this string
-:param input: string containing cut point characters
-:return: string without cut point characters</p>
-</dd></dl>
-
-<dl class="class">
-<dt id="PyDesign.State_Class.vrnaState">
-<em class="property">class </em><code class="descclassname">PyDesign.State_Class.</code><code class="descname">vrnaState</code><span class="sig-paren">(</span><em>parent</em>, <em>structure=None</em>, <em>temperature=37.0</em>, <em>ligand=None</em>, <em>constraint=None</em>, <em>enforce_constraint=False</em><span class="sig-paren">)</span><a class="headerlink" href="#PyDesign.State_Class.vrnaState" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#PyDesign.State_Class.State" title="PyDesign.State_Class.State"><code class="xref py py-class docutils literal"><span class="pre">PyDesign.State_Class.State</span></code></a></p>
-<dl class="attribute">
-<dt id="PyDesign.State_Class.vrnaState.classtype">
-<code class="descname">classtype</code><a class="headerlink" href="#PyDesign.State_Class.vrnaState.classtype" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-</div>
-</div>
-
-
-          </div>
-        </div>
+  <div id="navbar" class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="#"><span><img src="_static/rnasketch.png"></span>
+          RNAsketch</a>
+        <span class="navbar-text navbar-version pull-left"><b>1.1</b></span>
       </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
-        <div class="sphinxsidebarwrapper">
-  <h3><a href="#">Table Of Contents</a></h3>
-  <ul>
-<li><a class="reference internal" href="#">PyDesign package</a><ul>
-<li><a class="reference internal" href="#module-PyDesign">Module contents</a></li>
-<li><a class="reference internal" href="#module-PyDesign.Design_Class">PyDesign.Design_Class</a></li>
-<li><a class="reference internal" href="#module-PyDesign.State_Class">PyDesign.State_Class</a></li>
+
+        <div class="collapse navbar-collapse nav-collapse">
+          <ul class="nav navbar-nav">
+            
+            
+              <li class="dropdown globaltoc-container">
+  <a role="button"
+     id="dLabelGlobalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="#">Site <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"
+      role="menu"
+      aria-labelledby="dLabelGlobalToc"><ul>
+<li class="toctree-l1"><a class="reference internal" href="module.html">Module content</a></li>
+<li class="toctree-l1"><a class="reference internal" href="classes.html">Classes</a></li>
+</ul>
+</ul>
+</li>
+              
+                <li class="dropdown">
+  <a role="button"
+     id="dLabelLocalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="#">Page <b class="caret"></b></a>
+  <ul class="dropdown-menu localtoc"
+      role="menu"
+      aria-labelledby="dLabelLocalToc"><ul>
+<li><a class="reference internal" href="#">RNAsketch Library for designing RNA molecules</a><ul>
+<li><a class="reference internal" href="#installation">Installation</a></li>
+<li><a class="reference internal" href="#build-the-documentation">Build the documentation</a></li>
+<li><a class="reference internal" href="#provided-example-scripts">Provided Example Scripts</a><ul>
+<li><a class="reference internal" href="#design-a-multistate-design">Design a Multistate Design</a></li>
+<li><a class="reference internal" href="#design-a-srna-mediated-translational-regulation">Design a sRNA mediated translational regulation</a></li>
+<li><a class="reference internal" href="#design-a-multistate-thermoswitch">Design a multistate Thermoswitch</a></li>
+<li><a class="reference internal" href="#display-the-dependency-graph">Display the Dependency Graph</a></li>
 </ul>
 </li>
 </ul>
+</li>
+<li><a class="reference internal" href="#autodoc-contents">Autodoc contents</a></li>
+</ul>
+</ul>
+</li>
+              
+            
+            
+              
+                
+  <li>
+    <a href="module.html" title="Next Chapter: Module content"><span class="glyphicon glyphicon-chevron-right visible-sm"></span><span class="hidden-sm hidden-tablet">Module content &raquo;</span>
+    </a>
+  </li>
+              
+            
+            
+            
+            
+              <li class="hidden-sm">
+<div id="sourcelink">
+  <a href="_sources/index.txt"
+     rel="nofollow">Source</a>
+</div></li>
+            
+          </ul>
 
-  <div role="note" aria-label="source link">
-    <h3>This Page</h3>
-    <ul class="this-page-menu">
-      <li><a href="_sources/index.txt"
-            rel="nofollow">Show Source</a></li>
-    </ul>
-   </div>
-<div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
-    <form class="search" action="search.html" method="get">
-      <div><input type="text" name="q" /></div>
-      <div><input type="submit" value="Go" /></div>
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
-    </form>
-</div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+          
+            
+<form class="navbar-form navbar-right" action="search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+          
         </div>
-      </div>
-      <div class="clearer"></div>
     </div>
-    <div class="related" role="navigation" aria-label="related navigation">
-      <h3>Navigation</h3>
-      <ul>
-        <li class="right" style="margin-right: 10px">
-          <a href="genindex.html" title="General Index"
-             >index</a></li>
-        <li class="right" >
-          <a href="py-modindex.html" title="Python Module Index"
-             >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="#">PyDesign 0.1.0 documentation</a> &#187;</li> 
-      </ul>
+  </div>
+
+<div class="container">
+  <div class="row">
+    <div class="col-md-12 content">
+      
+  <div class="section" id="rnasketch-library-for-designing-rna-molecules">
+<h1>RNAsketch Library for designing RNA molecules<a class="headerlink" href="#rnasketch-library-for-designing-rna-molecules" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="installation">
+<h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h2>
+<p>Download the lastes RNAsketch package from <a class="reference external" href="https://github.com/ribonets/RNAsketch/releases/latest">https://github.com/ribonets/RNAsketch/releases/latest</a>, exctract and simply use setuptools to install the module and the few sample scripts:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">setup</span><span class="o">.</span><span class="n">py</span> <span class="n">install</span>
+</pre></div>
+</div>
+<p>I highly recommend to install the module locally into a directory specified in your
+<code class="code docutils literal"><span class="pre">PYTHONPATH</span></code> variable. This can be achieved either by using the <code class="code docutils literal"><span class="pre">--prefix=$HOME/local_path</span></code>
+argument, or in case <code class="code docutils literal"><span class="pre">PYTHONUSERBASE</span></code> is set, just use the <code class="code docutils literal"><span class="pre">--user</span></code> flag.</p>
+</div>
+<div class="section" id="build-the-documentation">
+<h2>Build the documentation<a class="headerlink" href="#build-the-documentation" title="Permalink to this headline">¶</a></h2>
+<p>Documentation available online: <a class="reference external" href="http://ribonets.github.io/RNAsketch">http://ribonets.github.io/RNAsketch</a></p>
+<p>Call these commands to build the html documentation:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">cd</span> <span class="n">doc</span>
+<span class="n">make</span> <span class="n">html</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="provided-example-scripts">
+<h2>Provided Example Scripts<a class="headerlink" href="#provided-example-scripts" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="design-a-multistate-design">
+<h3>Design a Multistate Design<a class="headerlink" href="#design-a-multistate-design" title="Permalink to this headline">¶</a></h3>
+<p>This simple script generates a multistate design, which is a RNA molecule that is able to fold into
+all the given structural conformation. In case of a bistable molecule just call:</p>
+<div class="code bash highlight-default"><div class="highlight"><pre><span></span><span class="n">echo</span> <span class="o">-</span><span class="n">e</span> <span class="s1">&#39;(((((....)))))....</span><span class="se">\n</span><span class="s1">....(((((....)))))&#39;</span> <span class="o">|</span> <span class="n">design</span><span class="o">-</span><span class="n">multistate</span><span class="o">.</span><span class="n">py</span> <span class="o">-</span><span class="n">i</span> <span class="o">-</span><span class="n">m</span> <span class="n">random</span> <span class="o">-</span><span class="n">e</span> <span class="mi">500</span>
+</pre></div>
+</div>
+<p>The program <cite>barriers</cite> can the be used to visualize the energy landscape to confirm the design goals:</p>
+<div class="code text highlight-default"><div class="highlight"><pre><span></span>  <span class="n">GUGACCGCGGUCACGUGG</span>
+<span class="mi">1</span> <span class="p">(((((</span><span class="o">....</span><span class="p">)))))</span><span class="o">....</span>  <span class="o">-</span><span class="mf">7.00</span>    <span class="mi">0</span>  <span class="mf">10.00</span>
+<span class="mi">2</span> <span class="o">....</span><span class="p">(((((</span><span class="o">....</span><span class="p">)))))</span>  <span class="o">-</span><span class="mf">7.00</span>    <span class="mi">1</span>   <span class="mf">9.50</span>
+<span class="mi">3</span> <span class="o">..................</span>   <span class="mf">0.00</span>    <span class="mi">2</span>   <span class="mf">1.60</span>
+<span class="mi">4</span> <span class="o">....</span><span class="p">(((</span><span class="o">......</span><span class="p">))</span><span class="o">.</span><span class="p">)</span><span class="o">.</span>   <span class="mf">0.80</span>    <span class="mi">1</span>   <span class="mf">2.00</span>
+<span class="mi">5</span> <span class="p">((</span><span class="o">....</span><span class="p">))</span><span class="o">..........</span>   <span class="mf">1.10</span>    <span class="mi">1</span>   <span class="mf">1.50</span>
+<span class="mi">6</span> <span class="o">.......</span><span class="p">((</span><span class="o">......</span><span class="p">))</span><span class="o">.</span>   <span class="mf">1.50</span>    <span class="mi">1</span>   <span class="mf">1.10</span>
+<span class="mi">7</span> <span class="o">...</span><span class="p">((</span><span class="o">.........</span><span class="p">))</span><span class="o">..</span>   <span class="mf">2.40</span>    <span class="mi">1</span>   <span class="mf">0.40</span>
+<span class="mi">8</span> <span class="o">.</span><span class="p">((</span><span class="o">....</span><span class="p">))</span><span class="o">.........</span>   <span class="mf">2.60</span>    <span class="mi">1</span>   <span class="mf">0.20</span>
+</pre></div>
+</div>
+<div class="figure">
+<a class="reference internal image-reference" href="_images/barriers.png"><img alt="_images/barriers.png" src="_images/barriers.png" style="width: 350px;" /></a>
+</div>
+<div class="figure" id="id1">
+<a class="reference internal image-reference" href="doc/data/barriers.png"><img alt="doc/data/barriers.png" src="doc/data/barriers.png" style="width: 350px;" /></a>
+<p class="caption"><span class="caption-text">Barriers Tree showing the two desired states as deep minima (1, 2) and the open chain (3) as neighbouring
+minimum.</span></p>
+</div>
+</div>
+<div class="section" id="design-a-srna-mediated-translational-regulation">
+<h3>Design a sRNA mediated translational regulation<a class="headerlink" href="#design-a-srna-mediated-translational-regulation" title="Permalink to this headline">¶</a></h3>
+<div class="code bash highlight-default"><div class="highlight"><pre><span></span><span class="n">echo</span> <span class="s1">&#39;...(((((((((((((((((&amp;)))))))))))))))))((((....))));...(((((((((((((((((&amp;)))))))))))))))))............</span>
+<span class="o">....................&amp;.................</span><span class="p">((((</span><span class="o">....</span><span class="p">))));</span><span class="o">...</span><span class="n">xxxxxxxxxxxxxxxxx</span><span class="o">&amp;</span><span class="n">xxxxxxxxxxxxxxxxx</span><span class="o">............</span>
+<span class="n">NNNNAAGGAGNNNNNNNAUG</span><span class="o">&amp;</span><span class="n">NNNNNNNNNNNNNNNNNNNNNNNNNNNNN</span><span class="s1">&#39; | design-cofold.py -n 1 -e 1000</span>
+</pre></div>
+</div>
+<p>This small example will design a simple device consisting of a 5&#8217;UTR region which can
+be translationally controlled by a sRNA molecule. In this case the sRNA will shut down
+translation by directly binding the RBS (Ribosome Binding Site) and the AUG start codon.</p>
+<p><cite>RNAcofold -a -p -d2</cite> calculates three dot-plots showing the base pair probabilities in the ensemble of states which
+confirms the design objective:</p>
+<div class="figure">
+<a class="reference internal image-reference" href="_images/cofold.png"><img alt="_images/cofold.png" src="_images/cofold.png" style="width: 350px;" /></a>
+</div>
+<div class="figure" id="id2">
+<a class="reference internal image-reference" href="doc/data/cofold.png"><img alt="doc/data/cofold.png" src="doc/data/cofold.png" style="width: 350px;" /></a>
+<p class="caption"><span class="caption-text">RNAcofold Dot-Plots, ViennaRNA v2.2.9, AAAUAAGGAGUAAAUGAAUG&amp;CAUUCAUUUACUCCUUACCGCACUCGCGG
+Plots were assembled in a single picture for better comparison. Only base pair probabilities
+are shown in the plots.</span></p>
+<div class="legend">
+Score: 0.89; complex concentration: 1.00; P(5UTR unpaired): 0.97; P(sRNA unpaired): 0.99; P(mRNA context): 0.18</div>
+</div>
+</div>
+<div class="section" id="design-a-multistate-thermoswitch">
+<h3>Design a multistate Thermoswitch<a class="headerlink" href="#design-a-multistate-thermoswitch" title="Permalink to this headline">¶</a></h3>
+<div class="code bash highlight-default"><div class="highlight"><pre><span></span><span class="n">echo</span> <span class="o">-</span><span class="n">e</span> <span class="s2">&quot;(((((((((((((....))))))))))))) 5.0</span><span class="se">\n</span><span class="s2">(((((.....)))))(((((.....))))) 10.0</span><span class="se">\n</span><span class="s2">(((((.....)))))............... 37.0&quot;</span> <span class="o">|</span> <span class="n">design</span><span class="o">-</span><span class="n">thermoswitch</span><span class="o">.</span><span class="n">py</span> <span class="o">-</span><span class="n">m</span> <span class="n">random</span> <span class="o">-</span><span class="n">e</span> <span class="mi">1000</span>
+</pre></div>
+</div>
+<p>This results e.g in a sequence like <cite>GAUCUGUGUGGGGUCGAUUUUGUGUGGGUU</cite> which has the given MFE structures at the specified temperatures (lower plot).
+Folding it at all Temeratures from 10 to 100 degree Celsius shows, that the first structural change happens at ~7.0 degree
+Celsius and the second one at ~26 degrees. After _72 degrees, the sequence occurs only in the open chain conformation.</p>
+<p><cite>RNAheat</cite> further confirms that the designed sequence is indeed a three-stable thermoswitch:</p>
+<div class="figure">
+<a class="reference internal image-reference" href="_images/thermoswitch.png"><img alt="_images/thermoswitch.png" src="_images/thermoswitch.png" style="width: 350px;" /></a>
+</div>
+<div class="figure" id="id3">
+<a class="reference internal image-reference" href="doc/data/thermoswitch.png"><img alt="doc/data/thermoswitch.png" src="doc/data/thermoswitch.png" style="width: 350px;" /></a>
+<p class="caption"><span class="caption-text">RNAheat Plot, ViennaRNA v2.2.9, GAUCUGUGUGGGGUCGAUUUUGUGUGGGUU</span></p>
+</div>
+</div>
+<div class="section" id="display-the-dependency-graph">
+<h3>Display the Dependency Graph<a class="headerlink" href="#display-the-dependency-graph" title="Permalink to this headline">¶</a></h3>
+<p>We generated two example scripts which can dump the Dependency Graph in the common GraphML format and,
+by using the <code class="code docutils literal"><span class="pre">igraph</span></code> python library, render these files as images.
+Following example input is possible:</p>
+<div class="code bash highlight-default"><div class="highlight"><pre><span></span><span class="n">echo</span> <span class="o">-</span><span class="n">e</span> <span class="s1">&#39;(((((....)))))....</span><span class="se">\n</span><span class="s1">....(((((....)))))&#39;</span> <span class="o">|</span> <span class="n">design</span><span class="o">-</span><span class="n">generategraphml</span><span class="o">.</span><span class="n">py</span> <span class="o">-</span><span class="n">i</span> <span class="o">&gt;</span> <span class="n">dependency</span><span class="o">-</span><span class="n">graph</span><span class="o">.</span><span class="n">gml</span>
+<span class="n">design</span><span class="o">-</span><span class="n">printgraphml</span><span class="o">.</span><span class="n">py</span> <span class="o">-</span><span class="n">g</span> <span class="n">dependency</span><span class="o">-</span><span class="n">graph</span><span class="o">.</span><span class="n">gml</span> <span class="o">-</span><span class="n">o</span> <span class="n">dependency</span><span class="o">-</span><span class="n">graph</span><span class="o">.</span><span class="n">png</span>
+</pre></div>
+</div>
+<p>Or use the second script directly:</p>
+<div class="code bash highlight-default"><div class="highlight"><pre><span></span><span class="n">echo</span> <span class="o">-</span><span class="n">e</span> <span class="s1">&#39;(((((....)))))....</span><span class="se">\n</span><span class="s1">....(((((....)))))</span><span class="se">\n</span><span class="s1">(((((((....)))))))&#39;</span> <span class="o">|</span> <span class="n">design</span><span class="o">-</span><span class="n">printgraphml</span><span class="o">.</span><span class="n">py</span> <span class="o">-</span><span class="n">i</span>
+</pre></div>
+</div>
+<p>This results in a nice representation of the dependency graph:</p>
+<div class="figure">
+<a class="reference internal image-reference" href="_images/graph.png"><img alt="_images/graph.png" src="_images/graph.png" style="width: 350px;" /></a>
+</div>
+<div class="figure" id="id4">
+<a class="reference internal image-reference" href="doc/data/graph.png"><img alt="doc/data/graph.png" src="doc/data/graph.png" style="width: 350px;" /></a>
+<p class="caption"><span class="caption-text">Very simple dependency graph visualized using igraph.</span></p>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="autodoc-contents">
+<h1>Autodoc contents<a class="headerlink" href="#autodoc-contents" title="Permalink to this headline">¶</a></h1>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="module.html">Module content</a></li>
+<li class="toctree-l1"><a class="reference internal" href="classes.html">Classes</a></li>
+</ul>
+</div>
+</div>
+
+
     </div>
-    <div class="footer" role="contentinfo">
-        &#169; Copyright 2016, Stefan Hammer.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.6.
-    </div>
+      
+  </div>
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+    </p>
+    <p>
+        &copy; Copyright 2016, Stefan Hammer.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.6.<br/>
+    </p>
+  </div>
+</footer>
   </body>
 </html>
