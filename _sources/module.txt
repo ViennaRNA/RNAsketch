@@ -1,7 +1,7 @@
 Module content
 ==============
 
-.. automodule:: PyDesign
+.. automodule:: RNAsketch
     :members:
     :undoc-members:
     :show-inheritance:

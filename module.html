@@ -5,7 +5,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Module content &#8212; PyDesign 1.1.0 documentation</title>
+    <title>Module content &#8212; RNAsketch 1.2.0 documentation</title>
     
     <link rel="stylesheet" href="_static/basic.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -16,7 +16,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '1.1.0',
+        VERSION:     '1.2.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -29,9 +29,9 @@
     <script type="text/javascript" src="_static/js/jquery-fix.js"></script>
     <script type="text/javascript" src="_static/bootstrap-3.3.6/js/bootstrap.min.js"></script>
     <script type="text/javascript" src="_static/bootstrap-sphinx.js"></script>
-    <link rel="top" title="PyDesign 1.1.0 documentation" href="index.html" />
+    <link rel="top" title="RNAsketch 1.2.0 documentation" href="index.html" />
     <link rel="next" title="Classes" href="classes.html" />
-    <link rel="prev" title="PyDesign Library for designing RNA molecules" href="index.html" />
+    <link rel="prev" title="RNAsketch Library for designing RNA molecules" href="index.html" />
 <meta charset='utf-8'>
 <meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
 <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
@@ -49,9 +49,9 @@
           <span class="icon-bar"></span>
           <span class="icon-bar"></span>
         </button>
-        <a class="navbar-brand" href="index.html"><span><img src="_static/pydesign.png"></span>
-          PyDesign</a>
-        <span class="navbar-text navbar-version pull-left"><b>1.1</b></span>
+        <a class="navbar-brand" href="index.html"><span><img src="_static/rnasketch.png"></span>
+          RNAsketch</a>
+        <span class="navbar-text navbar-version pull-left"><b>1.2</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -92,7 +92,7 @@
               
                 
   <li>
-    <a href="index.html" title="Previous Chapter: PyDesign Library for designing RNA molecules"><span class="glyphicon glyphicon-chevron-left visible-sm"></span><span class="hidden-sm hidden-tablet">&laquo; PyDesign Libr...</span>
+    <a href="index.html" title="Previous Chapter: RNAsketch Library for designing RNA molecules"><span class="glyphicon glyphicon-chevron-left visible-sm"></span><span class="hidden-sm hidden-tablet">&laquo; RNAsketch Lib...</span>
     </a>
   </li>
   <li>
@@ -130,13 +130,43 @@
   <div class="row">
     <div class="col-md-12 content">
       
-  <div class="section" id="module-PyDesign">
-<span id="module-content"></span><h1>Module content<a class="headerlink" href="#module-PyDesign" title="Permalink to this headline">¶</a></h1>
-<p>PyDesign.py: A small module containing all the important helpers and 
+  <div class="section" id="module-RNAsketch">
+<span id="module-content"></span><h1>Module content<a class="headerlink" href="#module-RNAsketch" title="Permalink to this headline">¶</a></h1>
+<p>RNAsketch.py: A small module containing all the important helpers and
 functions for all major RNAdesign operations.</p>
 <dl class="function">
-<dt id="PyDesign.calculate_objective">
-<code class="descclassname">PyDesign.</code><code class="descname">calculate_objective</code><span class="sig-paren">(</span><em>design</em>, <em>weight=0.5</em><span class="sig-paren">)</span><a class="headerlink" href="#PyDesign.calculate_objective" title="Permalink to this definition">¶</a></dt>
+<dt id="RNAsketch.adaptive_walk_optimization">
+<code class="descclassname">RNAsketch.</code><code class="descname">adaptive_walk_optimization</code><span class="sig-paren">(</span><em>dg</em>, <em>design</em>, <em>objective_function=&lt;function calculate_objective&gt;</em>, <em>stop=1000</em>, <em>mode='sample'</em>, <em>avoid_motifs=None</em>, <em>white_positions=None</em>, <em>progress=False</em><span class="sig-paren">)</span><a class="headerlink" href="#RNAsketch.adaptive_walk_optimization" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes a Design object and does a adaptive walk optimization of this sequence.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>dg</strong> &#8211; RNAdesign DependencyGraph object</li>
+<li><strong>design</strong> &#8211; Design object containing the sequence and structures</li>
+<li><strong>objective_functions</strong> &#8211; array of functions which takes a design object and returns a score for evaluation</li>
+<li><strong>stop</strong> &#8211; Number of unsuccessful new sequences before stoping the optimization</li>
+<li><strong>mode</strong> &#8211; String defining the sampling mode: sample, sample_clocal, sample_plocal</li>
+<li><strong>avoid_motifs</strong> &#8211; list of regex pattern specifiying sequence motifs to avoid</li>
+<li><strong>white_positions</strong> &#8211; list of [start, end] positions in the sequence where the avoid_motifs pattern should be ignored</li>
+<li><strong>progress</strong> &#8211; Whether or not to print the progress to the console</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Optimization score reached for the final sequence</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Number of samples neccessary to reach this result</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="RNAsketch.calculate_objective">
+<code class="descclassname">RNAsketch.</code><code class="descname">calculate_objective</code><span class="sig-paren">(</span><em>design</em>, <em>weight=0.5</em><span class="sig-paren">)</span><a class="headerlink" href="#RNAsketch.calculate_objective" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculates the objective function given a Design object containing the designed sequence and input structures.
 objective function (3 seqs):    (eos(1)+eos(2)+eos(3) - 3 * gibbs) / number_of_structures +
 weight * (eos(1)-eos(2))^2 + (eos(1)-eos(3))^2 + (eos(2)-eos(3))^2) * 2 / (number_of_structures * (number_of_structures-1))</p>
@@ -158,8 +188,8 @@ weight * (eos(1)-eos(2))^2 + (eos(1)-eos(3))^2 + (eos(2)-eos(3))^2) * 2 / (numbe
 </dd></dl>
 
 <dl class="function">
-<dt id="PyDesign.calculate_objective_1">
-<code class="descclassname">PyDesign.</code><code class="descname">calculate_objective_1</code><span class="sig-paren">(</span><em>design</em><span class="sig-paren">)</span><a class="headerlink" href="#PyDesign.calculate_objective_1" title="Permalink to this definition">¶</a></dt>
+<dt id="RNAsketch.calculate_objective_1">
+<code class="descclassname">RNAsketch.</code><code class="descname">calculate_objective_1</code><span class="sig-paren">(</span><em>design</em><span class="sig-paren">)</span><a class="headerlink" href="#RNAsketch.calculate_objective_1" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculates the objective function given a Design object containing the designed sequence and input structures.
 objective function (3 seqs):    (eos(1)+eos(2)+eos(3) - 3 * gibbs) / number_of_structures</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -175,8 +205,25 @@ objective function (3 seqs):    (eos(1)+eos(2)+eos(3) - 3 * gibbs) / number_of_s
 </dd></dl>
 
 <dl class="function">
-<dt id="PyDesign.calculate_objective_2">
-<code class="descclassname">PyDesign.</code><code class="descname">calculate_objective_2</code><span class="sig-paren">(</span><em>design</em><span class="sig-paren">)</span><a class="headerlink" href="#PyDesign.calculate_objective_2" title="Permalink to this definition">¶</a></dt>
+<dt id="RNAsketch.calculate_objective_2">
+<code class="descclassname">RNAsketch.</code><code class="descname">calculate_objective_2</code><span class="sig-paren">(</span><em>design</em><span class="sig-paren">)</span><a class="headerlink" href="#RNAsketch.calculate_objective_2" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates the objective function given a Design object containing the designed sequence and input structures.
+objective function (3 seqs):    <a href="#id1"><span class="problematic" id="id2">|eos(1)-eos(2)|</span></a> + <a href="#id3"><span class="problematic" id="id4">|eos(1)-eos(3)|</span></a> + <a href="#id5"><span class="problematic" id="id6">|eos(2)-eos(3))|</span></a> * 2 / (number_of_structures * (number_of_structures-1))</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>design</strong> &#8211; Design object containing the sequence and structures</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">score calculated by the objective function</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="RNAsketch.calculate_objective_2_squared">
+<code class="descclassname">RNAsketch.</code><code class="descname">calculate_objective_2_squared</code><span class="sig-paren">(</span><em>design</em><span class="sig-paren">)</span><a class="headerlink" href="#RNAsketch.calculate_objective_2_squared" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculates the objective function given a Design object containing the designed sequence and input structures.
 objective function (3 seqs):    (eos(1)-eos(2))^2 + (eos(1)-eos(3))^2 + (eos(2)-eos(3))^2) * 2 / (number_of_structures * (number_of_structures-1))</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -192,38 +239,8 @@ objective function (3 seqs):    (eos(1)-eos(2))^2 + (eos(1)-eos(3))^2 + (eos(2)-
 </dd></dl>
 
 <dl class="function">
-<dt id="PyDesign.classic_optimization">
-<code class="descclassname">PyDesign.</code><code class="descname">classic_optimization</code><span class="sig-paren">(</span><em>dg</em>, <em>design</em>, <em>objective_function=&lt;function calculate_objective&gt;</em>, <em>exit=1000</em>, <em>mode='sample'</em>, <em>avoid_motifs=None</em>, <em>white_positions=None</em>, <em>progress=False</em><span class="sig-paren">)</span><a class="headerlink" href="#PyDesign.classic_optimization" title="Permalink to this definition">¶</a></dt>
-<dd><p>Takes a Design object and does a classic optimization of this sequence.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>dg</strong> &#8211; RNAdesign DependencyGraph object</li>
-<li><strong>design</strong> &#8211; Design object containing the sequence and structures</li>
-<li><strong>objective_functions</strong> &#8211; array of functions which takes a design object and returns a score for evaluation</li>
-<li><strong>exit</strong> &#8211; Number of unsuccessful new sequences before exiting the optimization</li>
-<li><strong>mode</strong> &#8211; String defining the sampling mode: sample, sample_global, sample_local</li>
-<li><strong>avoid_motifs</strong> &#8211; list of regex pattern specifiying sequence motifs to avoid</li>
-<li><strong>white_positions</strong> &#8211; list of [start, end] positions in the sequence where the avoid_motifs pattern should be ignored</li>
-<li><strong>progress</strong> &#8211; Whether or not to print the progress to the console</li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Optimization score reached for the final sequence</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Number of samples neccessary to reach this result</p>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="function">
-<dt id="PyDesign.constraint_generation_optimization">
-<code class="descclassname">PyDesign.</code><code class="descname">constraint_generation_optimization</code><span class="sig-paren">(</span><em>dg</em>, <em>design</em>, <em>objective_function=&lt;function calculate_objective&gt;</em>, <em>exit=1000</em>, <em>mode='sample'</em>, <em>num_neg_constraints=100</em>, <em>max_eos_diff=0</em>, <em>avoid_motifs=None</em>, <em>white_positions=None</em>, <em>progress=False</em><span class="sig-paren">)</span><a class="headerlink" href="#PyDesign.constraint_generation_optimization" title="Permalink to this definition">¶</a></dt>
+<dt id="RNAsketch.constraint_generation_optimization">
+<code class="descclassname">RNAsketch.</code><code class="descname">constraint_generation_optimization</code><span class="sig-paren">(</span><em>dg</em>, <em>design</em>, <em>objective_function=&lt;function calculate_objective&gt;</em>, <em>stop=1000</em>, <em>mode='sample'</em>, <em>num_neg_constraints=100</em>, <em>max_eos_diff=0</em>, <em>avoid_motifs=None</em>, <em>white_positions=None</em>, <em>progress=False</em><span class="sig-paren">)</span><a class="headerlink" href="#RNAsketch.constraint_generation_optimization" title="Permalink to this definition">¶</a></dt>
 <dd><p>Takes a Design object and does a constraint generation optimization of this sequence.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -233,8 +250,8 @@ objective function (3 seqs):    (eos(1)-eos(2))^2 + (eos(1)-eos(3))^2 + (eos(2)-
 <li><strong>dg</strong> &#8211; RNAdesign DependencyGraph object</li>
 <li><strong>design</strong> &#8211; Design object containing the sequence and structures</li>
 <li><strong>objective_functions</strong> &#8211; array of functions which takes a design object and returns a score for evaluation</li>
-<li><strong>exit</strong> &#8211; Number of unsuccessful new sequences before exiting the optimization</li>
-<li><strong>mode</strong> &#8211; String defining the sampling mode: sample, sample_global, sample_local</li>
+<li><strong>stop</strong> &#8211; Number of unsuccessful new sequences before stoping the optimization</li>
+<li><strong>mode</strong> &#8211; String defining the sampling mode: sample, sample_clocal, sample_plocal</li>
 <li><strong>num_neg_constraints</strong> &#8211; Maximal number of negative constraints to accumulate during the optimization process</li>
 <li><strong>max_eos_diff</strong> &#8211; Maximal difference between eos of the negative and positive constraints</li>
 <li><strong>avoid_motifs</strong> &#8211; list of regex pattern specifiying sequence motifs to avoid</li>
@@ -254,8 +271,8 @@ objective function (3 seqs):    (eos(1)-eos(2))^2 + (eos(1)-eos(3))^2 + (eos(2)-
 </dd></dl>
 
 <dl class="function">
-<dt id="PyDesign.get_graph_properties">
-<code class="descclassname">PyDesign.</code><code class="descname">get_graph_properties</code><span class="sig-paren">(</span><em>dg</em><span class="sig-paren">)</span><a class="headerlink" href="#PyDesign.get_graph_properties" title="Permalink to this definition">¶</a></dt>
+<dt id="RNAsketch.get_graph_properties">
+<code class="descclassname">RNAsketch.</code><code class="descname">get_graph_properties</code><span class="sig-paren">(</span><em>dg</em><span class="sig-paren">)</span><a class="headerlink" href="#RNAsketch.get_graph_properties" title="Permalink to this definition">¶</a></dt>
 <dd><p>Takes a RNAdesign DependencyGraph Object and constructs a dicionary with all the
 calculated properties.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -271,8 +288,8 @@ calculated properties.</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="PyDesign.read_inp_file">
-<code class="descclassname">PyDesign.</code><code class="descname">read_inp_file</code><span class="sig-paren">(</span><em>filename</em><span class="sig-paren">)</span><a class="headerlink" href="#PyDesign.read_inp_file" title="Permalink to this definition">¶</a></dt>
+<dt id="RNAsketch.read_inp_file">
+<code class="descclassname">RNAsketch.</code><code class="descname">read_inp_file</code><span class="sig-paren">(</span><em>filename</em><span class="sig-paren">)</span><a class="headerlink" href="#RNAsketch.read_inp_file" title="Permalink to this definition">¶</a></dt>
 <dd><p>Reads a file in .inp format and returns all neccessary information</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -291,10 +308,10 @@ calculated properties.</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="PyDesign.read_input">
-<code class="descclassname">PyDesign.</code><code class="descname">read_input</code><span class="sig-paren">(</span><em>content</em><span class="sig-paren">)</span><a class="headerlink" href="#PyDesign.read_input" title="Permalink to this definition">¶</a></dt>
+<dt id="RNAsketch.read_input">
+<code class="descclassname">RNAsketch.</code><code class="descname">read_input</code><span class="sig-paren">(</span><em>content</em><span class="sig-paren">)</span><a class="headerlink" href="#RNAsketch.read_input" title="Permalink to this definition">¶</a></dt>
 <dd><p>Reads some input and returns all neccessary information in the right container.
-Input is a string, lines separated by linebreaks. Content might be structures, 
+Input is a string, lines separated by linebreaks. Content might be structures,
 a sequence constraint and a start sequence</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -308,17 +325,15 @@ a sequence constraint and a start sequence</p>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">sequence - Start sequence</td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">additions - List of additional information after the structures</td>
-</tr>
 </tbody>
 </table>
 </dd></dl>
 
 <dl class="function">
-<dt id="PyDesign.read_input_additions">
-<code class="descclassname">PyDesign.</code><code class="descname">read_input_additions</code><span class="sig-paren">(</span><em>content</em><span class="sig-paren">)</span><a class="headerlink" href="#PyDesign.read_input_additions" title="Permalink to this definition">¶</a></dt>
+<dt id="RNAsketch.read_input_additions">
+<code class="descclassname">RNAsketch.</code><code class="descname">read_input_additions</code><span class="sig-paren">(</span><em>content</em><span class="sig-paren">)</span><a class="headerlink" href="#RNAsketch.read_input_additions" title="Permalink to this definition">¶</a></dt>
 <dd><p>Reads some input and returns all neccessary information in the right container.
-Input is a string, lines separated by linebreaks. Content might be structures, 
+Input is a string, lines separated by linebreaks. Content might be structures,
 a sequence constraint and a start sequence. Additional information for the structural
 states can be provided with any separator ;,: or whitespaces after the structure.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -340,9 +355,9 @@ states can be provided with any separator ;,: or whitespaces after the structure
 </dd></dl>
 
 <dl class="function">
-<dt id="PyDesign.sample_count_unique_solutions">
-<code class="descclassname">PyDesign.</code><code class="descname">sample_count_unique_solutions</code><span class="sig-paren">(</span><em>solution_space_size</em>, <em>sample_size</em><span class="sig-paren">)</span><a class="headerlink" href="#PyDesign.sample_count_unique_solutions" title="Permalink to this definition">¶</a></dt>
-<dd><p>Calculates the expectancy value of how many time it is necessary to draw a 
+<dt id="RNAsketch.sample_count_unique_solutions">
+<code class="descclassname">RNAsketch.</code><code class="descname">sample_count_unique_solutions</code><span class="sig-paren">(</span><em>solution_space_size</em>, <em>sample_size</em><span class="sig-paren">)</span><a class="headerlink" href="#RNAsketch.sample_count_unique_solutions" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates the expectancy value of how many time it is necessary to draw a
 solution to gain a unique set of solutions with the given sample size</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -362,8 +377,8 @@ solution to gain a unique set of solutions with the given sample size</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="PyDesign.sample_sequence">
-<code class="descclassname">PyDesign.</code><code class="descname">sample_sequence</code><span class="sig-paren">(</span><em>dg</em>, <em>design</em>, <em>mode</em>, <em>sample_steps=1</em>, <em>avoid_motifs=None</em>, <em>white_positions=None</em><span class="sig-paren">)</span><a class="headerlink" href="#PyDesign.sample_sequence" title="Permalink to this definition">¶</a></dt>
+<dt id="RNAsketch.sample_sequence">
+<code class="descclassname">RNAsketch.</code><code class="descname">sample_sequence</code><span class="sig-paren">(</span><em>dg</em>, <em>design</em>, <em>mode</em>, <em>sample_steps=1</em>, <em>avoid_motifs=None</em>, <em>white_positions=None</em><span class="sig-paren">)</span><a class="headerlink" href="#RNAsketch.sample_sequence" title="Permalink to this definition">¶</a></dt>
 <dd><p>This function samples a sequence with the given mode from the dependency graph object
 and writes it into the design object</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -384,6 +399,37 @@ and writes it into the design object</p>
 </td>
 </tr>
 <tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">sample_count is how many times we sampled a solution from the dependency graph object (important for revert later)</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="RNAsketch.simulated_annealing_optimization">
+<code class="descclassname">RNAsketch.</code><code class="descname">simulated_annealing_optimization</code><span class="sig-paren">(</span><em>dg</em>, <em>design</em>, <em>objective_function=&lt;function calculate_objective&gt;</em>, <em>temperature_gradient=None</em>, <em>cooling_step=50</em>, <em>mode='sample'</em>, <em>avoid_motifs=None</em>, <em>white_positions=None</em>, <em>progress=False</em><span class="sig-paren">)</span><a class="headerlink" href="#RNAsketch.simulated_annealing_optimization" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes a Design object and does a simulated annealing optimization of this sequence.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>dg</strong> &#8211; RNAdesign DependencyGraph object</li>
+<li><strong>design</strong> &#8211; Design object containing the sequence and structures</li>
+<li><strong>objective_functions</strong> &#8211; array of functions which takes a design object and returns a score for evaluation</li>
+<li><strong>temperature_gradient</strong> &#8211; Iterable containing the temperatures in descend order</li>
+<li><strong>cooling_steps</strong> &#8211; Use the current temperature that many times before cooling down</li>
+<li><strong>mode</strong> &#8211; String defining the sampling mode: sample, sample_clocal, sample_plocal</li>
+<li><strong>avoid_motifs</strong> &#8211; list of regex pattern specifiying sequence motifs to avoid</li>
+<li><strong>white_positions</strong> &#8211; list of [start, end] positions in the sequence where the avoid_motifs pattern should be ignored</li>
+<li><strong>progress</strong> &#8211; Whether or not to print the progress to the console</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Optimization score reached for the final sequence</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Number of samples neccessary to reach this result</p>
 </td>
 </tr>
 </tbody>

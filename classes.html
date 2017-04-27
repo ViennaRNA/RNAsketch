@@ -5,7 +5,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Classes &#8212; PyDesign 1.1.0 documentation</title>
+    <title>Classes &#8212; RNAsketch 1.2.0 documentation</title>
     
     <link rel="stylesheet" href="_static/basic.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -16,7 +16,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '1.1.0',
+        VERSION:     '1.2.0',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -29,7 +29,7 @@
     <script type="text/javascript" src="_static/js/jquery-fix.js"></script>
     <script type="text/javascript" src="_static/bootstrap-3.3.6/js/bootstrap.min.js"></script>
     <script type="text/javascript" src="_static/bootstrap-sphinx.js"></script>
-    <link rel="top" title="PyDesign 1.1.0 documentation" href="index.html" />
+    <link rel="top" title="RNAsketch 1.2.0 documentation" href="index.html" />
     <link rel="prev" title="Module content" href="module.html" />
 <meta charset='utf-8'>
 <meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
@@ -48,9 +48,9 @@
           <span class="icon-bar"></span>
           <span class="icon-bar"></span>
         </button>
-        <a class="navbar-brand" href="index.html"><span><img src="_static/pydesign.png"></span>
-          PyDesign</a>
-        <span class="navbar-text navbar-version pull-left"><b>1.1</b></span>
+        <a class="navbar-brand" href="index.html"><span><img src="_static/rnasketch.png"></span>
+          RNAsketch</a>
+        <span class="navbar-text navbar-version pull-left"><b>1.2</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -82,8 +82,8 @@
       role="menu"
       aria-labelledby="dLabelLocalToc"><ul>
 <li><a class="reference internal" href="#">Classes</a><ul>
-<li><a class="reference internal" href="#module-PyDesign.Design_Class">PyDesign.Design_Class</a></li>
-<li><a class="reference internal" href="#module-PyDesign.State_Class">PyDesign.State_Class</a></li>
+<li><a class="reference internal" href="#module-RNAsketch.Design">RNAsketch.Design</a></li>
+<li><a class="reference internal" href="#module-RNAsketch.State">RNAsketch.State</a></li>
 </ul>
 </li>
 </ul>
@@ -131,26 +131,26 @@
       
   <div class="section" id="classes">
 <h1>Classes<a class="headerlink" href="#classes" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="module-PyDesign.Design_Class">
-<span id="pydesign-design-class"></span><h2>PyDesign.Design_Class<a class="headerlink" href="#module-PyDesign.Design_Class" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-RNAsketch.Design">
+<span id="rnasketch-design"></span><h2>RNAsketch.Design<a class="headerlink" href="#module-RNAsketch.Design" title="Permalink to this headline">¶</a></h2>
 <p>Design_Class.py: Class as wrapper for ViennaRNA and Nupack
 functions to design an RNA molecule
 This implements the core class which holds all the states of a riboswitch</p>
 <dl class="class">
-<dt id="PyDesign.Design_Class.Design">
-<em class="property">class </em><code class="descclassname">PyDesign.Design_Class.</code><code class="descname">Design</code><span class="sig-paren">(</span><em>structures</em>, <em>sequence=''</em><span class="sig-paren">)</span><a class="headerlink" href="#PyDesign.Design_Class.Design" title="Permalink to this definition">¶</a></dt>
+<dt id="RNAsketch.Design.Design">
+<em class="property">class </em><code class="descclassname">RNAsketch.Design.</code><code class="descname">Design</code><span class="sig-paren">(</span><em>structures</em>, <em>sequence=''</em><span class="sig-paren">)</span><a class="headerlink" href="#RNAsketch.Design.Design" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/2/library/functions.html#object" title="(in Python v2.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
 <p>Design contains all neccessary information to generate a RNA device
 or to return a solution. It is used as a container between the different
 functions.</p>
 <dl class="attribute">
-<dt id="PyDesign.Design_Class.Design.classtype">
-<code class="descname">classtype</code><a class="headerlink" href="#PyDesign.Design_Class.Design.classtype" title="Permalink to this definition">¶</a></dt>
+<dt id="RNAsketch.Design.Design.classtype">
+<code class="descname">classtype</code><a class="headerlink" href="#RNAsketch.Design.Design.classtype" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
-<dt id="PyDesign.Design_Class.Design.ensemble_defect">
-<code class="descname">ensemble_defect</code><a class="headerlink" href="#PyDesign.Design_Class.Design.ensemble_defect" title="Permalink to this definition">¶</a></dt>
+<dt id="RNAsketch.Design.Design.ensemble_defect">
+<code class="descname">ensemble_defect</code><a class="headerlink" href="#RNAsketch.Design.Design.ensemble_defect" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -162,8 +162,8 @@ functions.</p>
 </dd></dl>
 
 <dl class="attribute">
-<dt id="PyDesign.Design_Class.Design.eos">
-<code class="descname">eos</code><a class="headerlink" href="#PyDesign.Design_Class.Design.eos" title="Permalink to this definition">¶</a></dt>
+<dt id="RNAsketch.Design.Design.eos">
+<code class="descname">eos</code><a class="headerlink" href="#RNAsketch.Design.Design.eos" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -175,8 +175,8 @@ functions.</p>
 </dd></dl>
 
 <dl class="attribute">
-<dt id="PyDesign.Design_Class.Design.eos_diff_mfe">
-<code class="descname">eos_diff_mfe</code><a class="headerlink" href="#PyDesign.Design_Class.Design.eos_diff_mfe" title="Permalink to this definition">¶</a></dt>
+<dt id="RNAsketch.Design.Design.eos_diff_mfe">
+<code class="descname">eos_diff_mfe</code><a class="headerlink" href="#RNAsketch.Design.Design.eos_diff_mfe" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -188,8 +188,8 @@ functions.</p>
 </dd></dl>
 
 <dl class="attribute">
-<dt id="PyDesign.Design_Class.Design.eos_reached_mfe">
-<code class="descname">eos_reached_mfe</code><a class="headerlink" href="#PyDesign.Design_Class.Design.eos_reached_mfe" title="Permalink to this definition">¶</a></dt>
+<dt id="RNAsketch.Design.Design.eos_reached_mfe">
+<code class="descname">eos_reached_mfe</code><a class="headerlink" href="#RNAsketch.Design.Design.eos_reached_mfe" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -201,8 +201,8 @@ functions.</p>
 </dd></dl>
 
 <dl class="attribute">
-<dt id="PyDesign.Design_Class.Design.length">
-<code class="descname">length</code><a class="headerlink" href="#PyDesign.Design_Class.Design.length" title="Permalink to this definition">¶</a></dt>
+<dt id="RNAsketch.Design.Design.length">
+<code class="descname">length</code><a class="headerlink" href="#RNAsketch.Design.Design.length" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -214,8 +214,8 @@ functions.</p>
 </dd></dl>
 
 <dl class="attribute">
-<dt id="PyDesign.Design_Class.Design.mfe_energy">
-<code class="descname">mfe_energy</code><a class="headerlink" href="#PyDesign.Design_Class.Design.mfe_energy" title="Permalink to this definition">¶</a></dt>
+<dt id="RNAsketch.Design.Design.mfe_energy">
+<code class="descname">mfe_energy</code><a class="headerlink" href="#RNAsketch.Design.Design.mfe_energy" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -227,8 +227,8 @@ functions.</p>
 </dd></dl>
 
 <dl class="attribute">
-<dt id="PyDesign.Design_Class.Design.mfe_structure">
-<code class="descname">mfe_structure</code><a class="headerlink" href="#PyDesign.Design_Class.Design.mfe_structure" title="Permalink to this definition">¶</a></dt>
+<dt id="RNAsketch.Design.Design.mfe_structure">
+<code class="descname">mfe_structure</code><a class="headerlink" href="#RNAsketch.Design.Design.mfe_structure" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -240,14 +240,14 @@ functions.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="PyDesign.Design_Class.Design.newState">
-<code class="descname">newState</code><span class="sig-paren">(</span><em>key</em>, <em>struct</em>, <em>temperature=37.0</em>, <em>ligand=None</em>, <em>constraint=None</em>, <em>enforce_constraint=False</em><span class="sig-paren">)</span><a class="headerlink" href="#PyDesign.Design_Class.Design.newState" title="Permalink to this definition">¶</a></dt>
+<dt id="RNAsketch.Design.Design.newState">
+<code class="descname">newState</code><span class="sig-paren">(</span><em>key</em>, <em>struct</em>, <em>temperature=37.0</em>, <em>ligand=None</em>, <em>constraint=None</em>, <em>enforce_constraint=False</em><span class="sig-paren">)</span><a class="headerlink" href="#RNAsketch.Design.Design.newState" title="Permalink to this definition">¶</a></dt>
 <dd><p>Creates a new state of the given subclass.</p>
 </dd></dl>
 
 <dl class="attribute">
-<dt id="PyDesign.Design_Class.Design.number_of_structures">
-<code class="descname">number_of_structures</code><a class="headerlink" href="#PyDesign.Design_Class.Design.number_of_structures" title="Permalink to this definition">¶</a></dt>
+<dt id="RNAsketch.Design.Design.number_of_structures">
+<code class="descname">number_of_structures</code><a class="headerlink" href="#RNAsketch.Design.Design.number_of_structures" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -259,8 +259,8 @@ functions.</p>
 </dd></dl>
 
 <dl class="attribute">
-<dt id="PyDesign.Design_Class.Design.pf_energy">
-<code class="descname">pf_energy</code><a class="headerlink" href="#PyDesign.Design_Class.Design.pf_energy" title="Permalink to this definition">¶</a></dt>
+<dt id="RNAsketch.Design.Design.pf_energy">
+<code class="descname">pf_energy</code><a class="headerlink" href="#RNAsketch.Design.Design.pf_energy" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -272,8 +272,8 @@ functions.</p>
 </dd></dl>
 
 <dl class="attribute">
-<dt id="PyDesign.Design_Class.Design.pf_structure">
-<code class="descname">pf_structure</code><a class="headerlink" href="#PyDesign.Design_Class.Design.pf_structure" title="Permalink to this definition">¶</a></dt>
+<dt id="RNAsketch.Design.Design.pf_structure">
+<code class="descname">pf_structure</code><a class="headerlink" href="#RNAsketch.Design.Design.pf_structure" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -285,8 +285,8 @@ functions.</p>
 </dd></dl>
 
 <dl class="attribute">
-<dt id="PyDesign.Design_Class.Design.pos">
-<code class="descname">pos</code><a class="headerlink" href="#PyDesign.Design_Class.Design.pos" title="Permalink to this definition">¶</a></dt>
+<dt id="RNAsketch.Design.Design.pos">
+<code class="descname">pos</code><a class="headerlink" href="#RNAsketch.Design.Design.pos" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -298,8 +298,8 @@ functions.</p>
 </dd></dl>
 
 <dl class="attribute">
-<dt id="PyDesign.Design_Class.Design.sequence">
-<code class="descname">sequence</code><a class="headerlink" href="#PyDesign.Design_Class.Design.sequence" title="Permalink to this definition">¶</a></dt>
+<dt id="RNAsketch.Design.Design.sequence">
+<code class="descname">sequence</code><a class="headerlink" href="#RNAsketch.Design.Design.sequence" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -311,8 +311,8 @@ functions.</p>
 </dd></dl>
 
 <dl class="attribute">
-<dt id="PyDesign.Design_Class.Design.structures">
-<code class="descname">structures</code><a class="headerlink" href="#PyDesign.Design_Class.Design.structures" title="Permalink to this definition">¶</a></dt>
+<dt id="RNAsketch.Design.Design.structures">
+<code class="descname">structures</code><a class="headerlink" href="#RNAsketch.Design.Design.structures" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -324,24 +324,24 @@ functions.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="PyDesign.Design_Class.Design.write_csv">
-<code class="descname">write_csv</code><span class="sig-paren">(</span><em>separator=';'</em><span class="sig-paren">)</span><a class="headerlink" href="#PyDesign.Design_Class.Design.write_csv" title="Permalink to this definition">¶</a></dt>
+<dt id="RNAsketch.Design.Design.write_csv">
+<code class="descname">write_csv</code><span class="sig-paren">(</span><em>separator=';'</em><span class="sig-paren">)</span><a class="headerlink" href="#RNAsketch.Design.Design.write_csv" title="Permalink to this definition">¶</a></dt>
 <dd><p>Generates a csv version of all values of this design separated by the given separator
 :param separator: separator for the values
 :return: string containing all values of this design separated by the given separator</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="PyDesign.Design_Class.Design.write_csv_header">
-<code class="descname">write_csv_header</code><span class="sig-paren">(</span><em>separator=';'</em><span class="sig-paren">)</span><a class="headerlink" href="#PyDesign.Design_Class.Design.write_csv_header" title="Permalink to this definition">¶</a></dt>
+<dt id="RNAsketch.Design.Design.write_csv_header">
+<code class="descname">write_csv_header</code><span class="sig-paren">(</span><em>separator=';'</em><span class="sig-paren">)</span><a class="headerlink" href="#RNAsketch.Design.Design.write_csv_header" title="Permalink to this definition">¶</a></dt>
 <dd><p>Generates a csv header for all values of this design separated by the given separator
 :param separator: separator for the values
 :return: string containing a csv header for this design separated by the given separator</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="PyDesign.Design_Class.Design.write_out">
-<code class="descname">write_out</code><span class="sig-paren">(</span><em>score=0</em><span class="sig-paren">)</span><a class="headerlink" href="#PyDesign.Design_Class.Design.write_out" title="Permalink to this definition">¶</a></dt>
+<dt id="RNAsketch.Design.Design.write_out">
+<code class="descname">write_out</code><span class="sig-paren">(</span><em>score=0</em><span class="sig-paren">)</span><a class="headerlink" href="#RNAsketch.Design.Design.write_out" title="Permalink to this definition">¶</a></dt>
 <dd><p>Generates a nice human readable version of all values of this design
 :param score: optimization score for this design
 :return: string containing a nicely formatted version of all design values</p>
@@ -350,57 +350,57 @@ functions.</p>
 </dd></dl>
 
 <dl class="class">
-<dt id="PyDesign.Design_Class.nupackDesign">
-<em class="property">class </em><code class="descclassname">PyDesign.Design_Class.</code><code class="descname">nupackDesign</code><span class="sig-paren">(</span><em>structures</em>, <em>sequence=''</em><span class="sig-paren">)</span><a class="headerlink" href="#PyDesign.Design_Class.nupackDesign" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#PyDesign.Design_Class.Design" title="PyDesign.Design_Class.Design"><code class="xref py py-class docutils literal"><span class="pre">PyDesign.Design_Class.Design</span></code></a></p>
+<dt id="RNAsketch.Design.nupackDesign">
+<em class="property">class </em><code class="descclassname">RNAsketch.Design.</code><code class="descname">nupackDesign</code><span class="sig-paren">(</span><em>structures</em>, <em>sequence=''</em><span class="sig-paren">)</span><a class="headerlink" href="#RNAsketch.Design.nupackDesign" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#RNAsketch.Design.Design" title="RNAsketch.Design.Design"><code class="xref py py-class docutils literal"><span class="pre">RNAsketch.Design.Design</span></code></a></p>
 <dl class="attribute">
-<dt id="PyDesign.Design_Class.nupackDesign.classtype">
-<code class="descname">classtype</code><a class="headerlink" href="#PyDesign.Design_Class.nupackDesign.classtype" title="Permalink to this definition">¶</a></dt>
+<dt id="RNAsketch.Design.nupackDesign.classtype">
+<code class="descname">classtype</code><a class="headerlink" href="#RNAsketch.Design.nupackDesign.classtype" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
-<dt id="PyDesign.Design_Class.nupackDesign.newState">
-<code class="descname">newState</code><span class="sig-paren">(</span><em>key</em>, <em>struct</em>, <em>temperature=37.0</em>, <em>ligand=None</em>, <em>constraint=None</em>, <em>enforce_constraint=False</em><span class="sig-paren">)</span><a class="headerlink" href="#PyDesign.Design_Class.nupackDesign.newState" title="Permalink to this definition">¶</a></dt>
+<dt id="RNAsketch.Design.nupackDesign.newState">
+<code class="descname">newState</code><span class="sig-paren">(</span><em>key</em>, <em>struct</em>, <em>temperature=37.0</em>, <em>ligand=None</em>, <em>constraint=None</em>, <em>enforce_constraint=False</em><span class="sig-paren">)</span><a class="headerlink" href="#RNAsketch.Design.nupackDesign.newState" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="class">
-<dt id="PyDesign.Design_Class.vrnaDesign">
-<em class="property">class </em><code class="descclassname">PyDesign.Design_Class.</code><code class="descname">vrnaDesign</code><span class="sig-paren">(</span><em>structures</em>, <em>sequence=''</em><span class="sig-paren">)</span><a class="headerlink" href="#PyDesign.Design_Class.vrnaDesign" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#PyDesign.Design_Class.Design" title="PyDesign.Design_Class.Design"><code class="xref py py-class docutils literal"><span class="pre">PyDesign.Design_Class.Design</span></code></a></p>
+<dt id="RNAsketch.Design.vrnaDesign">
+<em class="property">class </em><code class="descclassname">RNAsketch.Design.</code><code class="descname">vrnaDesign</code><span class="sig-paren">(</span><em>structures</em>, <em>sequence=''</em><span class="sig-paren">)</span><a class="headerlink" href="#RNAsketch.Design.vrnaDesign" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#RNAsketch.Design.Design" title="RNAsketch.Design.Design"><code class="xref py py-class docutils literal"><span class="pre">RNAsketch.Design.Design</span></code></a></p>
 <dl class="attribute">
-<dt id="PyDesign.Design_Class.vrnaDesign.classtype">
-<code class="descname">classtype</code><a class="headerlink" href="#PyDesign.Design_Class.vrnaDesign.classtype" title="Permalink to this definition">¶</a></dt>
+<dt id="RNAsketch.Design.vrnaDesign.classtype">
+<code class="descname">classtype</code><a class="headerlink" href="#RNAsketch.Design.vrnaDesign.classtype" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
-<dt id="PyDesign.Design_Class.vrnaDesign.newState">
-<code class="descname">newState</code><span class="sig-paren">(</span><em>key</em>, <em>struct</em>, <em>temperature=37.0</em>, <em>ligand=None</em>, <em>constraint=None</em>, <em>enforce_constraint=False</em><span class="sig-paren">)</span><a class="headerlink" href="#PyDesign.Design_Class.vrnaDesign.newState" title="Permalink to this definition">¶</a></dt>
+<dt id="RNAsketch.Design.vrnaDesign.newState">
+<code class="descname">newState</code><span class="sig-paren">(</span><em>key</em>, <em>struct</em>, <em>temperature=37.0</em>, <em>ligand=None</em>, <em>constraint=None</em>, <em>enforce_constraint=False</em><span class="sig-paren">)</span><a class="headerlink" href="#RNAsketch.Design.vrnaDesign.newState" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 </div>
-<div class="section" id="module-PyDesign.State_Class">
-<span id="pydesign-state-class"></span><h2>PyDesign.State_Class<a class="headerlink" href="#module-PyDesign.State_Class" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-RNAsketch.State">
+<span id="rnasketch-state"></span><h2>RNAsketch.State<a class="headerlink" href="#module-RNAsketch.State" title="Permalink to this headline">¶</a></h2>
 <p>State_Class.py: Class as wrapper for ViennaRNA and Nupack
 functions to design an RNA molecule.
 This implements the various states of a riboswitch.</p>
 <dl class="class">
-<dt id="PyDesign.State_Class.State">
-<em class="property">class </em><code class="descclassname">PyDesign.State_Class.</code><code class="descname">State</code><span class="sig-paren">(</span><em>parent</em>, <em>structure=None</em>, <em>temperature=37.0</em>, <em>ligand=None</em>, <em>constraint=None</em>, <em>enforce_constraint=False</em><span class="sig-paren">)</span><a class="headerlink" href="#PyDesign.State_Class.State" title="Permalink to this definition">¶</a></dt>
+<dt id="RNAsketch.State.State">
+<em class="property">class </em><code class="descclassname">RNAsketch.State.</code><code class="descname">State</code><span class="sig-paren">(</span><em>parent</em>, <em>structure=None</em>, <em>temperature=37.0</em>, <em>ligand=None</em>, <em>constraint=None</em>, <em>enforce_constraint=False</em><span class="sig-paren">)</span><a class="headerlink" href="#RNAsketch.State.State" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/2/library/functions.html#object" title="(in Python v2.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
 <p>State object holds structure, ligand, constraints and calculates all values
 for this state.</p>
 <dl class="attribute">
-<dt id="PyDesign.State_Class.State.classtype">
-<code class="descname">classtype</code><a class="headerlink" href="#PyDesign.State_Class.State.classtype" title="Permalink to this definition">¶</a></dt>
+<dt id="RNAsketch.State.State.classtype">
+<code class="descname">classtype</code><a class="headerlink" href="#RNAsketch.State.State.classtype" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
-<dt id="PyDesign.State_Class.State.constraint">
-<code class="descname">constraint</code><a class="headerlink" href="#PyDesign.State_Class.State.constraint" title="Permalink to this definition">¶</a></dt>
+<dt id="RNAsketch.State.State.constraint">
+<code class="descname">constraint</code><a class="headerlink" href="#RNAsketch.State.State.constraint" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -412,8 +412,8 @@ for this state.</p>
 </dd></dl>
 
 <dl class="attribute">
-<dt id="PyDesign.State_Class.State.cut_points">
-<code class="descname">cut_points</code><a class="headerlink" href="#PyDesign.State_Class.State.cut_points" title="Permalink to this definition">¶</a></dt>
+<dt id="RNAsketch.State.State.cut_points">
+<code class="descname">cut_points</code><a class="headerlink" href="#RNAsketch.State.State.cut_points" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -425,8 +425,8 @@ for this state.</p>
 </dd></dl>
 
 <dl class="attribute">
-<dt id="PyDesign.State_Class.State.enforce_constraint">
-<code class="descname">enforce_constraint</code><a class="headerlink" href="#PyDesign.State_Class.State.enforce_constraint" title="Permalink to this definition">¶</a></dt>
+<dt id="RNAsketch.State.State.enforce_constraint">
+<code class="descname">enforce_constraint</code><a class="headerlink" href="#RNAsketch.State.State.enforce_constraint" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -438,8 +438,8 @@ for this state.</p>
 </dd></dl>
 
 <dl class="attribute">
-<dt id="PyDesign.State_Class.State.ensemble_defect">
-<code class="descname">ensemble_defect</code><a class="headerlink" href="#PyDesign.State_Class.State.ensemble_defect" title="Permalink to this definition">¶</a></dt>
+<dt id="RNAsketch.State.State.ensemble_defect">
+<code class="descname">ensemble_defect</code><a class="headerlink" href="#RNAsketch.State.State.ensemble_defect" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -451,8 +451,8 @@ for this state.</p>
 </dd></dl>
 
 <dl class="attribute">
-<dt id="PyDesign.State_Class.State.eos">
-<code class="descname">eos</code><a class="headerlink" href="#PyDesign.State_Class.State.eos" title="Permalink to this definition">¶</a></dt>
+<dt id="RNAsketch.State.State.eos">
+<code class="descname">eos</code><a class="headerlink" href="#RNAsketch.State.State.eos" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -464,8 +464,8 @@ for this state.</p>
 </dd></dl>
 
 <dl class="attribute">
-<dt id="PyDesign.State_Class.State.eos_diff_mfe">
-<code class="descname">eos_diff_mfe</code><a class="headerlink" href="#PyDesign.State_Class.State.eos_diff_mfe" title="Permalink to this definition">¶</a></dt>
+<dt id="RNAsketch.State.State.eos_diff_mfe">
+<code class="descname">eos_diff_mfe</code><a class="headerlink" href="#RNAsketch.State.State.eos_diff_mfe" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -477,8 +477,8 @@ for this state.</p>
 </dd></dl>
 
 <dl class="attribute">
-<dt id="PyDesign.State_Class.State.eos_reached_mfe">
-<code class="descname">eos_reached_mfe</code><a class="headerlink" href="#PyDesign.State_Class.State.eos_reached_mfe" title="Permalink to this definition">¶</a></dt>
+<dt id="RNAsketch.State.State.eos_reached_mfe">
+<code class="descname">eos_reached_mfe</code><a class="headerlink" href="#RNAsketch.State.State.eos_reached_mfe" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -490,8 +490,8 @@ for this state.</p>
 </dd></dl>
 
 <dl class="attribute">
-<dt id="PyDesign.State_Class.State.length">
-<code class="descname">length</code><a class="headerlink" href="#PyDesign.State_Class.State.length" title="Permalink to this definition">¶</a></dt>
+<dt id="RNAsketch.State.State.length">
+<code class="descname">length</code><a class="headerlink" href="#RNAsketch.State.State.length" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -503,8 +503,8 @@ for this state.</p>
 </dd></dl>
 
 <dl class="attribute">
-<dt id="PyDesign.State_Class.State.ligand">
-<code class="descname">ligand</code><a class="headerlink" href="#PyDesign.State_Class.State.ligand" title="Permalink to this definition">¶</a></dt>
+<dt id="RNAsketch.State.State.ligand">
+<code class="descname">ligand</code><a class="headerlink" href="#RNAsketch.State.State.ligand" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -516,8 +516,8 @@ for this state.</p>
 </dd></dl>
 
 <dl class="attribute">
-<dt id="PyDesign.State_Class.State.mfe_energy">
-<code class="descname">mfe_energy</code><a class="headerlink" href="#PyDesign.State_Class.State.mfe_energy" title="Permalink to this definition">¶</a></dt>
+<dt id="RNAsketch.State.State.mfe_energy">
+<code class="descname">mfe_energy</code><a class="headerlink" href="#RNAsketch.State.State.mfe_energy" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -529,8 +529,8 @@ for this state.</p>
 </dd></dl>
 
 <dl class="attribute">
-<dt id="PyDesign.State_Class.State.mfe_structure">
-<code class="descname">mfe_structure</code><a class="headerlink" href="#PyDesign.State_Class.State.mfe_structure" title="Permalink to this definition">¶</a></dt>
+<dt id="RNAsketch.State.State.mfe_structure">
+<code class="descname">mfe_structure</code><a class="headerlink" href="#RNAsketch.State.State.mfe_structure" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -542,8 +542,8 @@ for this state.</p>
 </dd></dl>
 
 <dl class="attribute">
-<dt id="PyDesign.State_Class.State.multifold">
-<code class="descname">multifold</code><a class="headerlink" href="#PyDesign.State_Class.State.multifold" title="Permalink to this definition">¶</a></dt>
+<dt id="RNAsketch.State.State.multifold">
+<code class="descname">multifold</code><a class="headerlink" href="#RNAsketch.State.State.multifold" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -555,8 +555,8 @@ for this state.</p>
 </dd></dl>
 
 <dl class="attribute">
-<dt id="PyDesign.State_Class.State.pf_energy">
-<code class="descname">pf_energy</code><a class="headerlink" href="#PyDesign.State_Class.State.pf_energy" title="Permalink to this definition">¶</a></dt>
+<dt id="RNAsketch.State.State.pf_energy">
+<code class="descname">pf_energy</code><a class="headerlink" href="#RNAsketch.State.State.pf_energy" title="Permalink to this definition">¶</a></dt>
 <dd><p>In case of a dimer cofold calculation with viennarna, the function returns the energy of true hybrid states only.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -569,8 +569,8 @@ for this state.</p>
 </dd></dl>
 
 <dl class="attribute">
-<dt id="PyDesign.State_Class.State.pf_structure">
-<code class="descname">pf_structure</code><a class="headerlink" href="#PyDesign.State_Class.State.pf_structure" title="Permalink to this definition">¶</a></dt>
+<dt id="RNAsketch.State.State.pf_structure">
+<code class="descname">pf_structure</code><a class="headerlink" href="#RNAsketch.State.State.pf_structure" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -582,8 +582,8 @@ for this state.</p>
 </dd></dl>
 
 <dl class="attribute">
-<dt id="PyDesign.State_Class.State.pos">
-<code class="descname">pos</code><a class="headerlink" href="#PyDesign.State_Class.State.pos" title="Permalink to this definition">¶</a></dt>
+<dt id="RNAsketch.State.State.pos">
+<code class="descname">pos</code><a class="headerlink" href="#RNAsketch.State.State.pos" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -595,13 +595,13 @@ for this state.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="PyDesign.State_Class.State.reset">
-<code class="descname">reset</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#PyDesign.State_Class.State.reset" title="Permalink to this definition">¶</a></dt>
+<dt id="RNAsketch.State.State.reset">
+<code class="descname">reset</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#RNAsketch.State.State.reset" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
-<dt id="PyDesign.State_Class.State.structure">
-<code class="descname">structure</code><a class="headerlink" href="#PyDesign.State_Class.State.structure" title="Permalink to this definition">¶</a></dt>
+<dt id="RNAsketch.State.State.structure">
+<code class="descname">structure</code><a class="headerlink" href="#RNAsketch.State.State.structure" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -613,8 +613,8 @@ for this state.</p>
 </dd></dl>
 
 <dl class="attribute">
-<dt id="PyDesign.State_Class.State.temperature">
-<code class="descname">temperature</code><a class="headerlink" href="#PyDesign.State_Class.State.temperature" title="Permalink to this definition">¶</a></dt>
+<dt id="RNAsketch.State.State.temperature">
+<code class="descname">temperature</code><a class="headerlink" href="#RNAsketch.State.State.temperature" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -628,8 +628,8 @@ for this state.</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="PyDesign.State_Class.add_cuts">
-<code class="descclassname">PyDesign.State_Class.</code><code class="descname">add_cuts</code><span class="sig-paren">(</span><em>input</em>, <em>cut_points</em><span class="sig-paren">)</span><a class="headerlink" href="#PyDesign.State_Class.add_cuts" title="Permalink to this definition">¶</a></dt>
+<dt id="RNAsketch.State.add_cuts">
+<code class="descclassname">RNAsketch.State.</code><code class="descname">add_cuts</code><span class="sig-paren">(</span><em>input</em>, <em>cut_points</em><span class="sig-paren">)</span><a class="headerlink" href="#RNAsketch.State.add_cuts" title="Permalink to this definition">¶</a></dt>
 <dd><p>Takes a string and add back the cut point characters at the positions stored in the cut points list</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -644,8 +644,8 @@ for this state.</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="PyDesign.State_Class.create_bp_table">
-<code class="descclassname">PyDesign.State_Class.</code><code class="descname">create_bp_table</code><span class="sig-paren">(</span><em>structure</em><span class="sig-paren">)</span><a class="headerlink" href="#PyDesign.State_Class.create_bp_table" title="Permalink to this definition">¶</a></dt>
+<dt id="RNAsketch.State.create_bp_table">
+<code class="descclassname">RNAsketch.State.</code><code class="descname">create_bp_table</code><span class="sig-paren">(</span><em>structure</em><span class="sig-paren">)</span><a class="headerlink" href="#RNAsketch.State.create_bp_table" title="Permalink to this definition">¶</a></dt>
 <dd><p>Takes a structure in dot bracket notation and returns a base pair table.
 Unpaired positions are -1, otherwise the index of the adjacent bracket is listed</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -661,31 +661,31 @@ Unpaired positions are -1, otherwise the index of the adjacent bracket is listed
 </dd></dl>
 
 <dl class="class">
-<dt id="PyDesign.State_Class.nupackState">
-<em class="property">class </em><code class="descclassname">PyDesign.State_Class.</code><code class="descname">nupackState</code><span class="sig-paren">(</span><em>parent</em>, <em>structure=None</em>, <em>temperature=37.0</em>, <em>ligand=None</em>, <em>constraint=None</em>, <em>enforce_constraint=False</em><span class="sig-paren">)</span><a class="headerlink" href="#PyDesign.State_Class.nupackState" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#PyDesign.State_Class.State" title="PyDesign.State_Class.State"><code class="xref py py-class docutils literal"><span class="pre">PyDesign.State_Class.State</span></code></a></p>
+<dt id="RNAsketch.State.nupackState">
+<em class="property">class </em><code class="descclassname">RNAsketch.State.</code><code class="descname">nupackState</code><span class="sig-paren">(</span><em>parent</em>, <em>structure=None</em>, <em>temperature=37.0</em>, <em>ligand=None</em>, <em>constraint=None</em>, <em>enforce_constraint=False</em><span class="sig-paren">)</span><a class="headerlink" href="#RNAsketch.State.nupackState" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#RNAsketch.State.State" title="RNAsketch.State.State"><code class="xref py py-class docutils literal"><span class="pre">RNAsketch.State.State</span></code></a></p>
 <dl class="attribute">
-<dt id="PyDesign.State_Class.nupackState.classtype">
-<code class="descname">classtype</code><a class="headerlink" href="#PyDesign.State_Class.nupackState.classtype" title="Permalink to this definition">¶</a></dt>
+<dt id="RNAsketch.State.nupackState.classtype">
+<code class="descname">classtype</code><a class="headerlink" href="#RNAsketch.State.nupackState.classtype" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="function">
-<dt id="PyDesign.State_Class.remove_cuts">
-<code class="descclassname">PyDesign.State_Class.</code><code class="descname">remove_cuts</code><span class="sig-paren">(</span><em>input</em><span class="sig-paren">)</span><a class="headerlink" href="#PyDesign.State_Class.remove_cuts" title="Permalink to this definition">¶</a></dt>
+<dt id="RNAsketch.State.remove_cuts">
+<code class="descclassname">RNAsketch.State.</code><code class="descname">remove_cuts</code><span class="sig-paren">(</span><em>input</em><span class="sig-paren">)</span><a class="headerlink" href="#RNAsketch.State.remove_cuts" title="Permalink to this definition">¶</a></dt>
 <dd><p>Takes a string and removes all cut characters (+&amp;) from this string
 :param input: string containing cut point characters
 :return: string without cut point characters</p>
 </dd></dl>
 
 <dl class="class">
-<dt id="PyDesign.State_Class.vrnaState">
-<em class="property">class </em><code class="descclassname">PyDesign.State_Class.</code><code class="descname">vrnaState</code><span class="sig-paren">(</span><em>parent</em>, <em>structure=None</em>, <em>temperature=37.0</em>, <em>ligand=None</em>, <em>constraint=None</em>, <em>enforce_constraint=False</em><span class="sig-paren">)</span><a class="headerlink" href="#PyDesign.State_Class.vrnaState" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#PyDesign.State_Class.State" title="PyDesign.State_Class.State"><code class="xref py py-class docutils literal"><span class="pre">PyDesign.State_Class.State</span></code></a></p>
+<dt id="RNAsketch.State.vrnaState">
+<em class="property">class </em><code class="descclassname">RNAsketch.State.</code><code class="descname">vrnaState</code><span class="sig-paren">(</span><em>parent</em>, <em>structure=None</em>, <em>temperature=37.0</em>, <em>ligand=None</em>, <em>constraint=None</em>, <em>enforce_constraint=False</em><span class="sig-paren">)</span><a class="headerlink" href="#RNAsketch.State.vrnaState" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#RNAsketch.State.State" title="RNAsketch.State.State"><code class="xref py py-class docutils literal"><span class="pre">RNAsketch.State.State</span></code></a></p>
 <dl class="attribute">
-<dt id="PyDesign.State_Class.vrnaState.classtype">
-<code class="descname">classtype</code><a class="headerlink" href="#PyDesign.State_Class.vrnaState.classtype" title="Permalink to this definition">¶</a></dt>
+<dt id="RNAsketch.State.vrnaState.classtype">
+<code class="descname">classtype</code><a class="headerlink" href="#RNAsketch.State.vrnaState.classtype" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
