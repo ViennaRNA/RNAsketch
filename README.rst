@@ -4,7 +4,7 @@ RNAsketch Library for designing RNA molecules
 Installation
 ------------
 
-Download the lastes RNAsketch package from https://github.com/ribonets/RNAsketch/releases/latest, exctract and simply use setuptools to install the module and the few sample scripts::
+Download the lastes RNAsketch package from https://github.com/ViennaRNA/RNAsketch/releases/latest, exctract and simply use setuptools to install the module and the few sample scripts::
 
     python setup.py install
 
@@ -15,12 +15,17 @@ argument, or in case :code:`PYTHONUSERBASE` is set, just use the :code:`--user` 
 Build the documentation
 -----------------------
 
-Documentation available online: http://ribonets.github.io/RNAsketch
+Documentation available online: http://viennarna.github.io/RNAsketch
 
 Call these commands to build the html documentation::
 
     cd doc
     make html
+
+Cite
+----
+
+Stefan Hammer, Birgit Tschiatschek, Christoph Flamm, Ivo L. Hofacker, and Sven Findeiß. “RNAblueprint: Flexible Multiple Target Nucleic Acid Sequence Design.” Bioinformatics, 2017. https://doi.org/10.1093/bioinformatics/btx263.
 
 Provided Example Scripts
 ------------------------
