@@ -27,6 +27,7 @@ def main():
     parser = argparse.ArgumentParser(description='Display a Dependency Graph with python given structural constraints or a graphml file.')
     parser.add_argument("-g", "--graphml", type=str, default=None, help='Read graphml file with the given filename.')
     parser.add_argument("-i", "--input", default=False, action='store_true', help='Read custom structures and sequence constraints from stdin')
+    parser.add_argument("-l", "--layout", type=str, default='components', help='Specify the plotting layout: components - vertice in connected components will be close to each other; circle: vertices will be drawn on a circle')
     parser.add_argument("-f", "--file", type = str, default=None, help='Read file in *.inp format')
     parser.add_argument("-o", "--output", type=str, default=None, help='Write graph to PNG file with the given filename.')
     args = parser.parse_args()
@@ -69,13 +70,18 @@ def main():
     
     # now show the graph as plot
     g.vs["label"] = [int(i) for i in g.vs["name"]]
-    layout = g.layout_fruchterman_reingold()
+    layout = g.layout_random()
+    if args.layout == 'components':
+        layout = g.layout_fruchterman_reingold()
+    if args.layout == 'circle':
+        layout = g.layout_circle()
     bool_dict = ["white", "red"]
     ear_dict=["black"]
-    max_ear=int(max(g.es["ear"]))
-    palette=igraph.RainbowPalette(n=max_ear+1)
-    for c in range(0, max_ear+1):
-        ear_dict.append(palette.get(c))
+    if g.es["ear"]:
+        max_ear=int(max(g.es["ear"]))
+        palette=igraph.RainbowPalette(n=max_ear+1)
+        for c in range(0, max_ear+1):
+            ear_dict.append(palette.get(c))
     igraph.plot(g, args.output, layout = layout, vertex_size=30, edge_width=5, margin=20, bbox=(800, 800), edge_color=[ear_dict[int(ear)] for ear in g.es["ear"]], vertex_color=[bool_dict[articulation] for articulation in g.vs["articulation"]])
     
     
