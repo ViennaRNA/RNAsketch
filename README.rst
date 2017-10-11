@@ -38,7 +38,7 @@ all the given structural conformation. In case of a bistable molecule just call:
 
 .. code:: bash
 
-    echo -e '(((((....)))))....\n....(((((....)))))' | design-multistate.py -i -m random -e 500
+    echo -e '(((((....)))))....\n....(((((....)))))' | design-multistate.py -i -m random -s 500
 
 The program `barriers` can the be used to visualize the energy landscape to confirm the design goals:
 
@@ -69,7 +69,7 @@ Design a sRNA mediated translational regulation
     
     echo '...(((((((((((((((((&)))))))))))))))))((((....))));...(((((((((((((((((&)))))))))))))))))............
     ....................&.................((((....))));...xxxxxxxxxxxxxxxxx&xxxxxxxxxxxxxxxxx............
-    NNNNAAGGAGNNNNNNNAUG&NNNNNNNNNNNNNNNNNNNNNNNNNNNNN' | design-cofold.py -n 1 -e 1000
+    NNNNAAGGAGNNNNNNNAUG&NNNNNNNNNNNNNNNNNNNNNNNNNNNNN' | design-cofold.py -n 1 -s 1000
 
 This small example will design a simple device consisting of a 5'UTR region which can
 be translationally controlled by a sRNA molecule. In this case the sRNA will shut down
@@ -94,7 +94,7 @@ Design a multistate Thermoswitch
 
 .. code:: bash
 
-    echo -e "(((((((((((((....))))))))))))) 5.0\n(((((.....)))))(((((.....))))) 10.0\n(((((.....)))))............... 37.0" | design-thermoswitch.py -m random -e 1000
+    echo -e "(((((((((((((....))))))))))))) 5.0\n(((((.....)))))(((((.....))))) 10.0\n(((((.....)))))............... 37.0" | design-thermoswitch.py -m random -s 1000
 
 This results e.g in a sequence like `GAUCUGUGUGGGGUCGAUUUUGUGUGGGUU` which has the given MFE structures at the specified temperatures (lower plot).
 Folding it at all Temeratures from 10 to 100 degree Celsius shows, that the first structural change happens at ~7.0 degree
