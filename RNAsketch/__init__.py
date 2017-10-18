@@ -247,7 +247,7 @@ def sample_sequence(dg, design, mode, sample_steps=1, avoid_motifs=None, white_p
             for _ in range(0, sample_steps):
                 mut_nos *= dg.sample_plocal()
                 sample_count += 1
-        elif consen_mode == 'sample_unpaired':
+        elif chosen_mode == 'sample_unpaired':
             # sample only unpaired positions
             for _ in range(0, sample_steps):
                 mut_nos *= dg.sample_clocal(1,1)
