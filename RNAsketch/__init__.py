@@ -247,6 +247,11 @@ def sample_sequence(dg, design, mode, sample_steps=1, avoid_motifs=None, white_p
             for _ in range(0, sample_steps):
                 mut_nos *= dg.sample_plocal()
                 sample_count += 1
+        elif consen_mode == 'sample_unpaired':
+            # sample only unpaired positions
+            for _ in range(0, sample_steps):
+                mut_nos *= dg.sample_clocal(1,1)
+                sample_count += 1
         else:
             raise ValueError("Wrong mode argument: " + mode + "\n")
 
@@ -376,7 +381,7 @@ def simulated_annealing_optimization(dg, design, objective_function=calculate_ob
     number_of_samples = 0
     # remember how often we used the temperature already
     number_of_same_temp = 0
-    
+
     # main optimization loop
     while True:
         # check if we have to cool down
