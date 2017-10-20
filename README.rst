@@ -1,5 +1,5 @@
 RNAsketch Library for designing RNA molecules
-============================================
+=============================================
 
 Installation
 ------------
