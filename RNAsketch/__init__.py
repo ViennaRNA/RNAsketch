@@ -252,6 +252,11 @@ def sample_sequence(dg, design, mode, sample_steps=1, avoid_motifs=None, white_p
             for _ in range(0, sample_steps):
                 mut_nos *= dg.sample_clocal(1,1)
                 sample_count += 1
+        elif chosen_mode == 'sample_pairs':
+            # sample unpaired bases and single basepairs
+            for _ in range(0, sample_steps):
+                mut_nos *= dg.sample_clocal(1,2)
+                sample_count += 1
         else:
             raise ValueError("Wrong mode argument: " + mode + "\n")
 
@@ -336,6 +341,62 @@ def adaptive_walk_optimization(dg, design, objective_function=calculate_objectiv
             count += 1
             if count > stop:
                 break
+
+    # clear the console
+    if (progress):
+        sys.stderr.write("\r" + " " * 60 + "\r")
+        sys.stderr.flush()
+    # finally return the result
+    return score, number_of_samples
+
+def adaptive_walk_fixed(dg, design, objective_function=calculate_objective, number=1000, mode='sample_clocal', avoid_motifs=None, white_positions=None, progress=False):
+    '''
+    Takes a Design object and does a adaptive walk optimization with a fixed amount of move steps.
+
+    :param dg: RNAdesign DependencyGraph object
+    :param design: Design object containing the sequence and structures
+    :param objective_functions: array of functions which takes a design object and returns a score for evaluation
+    :param number: Number of sampling new sequences before stoping the optimization
+    :param mode: String defining the sampling mode: sample, sample_clocal, sample_plocal
+    :param avoid_motifs: list of regex pattern specifiying sequence motifs to avoid
+    :param white_positions: list of [start, end] positions in the sequence where the avoid_motifs pattern should be ignored
+    :param progress: Whether or not to print the progress to the console
+    :return: Optimization score reached for the final sequence
+    :return: Number of samples neccessary to reach this result
+    '''
+    if avoid_motifs is None:
+        avoid_motifs=[]
+    if white_positions is None:
+        white_positions=[]
+    # if the design has no sequence yet, sample one from scratch
+    if not design.sequence:
+        sample_sequence(dg, design, 'sample', avoid_motifs=avoid_motifs, white_positions=white_positions)
+    else:
+        dg.set_sequence(design.sequence)
+
+    score = objective_function(design)
+    # remember how may mutations were done
+    number_of_samples = 0
+
+    # main optimization loop
+    for _ in range(0, number):
+        # count up the mutations
+        number_of_samples += 1
+        # sample a new sequence
+        (mut_nos, sample_count) = sample_sequence(dg, design, mode, avoid_motifs=avoid_motifs, white_positions=white_positions)
+
+        # write progress
+        if progress:
+            sys.stderr.write("\rMutate: {0:7.0f} | Score: {1:5.2f} | NOS: {2:.5e} | Mode: {3:s}".format(number_of_samples, score, mut_nos, mode) + " " * 20)
+            sys.stderr.flush()
+
+        this_score = objective_function(design)
+        # evaluate
+        if (this_score < score):
+            score = this_score
+        else:
+            dg.revert_sequence(sample_count)
+            design.sequence = dg.get_sequence()
 
     # clear the console
     if (progress):
