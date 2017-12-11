@@ -82,8 +82,8 @@
       role="menu"
       aria-labelledby="dLabelLocalToc"><ul>
 <li><a class="reference internal" href="#">Classes</a><ul>
-<li><a class="reference internal" href="#rnasketch-design">RNAsketch.Design</a></li>
-<li><a class="reference internal" href="#rnasketch-state">RNAsketch.State</a></li>
+<li><a class="reference internal" href="#module-RNAsketch.Design">RNAsketch.Design</a></li>
+<li><a class="reference internal" href="#module-RNAsketch.State">RNAsketch.State</a></li>
 </ul>
 </li>
 </ul>
@@ -131,11 +131,565 @@
       
   <div class="section" id="classes">
 <h1>Classes<a class="headerlink" href="#classes" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="rnasketch-design">
-<h2>RNAsketch.Design<a class="headerlink" href="#rnasketch-design" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-RNAsketch.Design">
+<span id="rnasketch-design"></span><h2>RNAsketch.Design<a class="headerlink" href="#module-RNAsketch.Design" title="Permalink to this headline">¶</a></h2>
+<p>Design_Class.py: Class as wrapper for ViennaRNA and Nupack
+functions to design an RNA molecule
+This implements the core class which holds all the states of a riboswitch</p>
+<dl class="class">
+<dt id="RNAsketch.Design.Design">
+<em class="property">class </em><code class="descclassname">RNAsketch.Design.</code><code class="descname">Design</code><span class="sig-paren">(</span><em>structures</em>, <em>sequence=''</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/RNAsketch/Design.html#Design"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#RNAsketch.Design.Design" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/2/library/functions.html#object" title="(in Python v2.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<p>Design contains all neccessary information to generate a RNA device
+or to return a solution. It is used as a container between the different
+functions.</p>
+<dl class="attribute">
+<dt id="RNAsketch.Design.Design.classtype">
+<code class="descname">classtype</code><a class="headerlink" href="#RNAsketch.Design.Design.classtype" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="RNAsketch.Design.Design.ensemble_defect">
+<code class="descname">ensemble_defect</code><a class="headerlink" href="#RNAsketch.Design.Design.ensemble_defect" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Dict of ensemble defect values of all states with state names as keys</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="RNAsketch.Design.Design.eos">
+<code class="descname">eos</code><a class="headerlink" href="#RNAsketch.Design.Design.eos" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Dict of energy of structure values of all states with state names as keys</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="RNAsketch.Design.Design.eos_diff_mfe">
+<code class="descname">eos_diff_mfe</code><a class="headerlink" href="#RNAsketch.Design.Design.eos_diff_mfe" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Dict of energy of structure to MFE difference values of all states with state names as keys</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="RNAsketch.Design.Design.eos_reached_mfe">
+<code class="descname">eos_reached_mfe</code><a class="headerlink" href="#RNAsketch.Design.Design.eos_reached_mfe" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Dict of booleans telling if the energy of struct equals the mfe energy of all states with state names as keys</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="RNAsketch.Design.Design.length">
+<code class="descname">length</code><a class="headerlink" href="#RNAsketch.Design.Design.length" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Length of the designed sequence</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="RNAsketch.Design.Design.mfe_energy">
+<code class="descname">mfe_energy</code><a class="headerlink" href="#RNAsketch.Design.Design.mfe_energy" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Dict of mfe values of all states with state names as keys</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="RNAsketch.Design.Design.mfe_structure">
+<code class="descname">mfe_structure</code><a class="headerlink" href="#RNAsketch.Design.Design.mfe_structure" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Dict of mfe structures of all states with state names as keys</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="RNAsketch.Design.Design.newState">
+<code class="descname">newState</code><span class="sig-paren">(</span><em>key</em>, <em>struct</em>, <em>temperature=37.0</em>, <em>ligand=None</em>, <em>constraint=None</em>, <em>enforce_constraint=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/RNAsketch/Design.html#Design.newState"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#RNAsketch.Design.Design.newState" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a new state of the given subclass.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="RNAsketch.Design.Design.number_of_structures">
+<code class="descname">number_of_structures</code><a class="headerlink" href="#RNAsketch.Design.Design.number_of_structures" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Number of uniq structures of all states</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="RNAsketch.Design.Design.pf_energy">
+<code class="descname">pf_energy</code><a class="headerlink" href="#RNAsketch.Design.Design.pf_energy" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Dict of partition function energy values of all states with state names as keys</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="RNAsketch.Design.Design.pf_structure">
+<code class="descname">pf_structure</code><a class="headerlink" href="#RNAsketch.Design.Design.pf_structure" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Dict of partition function consensus structures of all states with state names as keys</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="RNAsketch.Design.Design.pos">
+<code class="descname">pos</code><a class="headerlink" href="#RNAsketch.Design.Design.pos" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Dict of probability of structure values of all states with state names as keys</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="RNAsketch.Design.Design.sequence">
+<code class="descname">sequence</code><a class="headerlink" href="#RNAsketch.Design.Design.sequence" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Sequence of this design object</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="RNAsketch.Design.Design.structures">
+<code class="descname">structures</code><a class="headerlink" href="#RNAsketch.Design.Design.structures" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">List containing the structures of all states</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="RNAsketch.Design.Design.write_csv">
+<code class="descname">write_csv</code><span class="sig-paren">(</span><em>separator=';'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/RNAsketch/Design.html#Design.write_csv"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#RNAsketch.Design.Design.write_csv" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generates a csv version of all values of this design separated by the given separator
+:param separator: separator for the values
+:return: string containing all values of this design separated by the given separator</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="RNAsketch.Design.Design.write_csv_header">
+<code class="descname">write_csv_header</code><span class="sig-paren">(</span><em>separator=';'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/RNAsketch/Design.html#Design.write_csv_header"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#RNAsketch.Design.Design.write_csv_header" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generates a csv header for all values of this design separated by the given separator
+:param separator: separator for the values
+:return: string containing a csv header for this design separated by the given separator</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="RNAsketch.Design.Design.write_out">
+<code class="descname">write_out</code><span class="sig-paren">(</span><em>score=0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/RNAsketch/Design.html#Design.write_out"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#RNAsketch.Design.Design.write_out" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generates a nice human readable version of all values of this design
+:param score: optimization score for this design
+:return: string containing a nicely formatted version of all design values</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="RNAsketch.Design.nupackDesign">
+<em class="property">class </em><code class="descclassname">RNAsketch.Design.</code><code class="descname">nupackDesign</code><span class="sig-paren">(</span><em>structures</em>, <em>sequence=''</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/RNAsketch/Design.html#nupackDesign"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#RNAsketch.Design.nupackDesign" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#RNAsketch.Design.Design" title="RNAsketch.Design.Design"><code class="xref py py-class docutils literal"><span class="pre">RNAsketch.Design.Design</span></code></a></p>
+<dl class="attribute">
+<dt id="RNAsketch.Design.nupackDesign.classtype">
+<code class="descname">classtype</code><a class="headerlink" href="#RNAsketch.Design.nupackDesign.classtype" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="RNAsketch.Design.nupackDesign.newState">
+<code class="descname">newState</code><span class="sig-paren">(</span><em>key</em>, <em>struct</em>, <em>temperature=37.0</em>, <em>ligand=None</em>, <em>constraint=None</em>, <em>enforce_constraint=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/RNAsketch/Design.html#nupackDesign.newState"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#RNAsketch.Design.nupackDesign.newState" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="RNAsketch.Design.vrnaDesign">
+<em class="property">class </em><code class="descclassname">RNAsketch.Design.</code><code class="descname">vrnaDesign</code><span class="sig-paren">(</span><em>structures</em>, <em>sequence=''</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/RNAsketch/Design.html#vrnaDesign"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#RNAsketch.Design.vrnaDesign" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#RNAsketch.Design.Design" title="RNAsketch.Design.Design"><code class="xref py py-class docutils literal"><span class="pre">RNAsketch.Design.Design</span></code></a></p>
+<dl class="attribute">
+<dt id="RNAsketch.Design.vrnaDesign.classtype">
+<code class="descname">classtype</code><a class="headerlink" href="#RNAsketch.Design.vrnaDesign.classtype" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="RNAsketch.Design.vrnaDesign.newState">
+<code class="descname">newState</code><span class="sig-paren">(</span><em>key</em>, <em>struct</em>, <em>temperature=37.0</em>, <em>ligand=None</em>, <em>constraint=None</em>, <em>enforce_constraint=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/RNAsketch/Design.html#vrnaDesign.newState"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#RNAsketch.Design.vrnaDesign.newState" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
 </div>
-<div class="section" id="rnasketch-state">
-<h2>RNAsketch.State<a class="headerlink" href="#rnasketch-state" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-RNAsketch.State">
+<span id="rnasketch-state"></span><h2>RNAsketch.State<a class="headerlink" href="#module-RNAsketch.State" title="Permalink to this headline">¶</a></h2>
+<p>State_Class.py: Class as wrapper for ViennaRNA and Nupack
+functions to design an RNA molecule.
+This implements the various states of a riboswitch.</p>
+<dl class="class">
+<dt id="RNAsketch.State.State">
+<em class="property">class </em><code class="descclassname">RNAsketch.State.</code><code class="descname">State</code><span class="sig-paren">(</span><em>parent</em>, <em>structure=None</em>, <em>temperature=37.0</em>, <em>ligand=None</em>, <em>constraint=None</em>, <em>enforce_constraint=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/RNAsketch/State.html#State"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#RNAsketch.State.State" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/2/library/functions.html#object" title="(in Python v2.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<p>State object holds structure, ligand, constraints and calculates all values
+for this state.</p>
+<dl class="attribute">
+<dt id="RNAsketch.State.State.classtype">
+<code class="descname">classtype</code><a class="headerlink" href="#RNAsketch.State.State.classtype" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="RNAsketch.State.State.constraint">
+<code class="descname">constraint</code><a class="headerlink" href="#RNAsketch.State.State.constraint" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Structural constraint of this state (hard constraint)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="RNAsketch.State.State.cut_points">
+<code class="descname">cut_points</code><a class="headerlink" href="#RNAsketch.State.State.cut_points" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">List containing the positions of the cut points (&amp; or +) in the sequence</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="RNAsketch.State.State.enforce_constraint">
+<code class="descname">enforce_constraint</code><a class="headerlink" href="#RNAsketch.State.State.enforce_constraint" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Boolean whether to enforce the hard constraint or not</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="RNAsketch.State.State.ensemble_defect">
+<code class="descname">ensemble_defect</code><a class="headerlink" href="#RNAsketch.State.State.ensemble_defect" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Ensemble defect value given all the properties of this state (constraints, temperature,...)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="RNAsketch.State.State.eos">
+<code class="descname">eos</code><a class="headerlink" href="#RNAsketch.State.State.eos" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Energy of structure given all the properties of this state (constraints, temperature,...)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="RNAsketch.State.State.eos_diff_mfe">
+<code class="descname">eos_diff_mfe</code><a class="headerlink" href="#RNAsketch.State.State.eos_diff_mfe" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Energy difference of structure to mfe given all the properties of this state (constraints, temperature,...)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="RNAsketch.State.State.eos_reached_mfe">
+<code class="descname">eos_reached_mfe</code><a class="headerlink" href="#RNAsketch.State.State.eos_reached_mfe" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Boolean defining whether the eos reached the mfe energy</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="RNAsketch.State.State.length">
+<code class="descname">length</code><a class="headerlink" href="#RNAsketch.State.State.length" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Length of the design sequence if available, otherwise of the stuctural input</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="RNAsketch.State.State.ligand">
+<code class="descname">ligand</code><a class="headerlink" href="#RNAsketch.State.State.ligand" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Ligand binding definitions for this state; List with sequence pattern, structure pattern and binding energy (soft constraint)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="RNAsketch.State.State.mfe_energy">
+<code class="descname">mfe_energy</code><a class="headerlink" href="#RNAsketch.State.State.mfe_energy" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">MFE value given all the properties of this state (constraints, temperature,...)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="RNAsketch.State.State.mfe_structure">
+<code class="descname">mfe_structure</code><a class="headerlink" href="#RNAsketch.State.State.mfe_structure" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">MFE structure given all the properties of this state (constraints, temperature,...)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="RNAsketch.State.State.multifold">
+<code class="descname">multifold</code><a class="headerlink" href="#RNAsketch.State.State.multifold" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Number of cut points to specify if it is a cofold or multifold problem</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="RNAsketch.State.State.pf_energy">
+<code class="descname">pf_energy</code><a class="headerlink" href="#RNAsketch.State.State.pf_energy" title="Permalink to this definition">¶</a></dt>
+<dd><p>In case of a dimer cofold calculation with viennarna, the function returns the energy of true hybrid states only.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Partition function energy value given all the properties of this state (constraints, temperature,...)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="RNAsketch.State.State.pf_structure">
+<code class="descname">pf_structure</code><a class="headerlink" href="#RNAsketch.State.State.pf_structure" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Partition function consensus structure given all the properties of this state (constraints, temperature,...)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="RNAsketch.State.State.pos">
+<code class="descname">pos</code><a class="headerlink" href="#RNAsketch.State.State.pos" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Probability of structure given all the properties of this state (constraints, temperature,...)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="RNAsketch.State.State.reset">
+<code class="descname">reset</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/RNAsketch/State.html#State.reset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#RNAsketch.State.State.reset" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="RNAsketch.State.State.structure">
+<code class="descname">structure</code><a class="headerlink" href="#RNAsketch.State.State.structure" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Dot-bracket structure as constraint for this state</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="RNAsketch.State.State.temperature">
+<code class="descname">temperature</code><a class="headerlink" href="#RNAsketch.State.State.temperature" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Temperature of this state</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="RNAsketch.State.add_cuts">
+<code class="descclassname">RNAsketch.State.</code><code class="descname">add_cuts</code><span class="sig-paren">(</span><em>input</em>, <em>cut_points</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/RNAsketch/State.html#add_cuts"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#RNAsketch.State.add_cuts" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes a string and add back the cut point characters at the positions stored in the cut points list</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>input</strong> &#8211; string without cut point characters</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">string containing cut point characters</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="RNAsketch.State.create_bp_table">
+<code class="descclassname">RNAsketch.State.</code><code class="descname">create_bp_table</code><span class="sig-paren">(</span><em>structure</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/RNAsketch/State.html#create_bp_table"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#RNAsketch.State.create_bp_table" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes a structure in dot bracket notation and returns a base pair table.
+Unpaired positions are -1, otherwise the index of the adjacent bracket is listed</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>structure</strong> &#8211; string with dot-bracket notation of the strcture</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return bpt:</th><td class="field-body">base pair table</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="RNAsketch.State.nupackState">
+<em class="property">class </em><code class="descclassname">RNAsketch.State.</code><code class="descname">nupackState</code><span class="sig-paren">(</span><em>parent</em>, <em>structure=None</em>, <em>temperature=37.0</em>, <em>ligand=None</em>, <em>constraint=None</em>, <em>enforce_constraint=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/RNAsketch/State.html#nupackState"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#RNAsketch.State.nupackState" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#RNAsketch.State.State" title="RNAsketch.State.State"><code class="xref py py-class docutils literal"><span class="pre">RNAsketch.State.State</span></code></a></p>
+<dl class="attribute">
+<dt id="RNAsketch.State.nupackState.classtype">
+<code class="descname">classtype</code><a class="headerlink" href="#RNAsketch.State.nupackState.classtype" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="RNAsketch.State.remove_cuts">
+<code class="descclassname">RNAsketch.State.</code><code class="descname">remove_cuts</code><span class="sig-paren">(</span><em>input</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/RNAsketch/State.html#remove_cuts"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#RNAsketch.State.remove_cuts" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes a string and removes all cut characters (+&amp;) from this string
+:param input: string containing cut point characters
+:return: string without cut point characters</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="RNAsketch.State.vrnaState">
+<em class="property">class </em><code class="descclassname">RNAsketch.State.</code><code class="descname">vrnaState</code><span class="sig-paren">(</span><em>parent</em>, <em>structure=None</em>, <em>temperature=37.0</em>, <em>ligand=None</em>, <em>constraint=None</em>, <em>enforce_constraint=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/RNAsketch/State.html#vrnaState"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#RNAsketch.State.vrnaState" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#RNAsketch.State.State" title="RNAsketch.State.State"><code class="xref py py-class docutils literal"><span class="pre">RNAsketch.State.State</span></code></a></p>
+<dl class="attribute">
+<dt id="RNAsketch.State.vrnaState.classtype">
+<code class="descname">classtype</code><a class="headerlink" href="#RNAsketch.State.vrnaState.classtype" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
 </div>
 </div>
 

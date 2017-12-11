@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>RNAsketch.Design &#8212; RNAsketch 1.2.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/basic.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/bootstrap-3.3.6/css/bootstrap.min.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/bootstrap-3.3.6/css/bootstrap-theme.min.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/bootstrap-sphinx.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '1.2.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/js/jquery-1.11.0.min.js"></script>
+    <script type="text/javascript" src="../../_static/js/jquery-fix.js"></script>
+    <script type="text/javascript" src="../../_static/bootstrap-3.3.6/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="../../_static/bootstrap-sphinx.js"></script>
+    <link rel="top" title="RNAsketch 1.2.0 documentation" href="../../index.html" />
+    <link rel="up" title="RNAsketch" href="../RNAsketch.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+
+  </head>
+  <body role="document">
+
+  <div id="navbar" class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="../../index.html"><span><img src="../../_static/rnasketch.png"></span>
+          RNAsketch</a>
+        <span class="navbar-text navbar-version pull-left"><b>1.2</b></span>
+      </div>
+
+        <div class="collapse navbar-collapse nav-collapse">
+          <ul class="nav navbar-nav">
+            
+            
+              <li class="dropdown globaltoc-container">
+  <a role="button"
+     id="dLabelGlobalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="../../index.html">Site <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"
+      role="menu"
+      aria-labelledby="dLabelGlobalToc"><ul>
+<li class="toctree-l1"><a class="reference internal" href="../../module.html">Module content</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../classes.html">Classes</a></li>
+</ul>
+</ul>
+</li>
+              
+                <li class="dropdown">
+  <a role="button"
+     id="dLabelLocalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="#">Page <b class="caret"></b></a>
+  <ul class="dropdown-menu localtoc"
+      role="menu"
+      aria-labelledby="dLabelLocalToc"></ul>
+</li>
+              
+            
+            
+              
+                
+              
+            
+            
+            
+            
+              <li class="hidden-sm"></li>
+            
+          </ul>
+
+          
+            
+<form class="navbar-form navbar-right" action="../../search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+          
+        </div>
+    </div>
+  </div>
+
+<div class="container">
+  <div class="row">
+    <div class="col-md-12 content">
+      
+  <h1>Source code for RNAsketch.Design</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python</span>
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Design_Class.py: Class as wrapper for ViennaRNA and Nupack</span>
+<span class="sd">    functions to design an RNA molecule</span>
+<span class="sd">    This implements the core class which holds all the states of a riboswitch</span>
+<span class="sd">&#39;&#39;&#39;</span>
+
+<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;Stefan Hammer&quot;</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright 2016&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;0.1&quot;</span>
+<span class="n">__maintainer__</span> <span class="o">=</span> <span class="s2">&quot;Stefan Hammer&quot;</span>
+<span class="n">__email__</span> <span class="o">=</span> <span class="s2">&quot;s.hammer@univie.ac.at&quot;</span>
+
+
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">from</span> <span class="nn">State</span> <span class="k">import</span> <span class="o">*</span>
+
+<div class="viewcode-block" id="Design"><a class="viewcode-back" href="../../classes.html#RNAsketch.Design.Design">[docs]</a><span class="k">class</span> <span class="nc">Design</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Design contains all neccessary information to generate a RNA device</span>
+<span class="sd">    or to return a solution. It is used as a container between the different</span>
+<span class="sd">    functions.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">structures</span><span class="p">,</span> <span class="n">sequence</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Construct a new Design object.</span>
+<span class="sd">        </span>
+<span class="sd">        :param structures:</span>
+<span class="sd">        :param sequence:</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_number_of_structures</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="p">{}</span>
+        
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">structures</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">key</span> <span class="p">,</span> <span class="n">struct</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">structures</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_parseStructures</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">struct</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">structures</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">struct</span> <span class="ow">in</span> <span class="n">structures</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_parseStructures</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">struct</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;Structures must be a list or a dict hoding the state name and the structure&#39;</span><span class="p">)</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">sequence</span> <span class="o">=</span> <span class="n">sequence</span>
+        
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">classtype</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    
+    <span class="k">def</span> <span class="nf">_parseStructures</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">struct</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Function to create a new state given the state-name and the structure in dot-bracket notation</span>
+<span class="sd">        :param key: Name of the state</span>
+<span class="sd">        :param struct: Dot-bracket notation of a structure input</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">create_bp_table</span><span class="p">(</span><span class="n">struct</span><span class="p">)</span> <span class="c1">#check for balanced brackets</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">struct</span><span class="p">,</span> <span class="n">basestring</span><span class="p">)</span> <span class="ow">and</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s2">&quot;[\(\)\.\+\&amp;]&quot;</span><span class="p">),</span> <span class="n">struct</span><span class="p">)):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;Structure must be a string in dot-bracket notation&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">newState</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">key</span><span class="p">),</span> <span class="n">struct</span><span class="p">)</span>
+    
+<div class="viewcode-block" id="Design.newState"><a class="viewcode-back" href="../../classes.html#RNAsketch.Design.Design.newState">[docs]</a>    <span class="k">def</span> <span class="nf">newState</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">struct</span><span class="p">,</span> <span class="n">temperature</span><span class="o">=</span><span class="mf">37.0</span><span class="p">,</span> <span class="n">ligand</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">constraint</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">enforce_constraint</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Creates a new state of the given subclass.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">structures</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        :return: List containing the structures of all states</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">structure</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">result</span><span class="p">:</span>
+                <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">structure</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">result</span>
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">sequence</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        :return: Sequence of this design object</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sequence</span>
+    <span class="nd">@sequence</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">sequence</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">s</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">basestring</span><span class="p">)</span> <span class="ow">and</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s2">&quot;[AUGC\+\&amp;]&quot;</span><span class="p">),</span> <span class="n">s</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_sequence</span> <span class="o">=</span> <span class="n">s</span>
+            <span class="k">for</span> <span class="n">state</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+                <span class="n">state</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="n">s</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_sequence</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;Sequence must be a string containing a IUPAC RNA sequence&#39;</span><span class="p">)</span>
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">number_of_structures</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        :return: Number of uniq structures of all states</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_number_of_structures</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_number_of_structures</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">structures</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_number_of_structures</span>
+    
+<div class="viewcode-block" id="Design.write_out"><a class="viewcode-back" href="../../classes.html#RNAsketch.Design.Design.write_out">[docs]</a>    <span class="k">def</span> <span class="nf">write_out</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">score</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Generates a nice human readable version of all values of this design</span>
+<span class="sd">        :param score: optimization score for this design</span>
+<span class="sd">        :return: string containing a nicely formatted version of all design values</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{0:}</span><span class="se">\t</span><span class="s1"> </span><span class="si">{1:5.2f}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sequence</span><span class="p">,</span> <span class="n">score</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">:</span>
+            <span class="n">state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>
+            <span class="n">result</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="si">{0:}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
+            <span class="n">result</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="si">{0:}</span><span class="se">\t</span><span class="si">{1:9.4f}</span><span class="se">\t</span><span class="si">{2:+9.4f}</span><span class="se">\t</span><span class="si">{3:9.4f}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">state</span><span class="o">.</span><span class="n">structure</span><span class="p">,</span> <span class="n">state</span><span class="o">.</span><span class="n">eos</span><span class="p">,</span> <span class="n">state</span><span class="o">.</span><span class="n">eos</span><span class="o">-</span><span class="n">state</span><span class="o">.</span><span class="n">mfe_energy</span><span class="p">,</span> <span class="n">state</span><span class="o">.</span><span class="n">pos</span><span class="p">)</span>
+            <span class="n">result</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="si">{0:}</span><span class="se">\t</span><span class="si">{1:9.4f}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">state</span><span class="o">.</span><span class="n">mfe_structure</span><span class="p">,</span> <span class="n">state</span><span class="o">.</span><span class="n">mfe_energy</span><span class="p">)</span>
+            <span class="n">result</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="si">{0:}</span><span class="se">\t</span><span class="si">{1:9.4f}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">state</span><span class="o">.</span><span class="n">pf_structure</span><span class="p">,</span> <span class="n">state</span><span class="o">.</span><span class="n">pf_energy</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">result</span></div>
+    
+<div class="viewcode-block" id="Design.write_csv"><a class="viewcode-back" href="../../classes.html#RNAsketch.Design.Design.write_csv">[docs]</a>    <span class="k">def</span> <span class="nf">write_csv</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">separator</span><span class="o">=</span><span class="s1">&#39;;&#39;</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Generates a csv version of all values of this design separated by the given separator</span>
+<span class="sd">        :param separator: separator for the values</span>
+<span class="sd">        :return: string containing all values of this design separated by the given separator</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">separator</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;</span><span class="se">\&quot;</span><span class="s1">&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">sequence</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\&quot;</span><span class="s1">&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">length</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">number_of_structures</span> <span class="p">]))</span>
+        <span class="k">for</span> <span class="n">state</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">separator</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="p">[</span><span class="n">result</span><span class="p">,</span>
+            <span class="n">state</span><span class="o">.</span><span class="n">mfe_energy</span><span class="p">,</span>
+            <span class="n">state</span><span class="o">.</span><span class="n">mfe_structure</span><span class="p">,</span>
+            <span class="n">state</span><span class="o">.</span><span class="n">pf_energy</span><span class="p">,</span>
+            <span class="n">state</span><span class="o">.</span><span class="n">pf_structure</span><span class="p">,</span>
+            <span class="n">state</span><span class="o">.</span><span class="n">eos</span><span class="p">,</span>
+            <span class="n">state</span><span class="o">.</span><span class="n">eos_diff_mfe</span><span class="p">,</span> 
+            <span class="n">state</span><span class="o">.</span><span class="n">eos_reached_mfe</span><span class="p">,</span>
+            <span class="n">state</span><span class="o">.</span><span class="n">pos</span><span class="p">]))</span>
+        <span class="k">return</span> <span class="n">result</span></div>
+    
+<div class="viewcode-block" id="Design.write_csv_header"><a class="viewcode-back" href="../../classes.html#RNAsketch.Design.Design.write_csv_header">[docs]</a>    <span class="k">def</span> <span class="nf">write_csv_header</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">separator</span><span class="o">=</span><span class="s1">&#39;;&#39;</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Generates a csv header for all values of this design separated by the given separator</span>
+<span class="sd">        :param separator: separator for the values</span>
+<span class="sd">        :return: string containing a csv header for this design separated by the given separator</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">separator</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s1">&#39;sequence&#39;</span><span class="p">,</span> <span class="s1">&#39;seq_length&#39;</span><span class="p">,</span> <span class="s1">&#39;number_of_structures&#39;</span><span class="p">])</span>
+        <span class="n">strings</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;mfe_energy_&#39;</span><span class="p">,</span> <span class="s1">&#39;mfe_structure_&#39;</span><span class="p">,</span> <span class="s1">&#39;pf_energy_&#39;</span><span class="p">,</span> <span class="s1">&#39;pf_structure_&#39;</span><span class="p">,</span> <span class="s1">&#39;eos_&#39;</span><span class="p">,</span> <span class="s1">&#39;diff_eos_mfe_&#39;</span><span class="p">,</span> <span class="s1">&#39;mfe_reached_&#39;</span><span class="p">,</span> <span class="s1">&#39;prob_&#39;</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">state</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">strings</span><span class="p">:</span>
+                <span class="n">result</span> <span class="o">+=</span> <span class="n">separator</span> <span class="o">+</span> <span class="n">s</span> <span class="o">+</span> <span class="n">state</span>
+        <span class="k">return</span> <span class="n">result</span></div>
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">eos</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        :return: Dict of energy of structure values of all states with state names as keys</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">:</span>
+            <span class="n">result</span><span class="p">[</span><span class="n">s</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">eos</span>
+        <span class="k">return</span> <span class="n">result</span>
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">pos</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        :return: Dict of probability of structure values of all states with state names as keys</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">:</span>
+            <span class="n">result</span><span class="p">[</span><span class="n">s</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">pos</span>
+        <span class="k">return</span> <span class="n">result</span>
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">eos_diff_mfe</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        :return: Dict of energy of structure to MFE difference values of all states with state names as keys</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">:</span>
+            <span class="n">result</span><span class="p">[</span><span class="n">s</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">eos_diff_mfe</span>
+        <span class="k">return</span> <span class="n">result</span>
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">eos_reached_mfe</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        :return: Dict of booleans telling if the energy of struct equals the mfe energy of all states with state names as keys</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">:</span>
+            <span class="n">result</span><span class="p">[</span><span class="n">s</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">eos_reached_mfe</span>
+        <span class="k">return</span> <span class="n">result</span>
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">mfe_structure</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        :return: Dict of mfe structures of all states with state names as keys</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">:</span>
+            <span class="n">result</span><span class="p">[</span><span class="n">s</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">mfe_structure</span>
+        <span class="k">return</span> <span class="n">result</span>
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">mfe_energy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        :return: Dict of mfe values of all states with state names as keys</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">:</span>
+            <span class="n">result</span><span class="p">[</span><span class="n">s</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">mfe_energy</span>
+        <span class="k">return</span> <span class="n">result</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">pf_structure</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        :return: Dict of partition function consensus structures of all states with state names as keys</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">:</span>
+            <span class="n">result</span><span class="p">[</span><span class="n">s</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">pf_structure</span>
+        <span class="k">return</span> <span class="n">result</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">pf_energy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        :return: Dict of partition function energy values of all states with state names as keys</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">:</span>
+            <span class="n">result</span><span class="p">[</span><span class="n">s</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">pf_energy</span>
+        <span class="k">return</span> <span class="n">result</span>
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">ensemble_defect</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        :return: Dict of ensemble defect values of all states with state names as keys</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">:</span>
+            <span class="n">result</span><span class="p">[</span><span class="n">s</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">ensemble_defect</span>
+        <span class="k">return</span> <span class="n">result</span>
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">length</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        :return: Length of the designed sequence</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sequence</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="vrnaDesign"><a class="viewcode-back" href="../../classes.html#RNAsketch.Design.vrnaDesign">[docs]</a><span class="k">class</span> <span class="nc">vrnaDesign</span><span class="p">(</span><span class="n">Design</span><span class="p">):</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">classtype</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s1">&#39;vrna&#39;</span>
+    
+<div class="viewcode-block" id="vrnaDesign.newState"><a class="viewcode-back" href="../../classes.html#RNAsketch.Design.vrnaDesign.newState">[docs]</a>    <span class="k">def</span> <span class="nf">newState</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">struct</span><span class="p">,</span> <span class="n">temperature</span><span class="o">=</span><span class="mf">37.0</span><span class="p">,</span> <span class="n">ligand</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">constraint</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">enforce_constraint</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">vrnaState</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">structure</span><span class="o">=</span><span class="n">struct</span><span class="p">,</span> <span class="n">temperature</span><span class="o">=</span><span class="n">temperature</span><span class="p">,</span> <span class="n">ligand</span><span class="o">=</span><span class="n">ligand</span><span class="p">,</span> <span class="n">constraint</span><span class="o">=</span><span class="n">constraint</span><span class="p">,</span> <span class="n">enforce_constraint</span><span class="o">=</span><span class="n">enforce_constraint</span><span class="p">)</span></div></div>
+
+<div class="viewcode-block" id="nupackDesign"><a class="viewcode-back" href="../../classes.html#RNAsketch.Design.nupackDesign">[docs]</a><span class="k">class</span> <span class="nc">nupackDesign</span><span class="p">(</span><span class="n">Design</span><span class="p">):</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">classtype</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s1">&#39;nupack&#39;</span>
+    
+<div class="viewcode-block" id="nupackDesign.newState"><a class="viewcode-back" href="../../classes.html#RNAsketch.Design.nupackDesign.newState">[docs]</a>    <span class="k">def</span> <span class="nf">newState</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">struct</span><span class="p">,</span> <span class="n">temperature</span><span class="o">=</span><span class="mf">37.0</span><span class="p">,</span> <span class="n">ligand</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">constraint</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">enforce_constraint</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">nupackState</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">structure</span><span class="o">=</span><span class="n">struct</span><span class="p">,</span> <span class="n">temperature</span><span class="o">=</span><span class="n">temperature</span><span class="p">,</span> <span class="n">ligand</span><span class="o">=</span><span class="n">ligand</span><span class="p">,</span> <span class="n">constraint</span><span class="o">=</span><span class="n">constraint</span><span class="p">,</span> <span class="n">enforce_constraint</span><span class="o">=</span><span class="n">enforce_constraint</span><span class="p">)</span></div></div>
+</pre></div>
+
+    </div>
+      
+  </div>
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+    </p>
+    <p>
+        &copy; Copyright 2016, Stefan Hammer.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.6.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>

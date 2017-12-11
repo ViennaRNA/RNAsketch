@@ -89,6 +89,7 @@
 <li><a class="reference internal" href="#design-a-multistate-design">Design a Multistate Design</a></li>
 <li><a class="reference internal" href="#design-a-srna-mediated-translational-regulation">Design a sRNA mediated translational regulation</a></li>
 <li><a class="reference internal" href="#design-a-multistate-thermoswitch">Design a multistate Thermoswitch</a></li>
+<li><a class="reference internal" href="#design-a-ligand-triggered-switch">Design a ligand triggered switch</a></li>
 <li><a class="reference internal" href="#display-the-dependency-graph">Display the Dependency Graph</a></li>
 </ul>
 </li>
@@ -232,6 +233,25 @@ Celsius and the second one at ~26 degrees. After _72 degrees, the sequence occur
 <div class="figure" id="id3">
 <a class="reference internal image-reference" href="doc/data/thermoswitch.png"><img alt="doc/data/thermoswitch.png" src="doc/data/thermoswitch.png" style="width: 350px;" /></a>
 <p class="caption"><span class="caption-text">RNAheat Plot, ViennaRNA v2.2.9, GAUCUGUGUGGGGUCGAUUUUGUGUGGGUU</span></p>
+</div>
+</div>
+<div class="section" id="design-a-ligand-triggered-switch">
+<h3>Design a ligand triggered switch<a class="headerlink" href="#design-a-ligand-triggered-switch" title="Permalink to this headline">¶</a></h3>
+<div class="code bash highlight-default"><div class="highlight"><pre><span></span><span class="n">echo</span> <span class="o">-</span><span class="n">e</span> <span class="s2">&quot;(((((...((((((((.....)))))...)))...)))))........................</span><span class="se">\n</span><span class="s2">.........................(((((((((((......)))))))))))...........</span><span class="se">\n</span><span class="s2">AAGUGAUACCAGCAUCGUCUUGAUGCCCUUGGCAGCACUUCANNNNNNNNNNNNNNNNNNNNNN&quot;</span> <span class="o">|</span> <span class="n">design</span><span class="o">-</span><span class="n">ligand_switch</span><span class="o">.</span><span class="n">py</span> <span class="o">-</span><span class="n">r</span> <span class="mi">70</span><span class="p">:</span><span class="mi">30</span> <span class="o">--</span><span class="n">ligand</span> <span class="s2">&quot;GAUACCAG&amp;CCCUUGGCAGC;(...((((&amp;)...)))...);-9.22&quot;</span>
+</pre></div>
+</div>
+<p>This designs a simple theophylline triggered switch. It adapts to a certain ratio of
+the aptamer structure (ligand competent state) and an alternative state as specified
+with the <cite>&#8211;ratio</cite> option. To model ligand binding we use the soft-constraints framework
+of the ViennaRNA package, similar to the <cite>&#8211;motif</cite> option of <cite>RNAfold</cite>.
+The specified objective function calculates the probabilities of the structural features with
+and without ligand. Thus, we optimize towards the given ratio without the ligand and maximize the
+ligand binding competent state in the presence of the ligand.</p>
+<div class="figure">
+<a class="reference internal image-reference" href="_images/ligandswitch.png"><img alt="_images/ligandswitch.png" src="_images/ligandswitch.png" style="width: 350px;" /></a>
+</div>
+<div class="figure">
+<a class="reference internal image-reference" href="doc/data/ligandswitch.png"><img alt="doc/data/ligandswitch.png" src="doc/data/ligandswitch.png" style="width: 350px;" /></a>
 </div>
 </div>
 <div class="section" id="display-the-dependency-graph">

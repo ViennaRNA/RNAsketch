@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>RNAsketch.State &#8212; RNAsketch 1.2.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/basic.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/bootstrap-3.3.6/css/bootstrap.min.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/bootstrap-3.3.6/css/bootstrap-theme.min.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/bootstrap-sphinx.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '1.2.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/js/jquery-1.11.0.min.js"></script>
+    <script type="text/javascript" src="../../_static/js/jquery-fix.js"></script>
+    <script type="text/javascript" src="../../_static/bootstrap-3.3.6/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="../../_static/bootstrap-sphinx.js"></script>
+    <link rel="top" title="RNAsketch 1.2.0 documentation" href="../../index.html" />
+    <link rel="up" title="RNAsketch" href="../RNAsketch.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+
+  </head>
+  <body role="document">
+
+  <div id="navbar" class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="../../index.html"><span><img src="../../_static/rnasketch.png"></span>
+          RNAsketch</a>
+        <span class="navbar-text navbar-version pull-left"><b>1.2</b></span>
+      </div>
+
+        <div class="collapse navbar-collapse nav-collapse">
+          <ul class="nav navbar-nav">
+            
+            
+              <li class="dropdown globaltoc-container">
+  <a role="button"
+     id="dLabelGlobalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="../../index.html">Site <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"
+      role="menu"
+      aria-labelledby="dLabelGlobalToc"><ul>
+<li class="toctree-l1"><a class="reference internal" href="../../module.html">Module content</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../classes.html">Classes</a></li>
+</ul>
+</ul>
+</li>
+              
+                <li class="dropdown">
+  <a role="button"
+     id="dLabelLocalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="#">Page <b class="caret"></b></a>
+  <ul class="dropdown-menu localtoc"
+      role="menu"
+      aria-labelledby="dLabelLocalToc"></ul>
+</li>
+              
+            
+            
+              
+                
+              
+            
+            
+            
+            
+              <li class="hidden-sm"></li>
+            
+          </ul>
+
+          
+            
+<form class="navbar-form navbar-right" action="../../search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+          
+        </div>
+    </div>
+  </div>
+
+<div class="container">
+  <div class="row">
+    <div class="col-md-12 content">
+      
+  <h1>Source code for RNAsketch.State</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python</span>
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    State_Class.py: Class as wrapper for ViennaRNA and Nupack</span>
+<span class="sd">    functions to design an RNA molecule.</span>
+<span class="sd">    This implements the various states of a riboswitch.</span>
+<span class="sd">&#39;&#39;&#39;</span>
+
+<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;Stefan Hammer&quot;</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright 2016&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;0.1&quot;</span>
+<span class="n">__maintainer__</span> <span class="o">=</span> <span class="s2">&quot;Stefan Hammer&quot;</span>
+<span class="n">__email__</span> <span class="o">=</span> <span class="s2">&quot;s.hammer@univie.ac.at&quot;</span>
+
+
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">import</span> <span class="nn">math</span>
+
+<span class="n">vrna_available</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="n">nupack_available</span> <span class="o">=</span> <span class="kc">True</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">RNA</span>
+    <span class="c1">#RNA.read_parameter_file(&#39;/usr/share/ViennaRNA/rna_turner1999.par&#39;)</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
+    <span class="n">vrna_available</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;-&quot;</span> <span class="o">*</span> <span class="mi">60</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">WARNING: &quot;</span> <span class="o">+</span> <span class="n">e</span><span class="o">.</span><span class="n">message</span> <span class="o">+</span> <span class="s2">&quot;!!!</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="s2">&quot;-&quot;</span> <span class="o">*</span> <span class="mi">60</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">nupack</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
+    <span class="n">nupack_available</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;-&quot;</span> <span class="o">*</span> <span class="mi">60</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">WARNING: &quot;</span> <span class="o">+</span> <span class="n">e</span><span class="o">.</span><span class="n">message</span> <span class="o">+</span> <span class="s2">&quot;!!!</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="s2">&quot;-&quot;</span> <span class="o">*</span> <span class="mi">60</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+
+<span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">vrna_available</span> <span class="ow">or</span> <span class="n">nupack_available</span><span class="p">):</span>
+    <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span><span class="s2">&quot;Neither ViennaRNA package nor Nupack found!&quot;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="State"><a class="viewcode-back" href="../../classes.html#RNAsketch.State.State">[docs]</a><span class="k">class</span> <span class="nc">State</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    State object holds structure, ligand, constraints and calculates all values</span>
+<span class="sd">    for this state.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">structure</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">temperature</span><span class="o">=</span><span class="mf">37.0</span><span class="p">,</span> <span class="n">ligand</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">constraint</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">enforce_constraint</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Construct a new State object.</span>
+<span class="sd">        </span>
+<span class="sd">        :param structure:</span>
+<span class="sd">        :param parent:</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">structure</span><span class="p">,</span> <span class="n">basestring</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Not a structure string: &#39;</span> <span class="o">+</span> <span class="nb">repr</span><span class="p">(</span><span class="n">structure</span><span class="p">))</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">_structure</span> <span class="o">=</span> <span class="n">structure</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span> <span class="o">=</span> <span class="n">parent</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_temperature</span> <span class="o">=</span> <span class="n">temperature</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ligand</span> <span class="o">=</span> <span class="n">ligand</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_constraint</span> <span class="o">=</span> <span class="n">constraint</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_enforce_constraint</span> <span class="o">=</span> <span class="n">enforce_constraint</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_length</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_cut_points</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_multifold</span> <span class="o">=</span> <span class="kc">None</span>
+    
+<div class="viewcode-block" id="State.reset"><a class="viewcode-back" href="../../classes.html#RNAsketch.State.State.reset">[docs]</a>    <span class="k">def</span> <span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_eos</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_pos</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_eos_diff_mfe</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_eos_reached_mfe</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_mfe_structure</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_mfe_energy</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_pf_structure</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_pf_energy</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ensemble_defect</span> <span class="o">=</span> <span class="kc">None</span></div>
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">structure</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        :return: Dot-bracket structure as constraint for this state</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_structure</span>
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">temperature</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        :return: Temperature of this state </span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_temperature</span>
+    <span class="nd">@temperature</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">temperature</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">t</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="nb">float</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Temperature must be a float pointing value&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_temperature</span> <span class="o">=</span> <span class="n">t</span>
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">ligand</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        :return: Ligand binding definitions for this state; List with sequence pattern, structure pattern and binding energy (soft constraint)</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ligand</span>
+    <span class="nd">@ligand</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">ligand</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lig</span><span class="p">):</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">lig</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">3</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">lig</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Ligand must be a list with three items: sequence pattern, structure pattern and binding energy&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ligand</span> <span class="o">=</span> <span class="n">lig</span>
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">constraint</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        :return: Structural constraint of this state (hard constraint)</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_constraint</span>
+    <span class="nd">@constraint</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">constraint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">constraint</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">constraint</span><span class="p">:</span>
+            <span class="n">create_bp_table</span><span class="p">(</span><span class="n">constraint</span><span class="p">)</span> <span class="c1">#check for balanced brackets</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">constraint</span><span class="p">)</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">length</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;constraint and sequence must have equal length!&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_constraint</span> <span class="o">=</span> <span class="n">constraint</span>
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">enforce_constraint</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        :return: Boolean whether to enforce the hard constraint or not </span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_enforce_constraint</span>
+    <span class="nd">@enforce_constraint</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">enforce_constraint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">enforced</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">enforced</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_enforce_constraint</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_enforce_constraint</span> <span class="o">=</span> <span class="n">enforced</span>
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">length</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        :return: Length of the design sequence if available, otherwise of the stuctural input </span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_length</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span><span class="o">.</span><span class="n">sequence</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_parent</span><span class="o">.</span><span class="n">sequence</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_structure</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_length</span>
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">cut_points</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        :return: List containing the positions of the cut points (&amp; or +) in the sequence</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cut_points</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_structure</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_cut_points</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">iterator</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">finditer</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s1">&#39;\&amp;|\+&#39;</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">_structure</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">match</span> <span class="ow">in</span> <span class="n">iterator</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_cut_points</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">match</span><span class="o">.</span><span class="n">start</span><span class="p">()</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cut_points</span>
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">multifold</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        :return: Number of cut points to specify if it is a cofold or multifold problem</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_multifold</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_multifold</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cut_points</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_multifold</span>
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">classtype</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">eos</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        :return: Energy of structure given all the properties of this state (constraints, temperature,...)</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_eos</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span><span class="o">.</span><span class="n">sequence</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_structure</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_eos</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_eos</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_parent</span><span class="o">.</span><span class="n">sequence</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_structure</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">temperature</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ligand</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_eos</span>
+         
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">pos</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        :return: Probability of structure given all the properties of this state (constraints, temperature,...)</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pos</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span><span class="o">.</span><span class="n">sequence</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_pos</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">exp</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">pf_energy</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">eos</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_KT</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">temperature</span><span class="p">)</span> <span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pos</span>
+         
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">eos_diff_mfe</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        :return: Energy difference of structure to mfe given all the properties of this state (constraints, temperature,...)</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_eos_diff_mfe</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span><span class="o">.</span><span class="n">sequence</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_eos_diff_mfe</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">eos</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">mfe_energy</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_eos_diff_mfe</span>
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">eos_reached_mfe</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        :return: Boolean defining whether the eos reached the mfe energy</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_eos_reached_mfe</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span><span class="o">.</span><span class="n">sequence</span><span class="p">:</span>
+            <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">eos</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">mfe_energy</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_eos_reached_mfe</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_eos_reached_mfe</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_eos_reached_mfe</span>
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">mfe_energy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        :return: MFE value given all the properties of this state (constraints, temperature,...)</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mfe_energy</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span><span class="o">.</span><span class="n">sequence</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_calculate_mfe_energy_structure</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mfe_energy</span>
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">mfe_structure</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        :return: MFE structure given all the properties of this state (constraints, temperature,...)</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mfe_structure</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span><span class="o">.</span><span class="n">sequence</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_calculate_mfe_energy_structure</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mfe_structure</span>
+    
+    <span class="k">def</span> <span class="nf">_calculate_mfe_energy_structure</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="p">(</span><span class="n">structure</span><span class="p">,</span> <span class="n">energie</span><span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_fold</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_parent</span><span class="o">.</span><span class="n">sequence</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">temperature</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ligand</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">constraint</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_mfe_energy</span> <span class="o">=</span> <span class="n">energie</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_mfe_structure</span> <span class="o">=</span> <span class="n">structure</span>
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">pf_energy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        In case of a dimer cofold calculation with viennarna, the function returns the energy of true hybrid states only.</span>
+<span class="sd">        </span>
+<span class="sd">        :return: Partition function energy value given all the properties of this state (constraints, temperature,...)</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pf_energy</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span><span class="o">.</span><span class="n">sequence</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_calculate_pf_energy_structure</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pf_energy</span>
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">pf_structure</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        :return: Partition function consensus structure given all the properties of this state (constraints, temperature,...)</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pf_structure</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span><span class="o">.</span><span class="n">sequence</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_calculate_pf_energy_structure</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pf_structure</span>
+    
+    <span class="k">def</span> <span class="nf">_calculate_pf_energy_structure</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="p">(</span><span class="n">structure</span><span class="p">,</span> <span class="n">energie</span><span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_pf_fold</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_parent</span><span class="o">.</span><span class="n">sequence</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">temperature</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ligand</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">constraint</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_pf_energy</span> <span class="o">=</span> <span class="n">energie</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_pf_structure</span> <span class="o">=</span> <span class="n">structure</span>
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">ensemble_defect</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        :return: Ensemble defect value given all the properties of this state (constraints, temperature,...)</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ensemble_defect</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span><span class="o">.</span><span class="n">sequence</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_structure</span><span class="p">:</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_parent</span><span class="o">.</span><span class="n">sequence</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_structure</span><span class="p">)):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;sequence and structure must have equal length to calculate the ensemble defect!&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_ensemble_defect</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_ensemble_defect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_parent</span><span class="o">.</span><span class="n">sequence</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_structure</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">temperature</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ligand</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ensemble_defect</span>
+    
+    <span class="k">def</span> <span class="nf">_get_KT</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">temperature</span><span class="p">):</span>
+        <span class="c1"># KT = (betaScale*((temperature+K0)*GASCONST))/1000.0; /* in Kcal */</span>
+        <span class="k">return</span> <span class="p">((</span><span class="n">temperature</span> <span class="o">+</span> <span class="mf">273.15</span><span class="p">)</span><span class="o">*</span><span class="mf">1.98717</span><span class="p">)</span><span class="o">/</span><span class="mf">1000.0</span><span class="p">;</span>
+    
+    <span class="k">def</span> <span class="nf">_get_eos</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sequence</span><span class="p">,</span> <span class="n">structure</span><span class="p">,</span> <span class="n">temperature</span><span class="p">,</span> <span class="n">ligand</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+    
+    <span class="k">def</span> <span class="nf">_get_fold</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sequence</span><span class="p">,</span> <span class="n">temperature</span><span class="p">,</span> <span class="n">ligand</span><span class="p">,</span> <span class="n">constraint</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+    
+    <span class="k">def</span> <span class="nf">_get_pf_fold</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sequence</span><span class="p">,</span> <span class="n">temperature</span><span class="p">,</span> <span class="n">ligand</span><span class="p">,</span> <span class="n">constraint</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+    
+    <span class="k">def</span> <span class="nf">_get_ensemble_defect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sequence</span><span class="p">,</span> <span class="n">structure</span><span class="p">,</span> <span class="n">temperature</span><span class="p">,</span> <span class="n">ligand</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
+    
+<span class="k">if</span> <span class="n">vrna_available</span><span class="p">:</span>
+<div class="viewcode-block" id="vrnaState"><a class="viewcode-back" href="../../classes.html#RNAsketch.State.vrnaState">[docs]</a>    <span class="k">class</span> <span class="nc">vrnaState</span><span class="p">(</span><span class="n">State</span><span class="p">):</span>
+        <span class="nd">@property</span>
+        <span class="k">def</span> <span class="nf">classtype</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="k">return</span> <span class="s1">&#39;vrna&#39;</span>
+
+        <span class="k">def</span> <span class="nf">_change_cuts</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">input</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s1">&#39;[+]&#39;</span><span class="p">,</span> <span class="s1">&#39;&amp;&#39;</span><span class="p">,</span> <span class="nb">input</span><span class="p">)</span>
+        
+        <span class="k">def</span> <span class="nf">_get_fold_compound</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sequence</span><span class="p">,</span> <span class="n">temperature</span><span class="p">,</span> <span class="n">ligand</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">constraint</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="n">RNA</span><span class="o">.</span><span class="n">OPTION_PF</span><span class="p">):</span>
+            <span class="n">md</span> <span class="o">=</span> <span class="n">RNA</span><span class="o">.</span><span class="n">md</span><span class="p">()</span>
+            <span class="n">md</span><span class="o">.</span><span class="n">temperature</span> <span class="o">=</span> <span class="n">temperature</span>
+            <span class="n">md</span><span class="o">.</span><span class="n">dangles</span> <span class="o">=</span> <span class="mi">2</span>
+            <span class="n">fc</span> <span class="o">=</span> <span class="n">RNA</span><span class="o">.</span><span class="n">fold_compound</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_change_cuts</span><span class="p">(</span><span class="n">sequence</span><span class="p">),</span> <span class="n">md</span><span class="p">,</span> <span class="n">options</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">ligand</span><span class="p">:</span>
+                <span class="n">fc</span><span class="o">.</span><span class="n">sc_add_hi_motif</span><span class="p">(</span><span class="n">ligand</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">ligand</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">ligand</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+            <span class="k">if</span> <span class="n">constraint</span><span class="p">:</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_enforce_constraint</span><span class="p">:</span>
+                    <span class="n">fc</span><span class="o">.</span><span class="n">hc_add_from_db</span><span class="p">(</span><span class="n">remove_cuts</span><span class="p">(</span><span class="n">constraint</span><span class="p">),</span> <span class="n">RNA</span><span class="o">.</span><span class="n">CONSTRAINT_DB_DEFAULT</span> <span class="o">|</span> <span class="n">RNA</span><span class="o">.</span><span class="n">CONSTRAINT_DB_ENFORCE_BP</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">fc</span><span class="o">.</span><span class="n">hc_add_from_db</span><span class="p">(</span><span class="n">remove_cuts</span><span class="p">(</span><span class="n">constraint</span><span class="p">))</span>
+            <span class="k">return</span> <span class="n">fc</span>
+
+        <span class="k">def</span> <span class="nf">_get_eos</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sequence</span><span class="p">,</span> <span class="n">structure</span><span class="p">,</span> <span class="n">temperature</span><span class="p">,</span> <span class="n">ligand</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">multifold</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+            <span class="n">fc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_fold_compound</span><span class="p">(</span><span class="n">sequence</span><span class="p">,</span> <span class="n">temperature</span><span class="p">,</span> <span class="n">ligand</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="n">RNA</span><span class="o">.</span><span class="n">OPTION_MFE</span> <span class="o">|</span> <span class="n">RNA</span><span class="o">.</span><span class="n">OPTION_EVAL_ONLY</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">fc</span><span class="o">.</span><span class="n">eval_structure</span><span class="p">(</span><span class="n">remove_cuts</span><span class="p">(</span><span class="n">structure</span><span class="p">))</span>
+
+        <span class="k">def</span> <span class="nf">_get_fold</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sequence</span><span class="p">,</span> <span class="n">temperature</span><span class="p">,</span> <span class="n">ligand</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">constraint</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+            <span class="n">fc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_fold_compound</span><span class="p">(</span><span class="n">sequence</span><span class="p">,</span> <span class="n">temperature</span><span class="p">,</span> <span class="n">ligand</span><span class="p">,</span> <span class="n">constraint</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="n">RNA</span><span class="o">.</span><span class="n">OPTION_MFE</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">multifold</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="p">(</span><span class="n">structure</span><span class="p">,</span> <span class="n">energie</span><span class="p">)</span> <span class="o">=</span> <span class="n">fc</span><span class="o">.</span><span class="n">mfe</span><span class="p">()</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">multifold</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="p">(</span><span class="n">structure</span><span class="p">,</span> <span class="n">energie</span><span class="p">)</span> <span class="o">=</span> <span class="n">fc</span><span class="o">.</span><span class="n">mfe_dimer</span><span class="p">()</span>
+                <span class="n">structure</span> <span class="o">=</span> <span class="n">add_cuts</span><span class="p">(</span><span class="n">structure</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cut_points</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">multifold</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+            <span class="k">return</span> <span class="p">(</span><span class="n">structure</span><span class="p">,</span> <span class="n">energie</span><span class="p">)</span>
+
+        <span class="k">def</span> <span class="nf">_get_pf_fold</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sequence</span><span class="p">,</span> <span class="n">temperature</span><span class="p">,</span> <span class="n">ligand</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">constraint</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+            <span class="n">fc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_fold_compound</span><span class="p">(</span><span class="n">sequence</span><span class="p">,</span> <span class="n">temperature</span><span class="p">,</span> <span class="n">ligand</span><span class="p">,</span> <span class="n">constraint</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">multifold</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="p">(</span><span class="n">structure</span><span class="p">,</span> <span class="n">energie</span><span class="p">)</span> <span class="o">=</span> <span class="n">fc</span><span class="o">.</span><span class="n">pf</span><span class="p">()</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">multifold</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="c1"># returns (string structure, float *FA, float *FB, float *FcAB, float *FAB)</span>
+                <span class="p">(</span><span class="n">structure</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">energie</span><span class="p">,</span> <span class="n">_</span><span class="p">)</span> <span class="o">=</span> <span class="n">fc</span><span class="o">.</span><span class="n">pf_dimer</span><span class="p">()</span>
+                <span class="n">structure</span> <span class="o">=</span> <span class="n">add_cuts</span><span class="p">(</span><span class="n">structure</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cut_points</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">multifold</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+            <span class="k">return</span> <span class="p">(</span><span class="n">structure</span><span class="p">,</span> <span class="n">energie</span><span class="p">)</span>
+        
+        <span class="k">def</span> <span class="nf">_get_ensemble_defect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sequence</span><span class="p">,</span> <span class="n">structure</span><span class="p">,</span> <span class="n">temperature</span><span class="p">,</span> <span class="n">ligand</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+            <span class="c1">#TODO finish implementation with pairing matrix. need to ask ronny how it is done now or use old interface</span>
+            <span class="n">fc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_fold_compound</span><span class="p">(</span><span class="n">sequence</span><span class="p">,</span> <span class="n">temperature</span><span class="p">,</span> <span class="n">ligand</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">multifold</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">_</span><span class="p">,</span><span class="n">_</span> <span class="o">=</span> <span class="n">fc</span><span class="o">.</span><span class="n">pf</span><span class="p">()</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">multifold</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">_</span><span class="p">,</span><span class="n">_</span> <span class="o">=</span> <span class="n">fc</span><span class="o">.</span><span class="n">pf_dimer</span><span class="p">()</span>
+                <span class="n">structure</span> <span class="o">=</span> <span class="n">add_cuts</span><span class="p">(</span><span class="n">structure</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cut_points</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">multifold</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+            <span class="c1"># get base pairing probability matrix</span>
+            <span class="n">bpm</span> <span class="o">=</span> <span class="n">fc</span><span class="o">.</span><span class="n">bpp</span><span class="p">()</span>
+            <span class="c1"># get base pair table</span>
+            <span class="n">bpt</span> <span class="o">=</span> <span class="n">create_bp_table</span><span class="p">(</span><span class="n">structure</span><span class="p">)</span>
+            <span class="c1"># delta(i,j, s) = 1 if (i,j) in s, 0 otherwise</span>
+            <span class="c1"># d(s1, s2) = sum{i,j in s1}(1-delta{i,j}(s2)) + sum{i,j not in s1}(delta{i,j}(s2))</span>
+            <span class="c1"># ensemble defect = sum{i,j in structure}(1-P(i,j)) + sum{i,j not in structure}(P(i,j))</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">structure</span><span class="p">)):</span>
+                <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">structure</span><span class="p">)):</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="n">bpt</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="n">j</span><span class="p">):</span>
+                        <span class="c1">#print(&#39;{0:1.0f}/{1:1.0f}: {2:10.10f}&#39;.format(i, j, bpm[i+1][j+1]))</span>
+                        <span class="n">result</span> <span class="o">+=</span> <span class="mi">1</span><span class="o">-</span><span class="n">bpm</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">][</span><span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">result</span> <span class="o">+=</span> <span class="n">bpm</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">][</span><span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
+            <span class="k">return</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">result</span></div>
+
+<span class="k">if</span> <span class="n">nupack_available</span><span class="p">:</span>
+<div class="viewcode-block" id="nupackState"><a class="viewcode-back" href="../../classes.html#RNAsketch.State.nupackState">[docs]</a>    <span class="k">class</span> <span class="nc">nupackState</span><span class="p">(</span><span class="n">State</span><span class="p">):</span>
+        <span class="nd">@property</span>
+        <span class="k">def</span> <span class="nf">classtype</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="k">return</span> <span class="s1">&#39;nupack&#39;</span>
+
+        <span class="k">def</span> <span class="nf">_change_cuts</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">input</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s1">&#39;[&amp;]&#39;</span><span class="p">,</span> <span class="s1">&#39;+&#39;</span><span class="p">,</span> <span class="nb">input</span><span class="p">)</span>
+
+        <span class="k">def</span> <span class="nf">_get_eos</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sequence</span><span class="p">,</span> <span class="n">structure</span><span class="p">,</span> <span class="n">temperature</span><span class="p">,</span> <span class="n">ligand</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>            
+            <span class="c1">#TODO nupack.energy can not handle unconnected cofold structures</span>
+            <span class="k">return</span> <span class="n">nupack</span><span class="o">.</span><span class="n">energy</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">_change_cuts</span><span class="p">(</span><span class="n">sequence</span><span class="p">)],</span> <span class="bp">self</span><span class="o">.</span><span class="n">_change_cuts</span><span class="p">(</span><span class="n">structure</span><span class="p">),</span> <span class="n">material</span> <span class="o">=</span> <span class="s1">&#39;rna&#39;</span><span class="p">,</span> <span class="n">pseudo</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">T</span> <span class="o">=</span> <span class="n">temperature</span><span class="p">)</span>
+
+        <span class="k">def</span> <span class="nf">_get_fold</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sequence</span><span class="p">,</span> <span class="n">temperature</span><span class="p">,</span> <span class="n">ligand</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">constraint</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+            <span class="n">nupack_mfe</span> <span class="o">=</span> <span class="n">nupack</span><span class="o">.</span><span class="n">mfe</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">_change_cuts</span><span class="p">(</span><span class="n">sequence</span><span class="p">)],</span> <span class="n">material</span> <span class="o">=</span> <span class="s1">&#39;rna&#39;</span><span class="p">,</span> <span class="n">pseudo</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">T</span> <span class="o">=</span> <span class="n">temperature</span><span class="p">)</span> <span class="c1"># if str, 0, no error</span>
+
+            <span class="n">pattern</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s1">&#39;(\[\(</span><span class="se">\&#39;</span><span class="s1">)|(</span><span class="se">\&#39;</span><span class="s1">,)|(</span><span class="se">\&#39;</span><span class="s1">\)\])&#39;</span><span class="p">)</span>
+            <span class="n">temp_mfe</span> <span class="o">=</span> <span class="n">pattern</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span><span class="n">nupack_mfe</span><span class="p">)</span>
+            <span class="n">temp_mfe</span> <span class="o">=</span> <span class="n">temp_mfe</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;&#39;&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+            <span class="n">mfe_list</span> <span class="o">=</span> <span class="n">temp_mfe</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+
+            <span class="n">mfe_struct</span> <span class="o">=</span> <span class="n">mfe_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">mfe_energy</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">mfe_list</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+            <span class="k">return</span> <span class="n">mfe_struct</span><span class="p">,</span> <span class="n">mfe_energy</span>
+
+        <span class="k">def</span> <span class="nf">_get_pf_fold</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sequence</span><span class="p">,</span> <span class="n">temperature</span><span class="p">,</span> <span class="n">ligand</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">constraint</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+            <span class="c1"># Nupack doesn&#39;t return ensemble structure</span>
+            <span class="k">return</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s1">&#39;[^\+]&#39;</span><span class="p">,</span> <span class="s1">&#39;?&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_change_cuts</span><span class="p">(</span><span class="n">sequence</span><span class="p">)),</span> <span class="n">nupack</span><span class="o">.</span><span class="n">pfunc</span><span class="p">([</span><span class="n">sequence</span><span class="p">],</span> <span class="n">material</span> <span class="o">=</span> <span class="s1">&#39;rna&#39;</span><span class="p">,</span> <span class="n">pseudo</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">T</span> <span class="o">=</span> <span class="n">temperature</span><span class="p">)</span>
+        
+        <span class="k">def</span> <span class="nf">_get_ensemble_defect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sequence</span><span class="p">,</span> <span class="n">structure</span><span class="p">,</span> <span class="n">temperature</span><span class="p">,</span> <span class="n">ligand</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">nupack</span><span class="o">.</span><span class="n">defect</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">_change_cuts</span><span class="p">(</span><span class="n">sequence</span><span class="p">)],</span> <span class="n">structure</span><span class="p">,</span> <span class="n">material</span> <span class="o">=</span> <span class="s1">&#39;rna&#39;</span><span class="p">,</span> <span class="n">pseudo</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">T</span> <span class="o">=</span> <span class="n">temperature</span><span class="p">)</span></div>
+        
+<div class="viewcode-block" id="remove_cuts"><a class="viewcode-back" href="../../classes.html#RNAsketch.State.remove_cuts">[docs]</a><span class="k">def</span> <span class="nf">remove_cuts</span><span class="p">(</span><span class="nb">input</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Takes a string and removes all cut characters (+&amp;) from this string</span>
+<span class="sd">    :param input: string containing cut point characters</span>
+<span class="sd">    :return: string without cut point characters</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">return</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s1">&#39;[+&amp;]&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="nb">input</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="add_cuts"><a class="viewcode-back" href="../../classes.html#RNAsketch.State.add_cuts">[docs]</a><span class="k">def</span> <span class="nf">add_cuts</span><span class="p">(</span><span class="nb">input</span><span class="p">,</span> <span class="n">cut_points</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Takes a string and add back the cut point characters at the positions stored in the cut points list</span>
+
+<span class="sd">    :param input: string without cut point characters</span>
+<span class="sd">    :return: string containing cut point characters</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="nb">input</span>
+    <span class="k">for</span> <span class="n">cut</span> <span class="ow">in</span> <span class="n">cut_points</span><span class="p">:</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">result</span><span class="p">[:</span><span class="n">cut</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;&amp;&#39;</span> <span class="o">+</span> <span class="n">result</span><span class="p">[</span><span class="n">cut</span><span class="o">-</span><span class="mi">1</span><span class="p">:]</span>
+    <span class="k">return</span> <span class="n">result</span></div>
+
+<div class="viewcode-block" id="create_bp_table"><a class="viewcode-back" href="../../classes.html#RNAsketch.State.create_bp_table">[docs]</a><span class="k">def</span> <span class="nf">create_bp_table</span><span class="p">(</span><span class="n">structure</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Takes a structure in dot bracket notation and returns a base pair table.</span>
+<span class="sd">    Unpaired positions are -1, otherwise the index of the adjacent bracket is listed</span>
+
+<span class="sd">    :param structure: string with dot-bracket notation of the strcture</span>
+<span class="sd">    :return bpt: base pair table</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">bpo</span><span class="o">=</span><span class="p">[]</span>
+    <span class="n">bpt</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="nb">len</span><span class="p">(</span><span class="n">structure</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">substr</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">structure</span><span class="p">):</span>
+        <span class="k">if</span><span class="p">(</span><span class="n">substr</span><span class="o">==</span><span class="s2">&quot;(&quot;</span><span class="p">):</span>
+            <span class="n">bpo</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+        <span class="k">elif</span><span class="p">(</span><span class="n">substr</span><span class="o">==</span><span class="s2">&quot;)&quot;</span><span class="p">):</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">bpt</span><span class="p">[</span><span class="n">bpo</span><span class="o">.</span><span class="n">pop</span><span class="p">()]</span> <span class="o">=</span> <span class="n">i</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Unbalanced brackets: too few opening brackets&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">bpo</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Unbalanced brackets: too few closing brackets&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">bpt</span></div>
+</pre></div>
+
+    </div>
+      
+  </div>
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+    </p>
+    <p>
+        &copy; Copyright 2016, Stefan Hammer.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.6.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>

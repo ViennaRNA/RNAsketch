@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>RNAsketch &#8212; RNAsketch 1.2.0 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/basic.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/bootstrap-3.3.6/css/bootstrap.min.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/bootstrap-3.3.6/css/bootstrap-theme.min.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/bootstrap-sphinx.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.2.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/js/jquery-1.11.0.min.js"></script>
+    <script type="text/javascript" src="../_static/js/jquery-fix.js"></script>
+    <script type="text/javascript" src="../_static/bootstrap-3.3.6/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="../_static/bootstrap-sphinx.js"></script>
+    <link rel="top" title="RNAsketch 1.2.0 documentation" href="../index.html" />
+    <link rel="up" title="Module code" href="index.html" />
+<meta charset='utf-8'>
+<meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
+<meta name="apple-mobile-web-app-capable" content="yes">
+
+  </head>
+  <body role="document">
+
+  <div id="navbar" class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <!-- .btn-navbar is used as the toggle for collapsed navbar content -->
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="../index.html"><span><img src="../_static/rnasketch.png"></span>
+          RNAsketch</a>
+        <span class="navbar-text navbar-version pull-left"><b>1.2</b></span>
+      </div>
+
+        <div class="collapse navbar-collapse nav-collapse">
+          <ul class="nav navbar-nav">
+            
+            
+              <li class="dropdown globaltoc-container">
+  <a role="button"
+     id="dLabelGlobalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="../index.html">Site <b class="caret"></b></a>
+  <ul class="dropdown-menu globaltoc"
+      role="menu"
+      aria-labelledby="dLabelGlobalToc"><ul>
+<li class="toctree-l1"><a class="reference internal" href="../module.html">Module content</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../classes.html">Classes</a></li>
+</ul>
+</ul>
+</li>
+              
+                <li class="dropdown">
+  <a role="button"
+     id="dLabelLocalToc"
+     data-toggle="dropdown"
+     data-target="#"
+     href="#">Page <b class="caret"></b></a>
+  <ul class="dropdown-menu localtoc"
+      role="menu"
+      aria-labelledby="dLabelLocalToc"></ul>
+</li>
+              
+            
+            
+              
+                
+              
+            
+            
+            
+            
+              <li class="hidden-sm"></li>
+            
+          </ul>
+
+          
+            
+<form class="navbar-form navbar-right" action="../search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+          
+        </div>
+    </div>
+  </div>
+
+<div class="container">
+  <div class="row">
+    <div class="col-md-12 content">
+      
+  <h1>Source code for RNAsketch</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python</span>
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    RNAsketch.py: A small module containing all the important helpers and</span>
+<span class="sd">    functions for all major RNAdesign operations.</span>
+<span class="sd">&#39;&#39;&#39;</span>
+
+<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;Stefan Hammer&quot;</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright 2016&quot;</span>
+<span class="n">__maintainer__</span> <span class="o">=</span> <span class="s2">&quot;Stefan Hammer&quot;</span>
+<span class="n">__email__</span> <span class="o">=</span> <span class="s2">&quot;s.hammer@univie.ac.at&quot;</span>
+
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">random</span>
+<span class="kn">import</span> <span class="nn">collections</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">math</span>
+
+<span class="kn">import</span> <span class="nn">RNAblueprint</span> <span class="k">as</span> <span class="nn">rbp</span>
+<span class="kn">from</span> <span class="nn">Design</span> <span class="k">import</span> <span class="o">*</span>
+
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">Global variable:</span>
+<span class="sd">&#39;&#39;&#39;</span>
+
+<div class="viewcode-block" id="read_inp_file"><a class="viewcode-back" href="../module.html#RNAsketch.read_inp_file">[docs]</a><span class="k">def</span> <span class="nf">read_inp_file</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Reads a file in .inp format and returns all neccessary information</span>
+
+<span class="sd">    :param filename: Filename of the file to read</span>
+<span class="sd">    :return: structures - List of structures in dot-bracket notation</span>
+<span class="sd">    :return: constraint - Sequence constraint</span>
+<span class="sd">    :return: sequence - Start sequence</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+        <span class="p">(</span><span class="n">structures</span><span class="p">,</span> <span class="n">constraint</span><span class="p">,</span> <span class="n">sequence</span><span class="p">)</span> <span class="o">=</span> <span class="n">read_input</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+    <span class="n">constraint</span> <span class="o">=</span> <span class="n">constraint</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="s2">&quot;N&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">structures</span><span class="p">,</span> <span class="n">constraint</span><span class="p">,</span> <span class="n">sequence</span></div>
+
+<div class="viewcode-block" id="read_input"><a class="viewcode-back" href="../module.html#RNAsketch.read_input">[docs]</a><span class="k">def</span> <span class="nf">read_input</span><span class="p">(</span><span class="n">content</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Reads some input and returns all neccessary information in the right container.</span>
+<span class="sd">    Input is a string, lines separated by linebreaks. Content might be structures,</span>
+<span class="sd">    a sequence constraint and a start sequence</span>
+
+<span class="sd">    :param filename: Filename of the file to read</span>
+<span class="sd">    :return: structures - List of structures in dot-bracket notation</span>
+<span class="sd">    :return: constraint - Sequence constraint</span>
+<span class="sd">    :return: sequence - Start sequence</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">return</span> <span class="n">read_input_additions</span><span class="p">(</span><span class="n">content</span><span class="p">)[:</span><span class="mi">3</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="read_input_additions"><a class="viewcode-back" href="../module.html#RNAsketch.read_input_additions">[docs]</a><span class="k">def</span> <span class="nf">read_input_additions</span><span class="p">(</span><span class="n">content</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Reads some input and returns all neccessary information in the right container.</span>
+<span class="sd">    Input is a string, lines separated by linebreaks. Content might be structures,</span>
+<span class="sd">    a sequence constraint and a start sequence. Additional information for the structural</span>
+<span class="sd">    states can be provided with any separator ;,: or whitespaces after the structure.</span>
+
+<span class="sd">    :param filename: Filename of the file to read</span>
+<span class="sd">    :return: structures - List of structures in dot-bracket notation</span>
+<span class="sd">    :return: constraint - Sequence constraint</span>
+<span class="sd">    :return: sequence - Start sequence</span>
+<span class="sd">    :return: additions - List of additional information after the structures</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">structures</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">constraint</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+    <span class="n">sequence</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+    <span class="n">additions</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="n">lines</span> <span class="o">=</span> <span class="n">content</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">lines</span><span class="p">:</span>
+        <span class="c1"># if line begins with a semicolon ; stop parsing</span>
+        <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s2">&quot;^\;&quot;</span><span class="p">),</span> <span class="n">line</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+            <span class="k">break</span>
+        <span class="c1"># strip additional information after the structure/sequence string</span>
+        <span class="n">m</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s2">&quot;^([^\s\;\,\:]+)[\s\;\,\:]*(.*)$&quot;</span><span class="p">),</span> <span class="n">line</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">m</span><span class="p">:</span>
+            <span class="n">line</span><span class="p">,</span> <span class="n">addition</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">groups</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s2">&quot;^[\(\)\.\{\}\[\]\&lt;\&gt;\+\&amp;]+$&quot;</span><span class="p">),</span> <span class="n">line</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+            <span class="n">structures</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">))</span>
+            <span class="n">additions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">addition</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">))</span>
+        <span class="k">elif</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s2">&quot;^[\ ACGTUWSMKRYBDHVN\&amp;\+]+$&quot;</span><span class="p">),</span> <span class="n">line</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+            <span class="n">line</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="s2">&quot;N&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s2">&quot;^[ACGTU\&amp;\+]+$&quot;</span><span class="p">),</span> <span class="n">line</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="ow">and</span> <span class="n">sequence</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+                <span class="n">sequence</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">constraint</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+                <span class="n">constraint</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Too many constraints or start sequences: &#39;</span> <span class="o">+</span> <span class="n">line</span><span class="p">)</span>
+
+    <span class="n">checklength</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">structures</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="k">if</span> <span class="n">constraint</span> <span class="o">!=</span> <span class="s1">&#39;&#39;</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">constraint</span><span class="p">)</span> <span class="o">!=</span> <span class="n">checklength</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Structures and the sequence constraint must have the same length!&#39;</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">sequence</span> <span class="o">!=</span> <span class="s1">&#39;&#39;</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">sequence</span><span class="p">)</span> <span class="o">!=</span> <span class="n">checklength</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Structures and the start sequence must have the same length!&#39;</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">structures</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="o">!=</span> <span class="n">checklength</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Structures must all have the same length!&#39;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">structures</span><span class="p">,</span> <span class="n">constraint</span><span class="p">,</span> <span class="n">sequence</span><span class="p">,</span> <span class="n">additions</span></div>
+
+<div class="viewcode-block" id="get_graph_properties"><a class="viewcode-back" href="../module.html#RNAsketch.get_graph_properties">[docs]</a><span class="k">def</span> <span class="nf">get_graph_properties</span><span class="p">(</span><span class="n">dg</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Takes a RNAdesign DependencyGraph Object and constructs a dicionary with all the</span>
+<span class="sd">    calculated properties.</span>
+
+<span class="sd">    :param dg: RNAdesign DependencyGraph object</span>
+<span class="sd">    :return: properties - Dictionary containing all the graph properties</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">properties</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">articulation_ratios</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">max_articulations</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">max_component_vertices</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="n">properties</span><span class="p">[</span><span class="s1">&#39;num_cc&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dg</span><span class="o">.</span><span class="n">number_of_connected_components</span><span class="p">()</span>
+    <span class="n">properties</span><span class="p">[</span><span class="s1">&#39;nos&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dg</span><span class="o">.</span><span class="n">number_of_sequences</span><span class="p">()</span>
+
+    <span class="k">for</span> <span class="n">cc</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">properties</span><span class="p">[</span><span class="s1">&#39;num_cc&#39;</span><span class="p">]):</span>
+        <span class="n">cv</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">dg</span><span class="o">.</span><span class="n">component_vertices</span><span class="p">(</span><span class="n">cc</span><span class="p">))</span>
+        <span class="n">sv</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">dg</span><span class="o">.</span><span class="n">articulation_vertices</span><span class="p">(</span><span class="n">cc</span><span class="p">))</span>
+        <span class="n">articulation_ratios</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">sv</span><span class="p">)</span><span class="o">/</span><span class="nb">float</span><span class="p">(</span><span class="n">cv</span><span class="p">))</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">max_articulations</span> <span class="o">&lt;</span> <span class="n">sv</span><span class="p">):</span>
+            <span class="n">max_articulations</span> <span class="o">=</span> <span class="n">sv</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">max_component_vertices</span> <span class="o">&lt;</span> <span class="n">cv</span><span class="p">):</span>
+            <span class="n">max_component_vertices</span> <span class="o">=</span> <span class="n">cv</span>
+
+    <span class="n">properties</span><span class="p">[</span><span class="s1">&#39;max_articulations&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">max_articulations</span>
+    <span class="n">properties</span><span class="p">[</span><span class="s1">&#39;max_component_vertices&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">max_component_vertices</span>
+    <span class="n">properties</span><span class="p">[</span><span class="s1">&#39;max_articulation_ratio&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">articulation_ratios</span><span class="p">)</span>
+    <span class="n">properties</span><span class="p">[</span><span class="s1">&#39;mean_articulation_ratio&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">articulation_ratios</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">articulation_ratios</span><span class="p">)</span>
+    <span class="n">properties</span><span class="p">[</span><span class="s1">&#39;max_dimensions&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dg</span><span class="o">.</span><span class="n">max_number_of_dimensions</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="n">properties</span></div>
+
+<div class="viewcode-block" id="calculate_objective"><a class="viewcode-back" href="../module.html#RNAsketch.calculate_objective">[docs]</a><span class="k">def</span> <span class="nf">calculate_objective</span><span class="p">(</span><span class="n">design</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="mf">0.5</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Calculates the objective function given a Design object containing the designed sequence and input structures.</span>
+<span class="sd">    objective function (3 seqs):    (eos(1)+eos(2)+eos(3) - 3 * gibbs) / number_of_structures +</span>
+<span class="sd">    weight * (eos(1)-eos(2))^2 + (eos(1)-eos(3))^2 + (eos(2)-eos(3))^2) * 2 / (number_of_structures * (number_of_structures-1))</span>
+
+<span class="sd">    :param design: Design object containing the sequence and structures</span>
+<span class="sd">    :type design: Object of type Design</span>
+<span class="sd">    :param weight: To wheight the influence of the eos diffences</span>
+<span class="sd">    :type weight: float</span>
+<span class="sd">    :return: score calculated by the objective function</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">return</span> <span class="n">calculate_objective_1</span><span class="p">(</span><span class="n">design</span><span class="p">)</span> <span class="o">+</span> <span class="n">weight</span> <span class="o">*</span> <span class="n">calculate_objective_2</span><span class="p">(</span><span class="n">design</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="calculate_objective_1"><a class="viewcode-back" href="../module.html#RNAsketch.calculate_objective_1">[docs]</a><span class="k">def</span> <span class="nf">calculate_objective_1</span><span class="p">(</span><span class="n">design</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Calculates the objective function given a Design object containing the designed sequence and input structures.</span>
+<span class="sd">    objective function (3 seqs):    (eos(1)+eos(2)+eos(3) - 3 * gibbs) / number_of_structures</span>
+
+<span class="sd">    :param design: Design object containing the sequence and structures</span>
+<span class="sd">    :type design: Object of type Design</span>
+<span class="sd">    :return: score calculated by the objective function</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">return</span> <span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">design</span><span class="o">.</span><span class="n">eos</span><span class="o">.</span><span class="n">values</span><span class="p">())</span> <span class="o">-</span> <span class="nb">sum</span><span class="p">(</span><span class="n">design</span><span class="o">.</span><span class="n">pf_energy</span><span class="o">.</span><span class="n">values</span><span class="p">()))</span> <span class="o">/</span> <span class="n">design</span><span class="o">.</span><span class="n">number_of_structures</span></div>
+
+<div class="viewcode-block" id="calculate_objective_2"><a class="viewcode-back" href="../module.html#RNAsketch.calculate_objective_2">[docs]</a><span class="k">def</span> <span class="nf">calculate_objective_2</span><span class="p">(</span><span class="n">design</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Calculates the objective function given a Design object containing the designed sequence and input structures.</span>
+<span class="sd">    objective function (3 seqs):    |eos(1)-eos(2)| + |eos(1)-eos(3)| + |eos(2)-eos(3))| * 2 / (number_of_structures * (number_of_structures-1))</span>
+
+<span class="sd">    :param design: Design object containing the sequence and structures</span>
+<span class="sd">    :return: score calculated by the objective function</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">objective_difference_part</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">eos</span> <span class="o">=</span> <span class="n">design</span><span class="o">.</span><span class="n">eos</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">eos1</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">eos</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">eos2</span> <span class="ow">in</span> <span class="n">eos</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">:]:</span>
+            <span class="n">objective_difference_part</span> <span class="o">+=</span> <span class="n">math</span><span class="o">.</span><span class="n">fabs</span><span class="p">(</span><span class="n">eos1</span> <span class="o">-</span> <span class="n">eos2</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">design</span><span class="o">.</span><span class="n">number_of_structures</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">objective_difference_part</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">objective_difference_part</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">/</span> <span class="p">(</span><span class="n">design</span><span class="o">.</span><span class="n">number_of_structures</span> <span class="o">*</span> <span class="p">(</span><span class="n">design</span><span class="o">.</span><span class="n">number_of_structures</span><span class="o">-</span><span class="mi">1</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="calculate_objective_2_squared"><a class="viewcode-back" href="../module.html#RNAsketch.calculate_objective_2_squared">[docs]</a><span class="k">def</span> <span class="nf">calculate_objective_2_squared</span><span class="p">(</span><span class="n">design</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Calculates the objective function given a Design object containing the designed sequence and input structures.</span>
+<span class="sd">    objective function (3 seqs):    (eos(1)-eos(2))^2 + (eos(1)-eos(3))^2 + (eos(2)-eos(3))^2) * 2 / (number_of_structures * (number_of_structures-1))</span>
+
+<span class="sd">    :param design: Design object containing the sequence and structures</span>
+<span class="sd">    :return: score calculated by the objective function</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">objective_difference_part</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">eos</span> <span class="o">=</span> <span class="n">design</span><span class="o">.</span><span class="n">eos</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">eos1</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">eos</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">eos2</span> <span class="ow">in</span> <span class="n">eos</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">:]:</span>
+            <span class="n">objective_difference_part</span> <span class="o">+=</span> <span class="p">(</span><span class="n">eos1</span> <span class="o">-</span> <span class="n">eos2</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
+
+    <span class="k">if</span> <span class="n">design</span><span class="o">.</span><span class="n">number_of_structures</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">objective_difference_part</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">objective_difference_part</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">/</span> <span class="p">(</span><span class="n">design</span><span class="o">.</span><span class="n">number_of_structures</span> <span class="o">*</span> <span class="p">(</span><span class="n">design</span><span class="o">.</span><span class="n">number_of_structures</span><span class="o">-</span><span class="mi">1</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="sample_sequence"><a class="viewcode-back" href="../module.html#RNAsketch.sample_sequence">[docs]</a><span class="k">def</span> <span class="nf">sample_sequence</span><span class="p">(</span><span class="n">dg</span><span class="p">,</span> <span class="n">design</span><span class="p">,</span> <span class="n">mode</span><span class="p">,</span> <span class="n">sample_steps</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">avoid_motifs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">white_positions</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    This function samples a sequence with the given mode from the dependency graph object</span>
+<span class="sd">    and writes it into the design object</span>
+
+<span class="sd">    :param dg: RNAdesign dependency graph object</span>
+<span class="sd">    :param design: design object</span>
+<span class="sd">    :param mode: mode how to sample, this is a string</span>
+<span class="sd">    :param sample_steps: count how many times to do the sample operation</span>
+<span class="sd">    :param avoid_motifs: list of regex pattern specifiying sequence motifs to avoid</span>
+<span class="sd">    :param white_positions: list of [start, end] positions in the sequence where the avoid_motifs pattern should be ignored</span>
+<span class="sd">    :return: mut_nos is the solution space we drew from</span>
+<span class="sd">    :return: sample_count is how many times we sampled a solution from the dependency graph object (important for revert later)</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">if</span> <span class="n">avoid_motifs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">avoid_motifs</span><span class="o">=</span><span class="p">[]</span>
+    <span class="k">if</span> <span class="n">white_positions</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">white_positions</span><span class="o">=</span><span class="p">[]</span>
+    <span class="c1"># remember the solution space we drew from</span>
+    <span class="n">mut_nos</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">dg</span><span class="o">.</span><span class="n">set_history_size</span><span class="p">(</span><span class="n">sample_steps</span> <span class="o">+</span> <span class="mi">100</span><span class="p">)</span>
+    <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="c1"># count how many samples we did to be able to revert this later</span>
+        <span class="n">sample_count</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="c1"># sample a new sequence</span>
+        <span class="c1"># set the chosen mode for this run</span>
+        <span class="n">chosen_mode</span> <span class="o">=</span> <span class="n">mode</span>
+        <span class="c1"># if random choice is requested pick something new</span>
+        <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;random&quot;</span><span class="p">:</span>
+            <span class="n">modes</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;sample&#39;</span><span class="p">,</span><span class="s1">&#39;sample_clocal&#39;</span><span class="p">,</span><span class="s1">&#39;sample_plocal&#39;</span><span class="p">]</span>
+            <span class="n">chosen_mode</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">modes</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">sample_steps</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">sample_steps</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">randrange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">dg</span><span class="o">.</span><span class="n">number_of_connected_components</span><span class="p">())</span>
+
+        <span class="k">if</span> <span class="n">chosen_mode</span> <span class="o">==</span> <span class="s1">&#39;sample&#39;</span><span class="p">:</span>
+            <span class="n">mut_nos</span> <span class="o">=</span> <span class="n">dg</span><span class="o">.</span><span class="n">sample</span><span class="p">()</span>
+            <span class="n">sample_count</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">elif</span> <span class="n">chosen_mode</span> <span class="o">==</span> <span class="s1">&#39;sample_clocal&#39;</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">_sample_connected_components</span><span class="p">(</span><span class="n">dg</span><span class="p">,</span> <span class="n">sample_steps</span><span class="p">):</span>
+                <span class="n">mut_nos</span> <span class="o">*=</span> <span class="n">dg</span><span class="o">.</span><span class="n">sample_clocal</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
+                <span class="n">sample_count</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">elif</span> <span class="n">chosen_mode</span> <span class="o">==</span> <span class="s1">&#39;sample_plocal&#39;</span><span class="p">:</span>
+            <span class="c1"># TODO this local sampling is unfair this way and mut_nos is not calculated correctly!</span>
+            <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">sample_steps</span><span class="p">):</span>
+                <span class="n">mut_nos</span> <span class="o">*=</span> <span class="n">dg</span><span class="o">.</span><span class="n">sample_plocal</span><span class="p">()</span>
+                <span class="n">sample_count</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">elif</span> <span class="n">chosen_mode</span> <span class="o">==</span> <span class="s1">&#39;sample_unpaired&#39;</span><span class="p">:</span>
+            <span class="c1"># sample only unpaired positions</span>
+            <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">sample_steps</span><span class="p">):</span>
+                <span class="n">mut_nos</span> <span class="o">*=</span> <span class="n">dg</span><span class="o">.</span><span class="n">sample_clocal</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+                <span class="n">sample_count</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">elif</span> <span class="n">chosen_mode</span> <span class="o">==</span> <span class="s1">&#39;sample_pairs&#39;</span><span class="p">:</span>
+            <span class="c1"># sample unpaired bases and single basepairs</span>
+            <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">sample_steps</span><span class="p">):</span>
+                <span class="n">mut_nos</span> <span class="o">*=</span> <span class="n">dg</span><span class="o">.</span><span class="n">sample_clocal</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span>
+                <span class="n">sample_count</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Wrong mode argument: &quot;</span> <span class="o">+</span> <span class="n">mode</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="c1"># check if motifs to avoid are present, if so sample a new sequence, else return</span>
+        <span class="n">motiv_present</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">seq</span> <span class="o">=</span> <span class="n">dg</span><span class="o">.</span><span class="n">get_sequence</span><span class="p">()</span>
+        <span class="c1"># search for all motivs and ignore all hits inside any white_position</span>
+        <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">avoid_motifs</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">re</span><span class="o">.</span><span class="n">finditer</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;(?=(&#39;</span><span class="o">+</span><span class="n">m</span><span class="o">+</span><span class="s1">&#39;))&#39;</span><span class="p">),</span> <span class="n">seq</span><span class="p">,</span> <span class="n">flags</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+                <span class="n">motiv_present</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="k">for</span> <span class="n">white</span> <span class="ow">in</span> <span class="n">white_positions</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="p">((</span><span class="n">white</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">f</span><span class="o">.</span><span class="n">start</span><span class="p">()</span> <span class="o">&lt;=</span> <span class="n">white</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="ow">and</span> <span class="p">(</span><span class="n">white</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">f</span><span class="o">.</span><span class="n">start</span><span class="p">()</span><span class="o">+</span><span class="nb">len</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span><span class="o">-</span><span class="mi">1</span> <span class="o">&lt;=</span> <span class="n">white</span><span class="p">[</span><span class="mi">1</span><span class="p">])):</span>
+                        <span class="n">motiv_present</span> <span class="o">=</span> <span class="kc">False</span>
+                        <span class="k">break</span>
+                <span class="k">if</span> <span class="n">motiv_present</span><span class="p">:</span>
+                    <span class="k">break</span>
+            <span class="k">if</span> <span class="n">motiv_present</span><span class="p">:</span>
+                <span class="k">break</span>
+
+        <span class="c1"># if the motivs are not present, exit while and return</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">motiv_present</span><span class="p">:</span>
+            <span class="k">break</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># revert to previous sequence</span>
+            <span class="n">dg</span><span class="o">.</span><span class="n">revert_sequence</span><span class="p">(</span><span class="n">sample_count</span><span class="p">)</span>
+
+    <span class="c1"># assign sequence to design and return values</span>
+    <span class="n">design</span><span class="o">.</span><span class="n">sequence</span> <span class="o">=</span> <span class="n">dg</span><span class="o">.</span><span class="n">get_sequence</span><span class="p">()</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">mut_nos</span><span class="p">,</span> <span class="n">sample_count</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="adaptive_walk_optimization"><a class="viewcode-back" href="../module.html#RNAsketch.adaptive_walk_optimization">[docs]</a><span class="k">def</span> <span class="nf">adaptive_walk_optimization</span><span class="p">(</span><span class="n">dg</span><span class="p">,</span> <span class="n">design</span><span class="p">,</span> <span class="n">objective_function</span><span class="o">=</span><span class="n">calculate_objective</span><span class="p">,</span> <span class="n">stop</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;sample&#39;</span><span class="p">,</span> <span class="n">avoid_motifs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">white_positions</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">progress</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Takes a Design object and does a adaptive walk optimization of this sequence.</span>
+
+<span class="sd">    :param dg: RNAdesign DependencyGraph object</span>
+<span class="sd">    :param design: Design object containing the sequence and structures</span>
+<span class="sd">    :param objective_functions: array of functions which takes a design object and returns a score for evaluation</span>
+<span class="sd">    :param stop: Number of unsuccessful new sequences before stoping the optimization</span>
+<span class="sd">    :param mode: String defining the sampling mode: sample, sample_clocal, sample_plocal</span>
+<span class="sd">    :param avoid_motifs: list of regex pattern specifiying sequence motifs to avoid</span>
+<span class="sd">    :param white_positions: list of [start, end] positions in the sequence where the avoid_motifs pattern should be ignored</span>
+<span class="sd">    :param progress: Whether or not to print the progress to the console</span>
+<span class="sd">    :return: Optimization score reached for the final sequence</span>
+<span class="sd">    :return: Number of samples neccessary to reach this result</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">if</span> <span class="n">avoid_motifs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">avoid_motifs</span><span class="o">=</span><span class="p">[]</span>
+    <span class="k">if</span> <span class="n">white_positions</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">white_positions</span><span class="o">=</span><span class="p">[]</span>
+    <span class="c1"># if the design has no sequence yet, sample one from scratch</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">design</span><span class="o">.</span><span class="n">sequence</span><span class="p">:</span>
+        <span class="n">sample_sequence</span><span class="p">(</span><span class="n">dg</span><span class="p">,</span> <span class="n">design</span><span class="p">,</span> <span class="s1">&#39;sample&#39;</span><span class="p">,</span> <span class="n">avoid_motifs</span><span class="o">=</span><span class="n">avoid_motifs</span><span class="p">,</span> <span class="n">white_positions</span><span class="o">=</span><span class="n">white_positions</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">dg</span><span class="o">.</span><span class="n">set_sequence</span><span class="p">(</span><span class="n">design</span><span class="o">.</span><span class="n">sequence</span><span class="p">)</span>
+
+    <span class="n">score</span> <span class="o">=</span> <span class="n">objective_function</span><span class="p">(</span><span class="n">design</span><span class="p">)</span>
+    <span class="c1"># count for stop condition</span>
+    <span class="n">count</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="c1"># remember how may mutations were done</span>
+    <span class="n">number_of_samples</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="c1"># main optimization loop</span>
+    <span class="k">while</span> <span class="n">stop</span><span class="p">:</span>
+        <span class="c1"># count up the mutations</span>
+        <span class="n">number_of_samples</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="c1"># sample a new sequence</span>
+        <span class="p">(</span><span class="n">mut_nos</span><span class="p">,</span> <span class="n">sample_count</span><span class="p">)</span> <span class="o">=</span> <span class="n">sample_sequence</span><span class="p">(</span><span class="n">dg</span><span class="p">,</span> <span class="n">design</span><span class="p">,</span> <span class="n">mode</span><span class="p">,</span> <span class="n">avoid_motifs</span><span class="o">=</span><span class="n">avoid_motifs</span><span class="p">,</span> <span class="n">white_positions</span><span class="o">=</span><span class="n">white_positions</span><span class="p">)</span>
+
+        <span class="c1"># write progress</span>
+        <span class="k">if</span> <span class="n">progress</span><span class="p">:</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\r</span><span class="s2">Mutate: </span><span class="si">{0:7.0f}</span><span class="s2">/</span><span class="si">{1:5.0f}</span><span class="s2"> | Score: </span><span class="si">{2:5.2f}</span><span class="s2"> | NOS: </span><span class="si">{3:.5e}</span><span class="s2"> | Mode: </span><span class="si">{4:s}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">number_of_samples</span><span class="p">,</span> <span class="n">count</span><span class="p">,</span> <span class="n">score</span><span class="p">,</span> <span class="n">mut_nos</span><span class="p">,</span> <span class="n">mode</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span> <span class="o">*</span> <span class="mi">20</span><span class="p">)</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+
+        <span class="n">this_score</span> <span class="o">=</span> <span class="n">objective_function</span><span class="p">(</span><span class="n">design</span><span class="p">)</span>
+        <span class="c1"># evaluate</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">this_score</span> <span class="o">&lt;</span> <span class="n">score</span><span class="p">):</span>
+            <span class="n">score</span> <span class="o">=</span> <span class="n">this_score</span>
+            <span class="n">count</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">dg</span><span class="o">.</span><span class="n">revert_sequence</span><span class="p">(</span><span class="n">sample_count</span><span class="p">)</span>
+            <span class="n">design</span><span class="o">.</span><span class="n">sequence</span> <span class="o">=</span> <span class="n">dg</span><span class="o">.</span><span class="n">get_sequence</span><span class="p">()</span>
+            <span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">if</span> <span class="n">count</span> <span class="o">&gt;</span> <span class="n">stop</span><span class="p">:</span>
+                <span class="k">break</span>
+
+    <span class="c1"># clear the console</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">progress</span><span class="p">):</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\r</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span> <span class="o">*</span> <span class="mi">60</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\r</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+    <span class="c1"># finally return the result</span>
+    <span class="k">return</span> <span class="n">score</span><span class="p">,</span> <span class="n">number_of_samples</span></div>
+
+<div class="viewcode-block" id="adaptive_walk_fixed"><a class="viewcode-back" href="../module.html#RNAsketch.adaptive_walk_fixed">[docs]</a><span class="k">def</span> <span class="nf">adaptive_walk_fixed</span><span class="p">(</span><span class="n">dg</span><span class="p">,</span> <span class="n">design</span><span class="p">,</span> <span class="n">objective_function</span><span class="o">=</span><span class="n">calculate_objective</span><span class="p">,</span> <span class="n">number</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;sample_clocal&#39;</span><span class="p">,</span> <span class="n">avoid_motifs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">white_positions</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">progress</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Takes a Design object and does a adaptive walk optimization with a fixed amount of move steps.</span>
+
+<span class="sd">    :param dg: RNAdesign DependencyGraph object</span>
+<span class="sd">    :param design: Design object containing the sequence and structures</span>
+<span class="sd">    :param objective_functions: array of functions which takes a design object and returns a score for evaluation</span>
+<span class="sd">    :param number: Number of sampling new sequences before stoping the optimization</span>
+<span class="sd">    :param mode: String defining the sampling mode: sample, sample_clocal, sample_plocal</span>
+<span class="sd">    :param avoid_motifs: list of regex pattern specifiying sequence motifs to avoid</span>
+<span class="sd">    :param white_positions: list of [start, end] positions in the sequence where the avoid_motifs pattern should be ignored</span>
+<span class="sd">    :param progress: Whether or not to print the progress to the console</span>
+<span class="sd">    :return: Optimization score reached for the final sequence</span>
+<span class="sd">    :return: Number of samples neccessary to reach this result</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">if</span> <span class="n">avoid_motifs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">avoid_motifs</span><span class="o">=</span><span class="p">[]</span>
+    <span class="k">if</span> <span class="n">white_positions</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">white_positions</span><span class="o">=</span><span class="p">[]</span>
+    <span class="c1"># if the design has no sequence yet, sample one from scratch</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">design</span><span class="o">.</span><span class="n">sequence</span><span class="p">:</span>
+        <span class="n">sample_sequence</span><span class="p">(</span><span class="n">dg</span><span class="p">,</span> <span class="n">design</span><span class="p">,</span> <span class="s1">&#39;sample&#39;</span><span class="p">,</span> <span class="n">avoid_motifs</span><span class="o">=</span><span class="n">avoid_motifs</span><span class="p">,</span> <span class="n">white_positions</span><span class="o">=</span><span class="n">white_positions</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">dg</span><span class="o">.</span><span class="n">set_sequence</span><span class="p">(</span><span class="n">design</span><span class="o">.</span><span class="n">sequence</span><span class="p">)</span>
+
+    <span class="n">score</span> <span class="o">=</span> <span class="n">objective_function</span><span class="p">(</span><span class="n">design</span><span class="p">)</span>
+    <span class="c1"># remember how may mutations were done</span>
+    <span class="n">number_of_samples</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="c1"># main optimization loop</span>
+    <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">number</span><span class="p">):</span>
+        <span class="c1"># count up the mutations</span>
+        <span class="n">number_of_samples</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="c1"># sample a new sequence</span>
+        <span class="p">(</span><span class="n">mut_nos</span><span class="p">,</span> <span class="n">sample_count</span><span class="p">)</span> <span class="o">=</span> <span class="n">sample_sequence</span><span class="p">(</span><span class="n">dg</span><span class="p">,</span> <span class="n">design</span><span class="p">,</span> <span class="n">mode</span><span class="p">,</span> <span class="n">avoid_motifs</span><span class="o">=</span><span class="n">avoid_motifs</span><span class="p">,</span> <span class="n">white_positions</span><span class="o">=</span><span class="n">white_positions</span><span class="p">)</span>
+
+        <span class="c1"># write progress</span>
+        <span class="k">if</span> <span class="n">progress</span><span class="p">:</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\r</span><span class="s2">Mutate: </span><span class="si">{0:7.0f}</span><span class="s2"> | Score: </span><span class="si">{1:5.2f}</span><span class="s2"> | NOS: </span><span class="si">{2:.5e}</span><span class="s2"> | Mode: </span><span class="si">{3:s}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">number_of_samples</span><span class="p">,</span> <span class="n">score</span><span class="p">,</span> <span class="n">mut_nos</span><span class="p">,</span> <span class="n">mode</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span> <span class="o">*</span> <span class="mi">20</span><span class="p">)</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+
+        <span class="n">this_score</span> <span class="o">=</span> <span class="n">objective_function</span><span class="p">(</span><span class="n">design</span><span class="p">)</span>
+        <span class="c1"># evaluate</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">this_score</span> <span class="o">&lt;</span> <span class="n">score</span><span class="p">):</span>
+            <span class="n">score</span> <span class="o">=</span> <span class="n">this_score</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">dg</span><span class="o">.</span><span class="n">revert_sequence</span><span class="p">(</span><span class="n">sample_count</span><span class="p">)</span>
+            <span class="n">design</span><span class="o">.</span><span class="n">sequence</span> <span class="o">=</span> <span class="n">dg</span><span class="o">.</span><span class="n">get_sequence</span><span class="p">()</span>
+
+    <span class="c1"># clear the console</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">progress</span><span class="p">):</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\r</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span> <span class="o">*</span> <span class="mi">60</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\r</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+    <span class="c1"># finally return the result</span>
+    <span class="k">return</span> <span class="n">score</span><span class="p">,</span> <span class="n">number_of_samples</span></div>
+
+<div class="viewcode-block" id="simulated_annealing_optimization"><a class="viewcode-back" href="../module.html#RNAsketch.simulated_annealing_optimization">[docs]</a><span class="k">def</span> <span class="nf">simulated_annealing_optimization</span><span class="p">(</span><span class="n">dg</span><span class="p">,</span> <span class="n">design</span><span class="p">,</span> <span class="n">objective_function</span><span class="o">=</span><span class="n">calculate_objective</span><span class="p">,</span> <span class="n">temperature_gradient</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">cooling_step</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;sample&#39;</span><span class="p">,</span> <span class="n">avoid_motifs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">white_positions</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">progress</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Takes a Design object and does a simulated annealing optimization of this sequence.</span>
+
+<span class="sd">    :param dg: RNAdesign DependencyGraph object</span>
+<span class="sd">    :param design: Design object containing the sequence and structures</span>
+<span class="sd">    :param objective_functions: array of functions which takes a design object and returns a score for evaluation</span>
+<span class="sd">    :param temperature_gradient: Iterable containing the temperatures in descend order</span>
+<span class="sd">    :param cooling_steps: Use the current temperature that many times before cooling down</span>
+<span class="sd">    :param mode: String defining the sampling mode: sample, sample_clocal, sample_plocal</span>
+<span class="sd">    :param avoid_motifs: list of regex pattern specifiying sequence motifs to avoid</span>
+<span class="sd">    :param white_positions: list of [start, end] positions in the sequence where the avoid_motifs pattern should be ignored</span>
+<span class="sd">    :param progress: Whether or not to print the progress to the console</span>
+<span class="sd">    :return: Optimization score reached for the final sequence</span>
+<span class="sd">    :return: Number of samples neccessary to reach this result</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">if</span> <span class="n">avoid_motifs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">avoid_motifs</span><span class="o">=</span><span class="p">[]</span>
+    <span class="k">if</span> <span class="n">white_positions</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">white_positions</span><span class="o">=</span><span class="p">[]</span>
+    <span class="k">if</span> <span class="n">temperature_gradient</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">temperature_gradient</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="o">-</span><span class="mf">0.0002</span><span class="p">),[</span><span class="mf">1e-15</span><span class="p">]</span><span class="o">*</span><span class="mi">100</span><span class="p">])</span>
+    <span class="c1"># generate iterator (can call next() on it)</span>
+    <span class="n">temp_iter</span> <span class="o">=</span> <span class="nb">iter</span><span class="p">(</span><span class="n">temperature_gradient</span><span class="p">)</span>
+    <span class="n">temperature</span> <span class="o">=</span> <span class="n">temp_iter</span><span class="o">.</span><span class="n">next</span><span class="p">()</span>
+
+    <span class="c1"># if the design has no sequence yet, sample one from scratch</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">design</span><span class="o">.</span><span class="n">sequence</span><span class="p">:</span>
+        <span class="n">sample_sequence</span><span class="p">(</span><span class="n">dg</span><span class="p">,</span> <span class="n">design</span><span class="p">,</span> <span class="s1">&#39;sample&#39;</span><span class="p">,</span> <span class="n">avoid_motifs</span><span class="o">=</span><span class="n">avoid_motifs</span><span class="p">,</span> <span class="n">white_positions</span><span class="o">=</span><span class="n">white_positions</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">dg</span><span class="o">.</span><span class="n">set_sequence</span><span class="p">(</span><span class="n">design</span><span class="o">.</span><span class="n">sequence</span><span class="p">)</span>
+
+    <span class="n">score</span> <span class="o">=</span> <span class="n">objective_function</span><span class="p">(</span><span class="n">design</span><span class="p">)</span>
+    <span class="c1"># remember how may mutations were done</span>
+    <span class="n">number_of_samples</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="c1"># remember how often we used the temperature already</span>
+    <span class="n">number_of_same_temp</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="c1"># main optimization loop</span>
+    <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="c1"># check if we have to cool down</span>
+        <span class="n">number_of_same_temp</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="n">number_of_same_temp</span> <span class="o">&gt;</span> <span class="n">cooling_step</span><span class="p">:</span>
+            <span class="n">number_of_same_temp</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">temperature</span> <span class="o">=</span> <span class="n">temp_iter</span><span class="o">.</span><span class="n">next</span><span class="p">()</span>
+            <span class="k">except</span> <span class="ne">StopIteration</span><span class="p">:</span>
+                <span class="c1"># end of temperature scale reached... stop optimization</span>
+                <span class="k">break</span>
+
+        <span class="c1"># count up the mutations</span>
+        <span class="n">number_of_samples</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="c1"># sample a new sequence</span>
+        <span class="p">(</span><span class="n">mut_nos</span><span class="p">,</span> <span class="n">sample_count</span><span class="p">)</span> <span class="o">=</span> <span class="n">sample_sequence</span><span class="p">(</span><span class="n">dg</span><span class="p">,</span> <span class="n">design</span><span class="p">,</span> <span class="n">mode</span><span class="p">,</span> <span class="n">avoid_motifs</span><span class="o">=</span><span class="n">avoid_motifs</span><span class="p">,</span> <span class="n">white_positions</span><span class="o">=</span><span class="n">white_positions</span><span class="p">)</span>
+
+        <span class="c1"># write progress</span>
+        <span class="k">if</span> <span class="n">progress</span><span class="p">:</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\r</span><span class="s2">Mutate: </span><span class="si">{0:7.0f}</span><span class="s2">/</span><span class="si">{1:5.0f}</span><span class="s2"> | Score: </span><span class="si">{2:5.2f}</span><span class="s2"> | NOS: </span><span class="si">{3:.5e}</span><span class="s2"> | Mode: </span><span class="si">{4:s}</span><span class="s2"> | Temp: </span><span class="si">{5:5.8f}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">number_of_samples</span><span class="p">,</span> <span class="n">number_of_same_temp</span><span class="p">,</span> <span class="n">score</span><span class="p">,</span> <span class="n">mut_nos</span><span class="p">,</span> <span class="n">mode</span><span class="p">,</span> <span class="n">temperature</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span> <span class="o">*</span> <span class="mi">20</span><span class="p">)</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+
+        <span class="n">this_score</span> <span class="o">=</span> <span class="n">objective_function</span><span class="p">(</span><span class="n">design</span><span class="p">)</span>
+        <span class="c1"># evaluate probability</span>
+        <span class="n">rand</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">this_score</span><span class="o">-</span><span class="n">score</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">prob</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">prob</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="o">*</span><span class="p">(</span><span class="n">this_score</span><span class="o">-</span><span class="n">score</span><span class="p">)</span><span class="o">/</span><span class="n">temperature</span><span class="p">)</span>
+        <span class="c1"># compare and make decision</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">rand</span> <span class="o">&lt;=</span> <span class="n">prob</span><span class="p">):</span>
+            <span class="n">score</span> <span class="o">=</span> <span class="n">this_score</span>
+            <span class="c1"># go to next temperature step</span>
+            <span class="n">number_of_same_temp</span> <span class="o">=</span> <span class="n">cooling_step</span><span class="o">+</span><span class="mi">1</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">dg</span><span class="o">.</span><span class="n">revert_sequence</span><span class="p">(</span><span class="n">sample_count</span><span class="p">)</span>
+            <span class="n">design</span><span class="o">.</span><span class="n">sequence</span> <span class="o">=</span> <span class="n">dg</span><span class="o">.</span><span class="n">get_sequence</span><span class="p">()</span>
+
+    <span class="c1"># clear the console</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">progress</span><span class="p">):</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\r</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span> <span class="o">*</span> <span class="mi">60</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\r</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+    <span class="c1"># finally return the result</span>
+    <span class="k">return</span> <span class="n">score</span><span class="p">,</span> <span class="n">number_of_samples</span></div>
+
+<div class="viewcode-block" id="constraint_generation_optimization"><a class="viewcode-back" href="../module.html#RNAsketch.constraint_generation_optimization">[docs]</a><span class="k">def</span> <span class="nf">constraint_generation_optimization</span><span class="p">(</span><span class="n">dg</span><span class="p">,</span> <span class="n">design</span><span class="p">,</span> <span class="n">objective_function</span><span class="o">=</span><span class="n">calculate_objective</span><span class="p">,</span> <span class="n">stop</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;sample&#39;</span><span class="p">,</span> <span class="n">num_neg_constraints</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">max_eos_diff</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">avoid_motifs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">white_positions</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">progress</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Takes a Design object and does a constraint generation optimization of this sequence.</span>
+
+<span class="sd">    :param dg: RNAdesign DependencyGraph object</span>
+<span class="sd">    :param design: Design object containing the sequence and structures</span>
+<span class="sd">    :param objective_functions: array of functions which takes a design object and returns a score for evaluation</span>
+<span class="sd">    :param stop: Number of unsuccessful new sequences before stoping the optimization</span>
+<span class="sd">    :param mode: String defining the sampling mode: sample, sample_clocal, sample_plocal</span>
+<span class="sd">    :param num_neg_constraints: Maximal number of negative constraints to accumulate during the optimization process</span>
+<span class="sd">    :param max_eos_diff: Maximal difference between eos of the negative and positive constraints</span>
+<span class="sd">    :param avoid_motifs: list of regex pattern specifiying sequence motifs to avoid</span>
+<span class="sd">    :param white_positions: list of [start, end] positions in the sequence where the avoid_motifs pattern should be ignored</span>
+<span class="sd">    :param progress: Whether or not to print the progress to the console</span>
+<span class="sd">    :return: Optimization score reached for the final sequence</span>
+<span class="sd">    :return: Number of samples neccessary to reach this result</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">if</span> <span class="n">avoid_motifs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">avoid_motifs</span><span class="o">=</span><span class="p">[]</span>
+    <span class="k">if</span> <span class="n">white_positions</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">white_positions</span><span class="o">=</span><span class="p">[]</span>
+    <span class="n">dg</span><span class="o">.</span><span class="n">set_history_size</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span>
+    <span class="n">neg_constraints</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">deque</span><span class="p">(</span><span class="n">maxlen</span><span class="o">=</span><span class="n">num_neg_constraints</span><span class="p">)</span>
+
+    <span class="c1"># if the design has no sequence yet, sample one from scratch</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">design</span><span class="o">.</span><span class="n">sequence</span><span class="p">:</span>
+        <span class="n">sample_sequence</span><span class="p">(</span><span class="n">dg</span><span class="p">,</span> <span class="n">design</span><span class="p">,</span> <span class="s1">&#39;sample&#39;</span><span class="p">,</span> <span class="n">avoid_motifs</span><span class="o">=</span><span class="n">avoid_motifs</span><span class="p">,</span> <span class="n">white_positions</span><span class="o">=</span><span class="n">white_positions</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">dg</span><span class="o">.</span><span class="n">set_sequence</span><span class="p">(</span><span class="n">design</span><span class="o">.</span><span class="n">sequence</span><span class="p">)</span>
+
+    <span class="n">score</span> <span class="o">=</span> <span class="n">objective_function</span><span class="p">(</span><span class="n">design</span><span class="p">)</span>
+    <span class="c1"># count for stop condition</span>
+    <span class="n">count</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="c1"># remember how may mutations were done</span>
+    <span class="n">number_of_samples</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="c1"># main optimization loop</span>
+    <span class="k">while</span> <span class="n">stop</span><span class="p">:</span>
+        <span class="c1"># constraint generation loop</span>
+        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="c1"># count up the mutations</span>
+            <span class="n">number_of_samples</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="c1"># sample a new sequence</span>
+            <span class="p">(</span><span class="n">mut_nos</span><span class="p">,</span> <span class="n">sample_count</span><span class="p">)</span> <span class="o">=</span> <span class="n">sample_sequence</span><span class="p">(</span><span class="n">dg</span><span class="p">,</span> <span class="n">design</span><span class="p">,</span> <span class="n">mode</span><span class="p">,</span> <span class="n">avoid_motifs</span><span class="o">=</span><span class="n">avoid_motifs</span><span class="p">,</span> <span class="n">white_positions</span><span class="o">=</span><span class="n">white_positions</span><span class="p">)</span>
+
+            <span class="c1"># write progress</span>
+            <span class="k">if</span> <span class="n">progress</span><span class="p">:</span>
+                <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\r</span><span class="s2">Mutate: </span><span class="si">{0:7.0f}</span><span class="s2">/</span><span class="si">{1:5.0f}</span><span class="s2"> | EOS-Diff: </span><span class="si">{2:4.2f}</span><span class="s2"> | Score: </span><span class="si">{3:5.2f}</span><span class="s2"> | NOS: </span><span class="si">{4:.5e}</span><span class="s2"> | Mode: </span><span class="si">{5:s}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">number_of_samples</span><span class="p">,</span> <span class="n">count</span><span class="p">,</span> <span class="n">max_eos_diff</span><span class="p">,</span> <span class="n">score</span><span class="p">,</span> <span class="n">mut_nos</span><span class="p">,</span> <span class="n">mode</span><span class="p">))</span>
+                <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+            <span class="c1"># boolean if it is perfect already</span>
+            <span class="n">perfect</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="c1"># evaluate the constraints</span>
+            <span class="k">for</span> <span class="n">negc</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="n">neg_constraints</span><span class="p">):</span>
+                <span class="c1"># test if the newly sampled sequence is compatible to the neg constraint, if not -&gt; Perfect!</span>
+                <span class="k">if</span> <span class="n">rbp</span><span class="o">.</span><span class="n">sequence_structure_compatible</span><span class="p">(</span><span class="n">design</span><span class="o">.</span><span class="n">sequence</span><span class="p">,</span> <span class="p">[</span><span class="n">negc</span><span class="p">]):</span>
+                    <span class="k">if</span> <span class="n">design</span><span class="o">.</span><span class="n">classtype</span> <span class="o">==</span> <span class="s1">&#39;vrna&#39;</span><span class="p">:</span>
+                        <span class="n">neg_eos</span> <span class="o">=</span> <span class="n">RNA</span><span class="o">.</span><span class="n">energy_of_struct</span><span class="p">(</span><span class="n">design</span><span class="o">.</span><span class="n">sequence</span><span class="p">,</span> <span class="n">negc</span><span class="p">)</span>
+                    <span class="k">elif</span> <span class="n">design</span><span class="o">.</span><span class="n">classtype</span> <span class="o">==</span> <span class="s1">&#39;nupack&#39;</span><span class="p">:</span>
+                        <span class="n">neg_eos</span> <span class="o">=</span> <span class="n">nupack</span><span class="o">.</span><span class="n">energy</span><span class="p">([</span><span class="n">design</span><span class="o">.</span><span class="n">sequence</span><span class="p">],</span> <span class="n">negc</span><span class="p">,</span> <span class="n">material</span> <span class="o">=</span> <span class="s1">&#39;rna&#39;</span><span class="p">,</span> <span class="n">pseudo</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Could not figure out the classtype of the Design object.&#39;</span><span class="p">)</span>
+                    <span class="c1"># test if the newly sampled sequence eos for pos constraints is lower than</span>
+                    <span class="c1"># the eos for all negative constraints, if not -&gt; Perfect!</span>
+                    <span class="k">for</span> <span class="n">eos</span> <span class="ow">in</span> <span class="n">design</span><span class="o">.</span><span class="n">eos</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+                        <span class="k">if</span> <span class="nb">float</span><span class="p">(</span><span class="n">neg_eos</span><span class="p">)</span> <span class="o">-</span> <span class="nb">float</span><span class="p">(</span><span class="n">eos</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">max_eos_diff</span><span class="p">:</span>
+                            <span class="c1"># this is no better solution, revert!</span>
+                            <span class="n">perfect</span> <span class="o">=</span> <span class="kc">False</span>
+                            <span class="n">dg</span><span class="o">.</span><span class="n">revert_sequence</span><span class="p">(</span><span class="n">sample_count</span><span class="p">)</span>
+                            <span class="n">design</span><span class="o">.</span><span class="n">sequence</span> <span class="o">=</span> <span class="n">dg</span><span class="o">.</span><span class="n">get_sequence</span><span class="p">()</span>
+                            <span class="k">break</span>
+                <span class="c1"># if this is no perfect solution, stop evaluating and sample a new one</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">perfect</span><span class="p">:</span>
+                    <span class="k">break</span>
+            <span class="c1"># if solution is perfect, stop the optimization and go down to score calculation</span>
+            <span class="k">if</span> <span class="n">perfect</span><span class="p">:</span>
+                <span class="k">break</span>
+
+        <span class="c1"># count this as a solution to analyse</span>
+        <span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="c1"># calculate objective</span>
+        <span class="n">this_score</span> <span class="o">=</span> <span class="n">objective_function</span><span class="p">(</span><span class="n">design</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="n">this_score</span> <span class="o">&lt;</span> <span class="n">score</span><span class="p">):</span>
+            <span class="n">score</span> <span class="o">=</span> <span class="n">this_score</span>
+            <span class="c1"># reset values</span>
+            <span class="n">count</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">dg</span><span class="o">.</span><span class="n">revert_sequence</span><span class="p">(</span><span class="n">sample_count</span><span class="p">)</span>
+            <span class="n">design</span><span class="o">.</span><span class="n">sequence</span> <span class="o">=</span> <span class="n">dg</span><span class="o">.</span><span class="n">get_sequence</span><span class="p">()</span>
+        <span class="c1"># else if current mfe is not in negative constraints, add to it</span>
+        <span class="k">for</span> <span class="n">mfe_str</span> <span class="ow">in</span> <span class="n">design</span><span class="o">.</span><span class="n">mfe_structure</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">mfe_str</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">design</span><span class="o">.</span><span class="n">structures</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">mfe_str</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">neg_constraints</span><span class="p">:</span>
+                    <span class="n">neg_constraints</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mfe_str</span><span class="p">)</span>
+                    <span class="c1">#print(&#39;\n&#39;+&#39;\n&#39;.join(neg_constraints))</span>
+
+        <span class="c1"># stop condition</span>
+        <span class="k">if</span> <span class="n">count</span> <span class="o">&gt;</span> <span class="n">stop</span><span class="p">:</span>
+            <span class="k">break</span>
+
+    <span class="c1"># clear the console</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">progress</span><span class="p">):</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\r</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span> <span class="o">*</span> <span class="mi">60</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\r</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+    <span class="c1"># finally return the result</span>
+    <span class="k">return</span> <span class="n">score</span><span class="p">,</span> <span class="n">number_of_samples</span></div>
+
+
+<span class="k">def</span> <span class="nf">_sample_connected_components</span><span class="p">(</span><span class="n">dg</span><span class="p">,</span> <span class="n">amount</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    This function samples several connected component weighted by their number of solutions.</span>
+<span class="sd">    We need this function to draw from the set of CCs without getting the same CC twice.</span>
+<span class="sd">    Therefore the complete number of solutions if we sample these CCs new, is the product of the</span>
+<span class="sd">    number of solutions for each CC.</span>
+
+<span class="sd">    :param dg: Dependency Graph object from the RNAdesig library</span>
+<span class="sd">    :param amount: number of connected components to sample</span>
+<span class="sd">    :return: list of connected component IDs which can be used for example for: dg.sample_clocal(ID)</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">noslist</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">dg</span><span class="o">.</span><span class="n">number_of_connected_components</span><span class="p">()):</span>
+        <span class="c1">#if dg.number_of_sequences(c) != 1:</span>
+        <span class="n">noslist</span><span class="p">[</span><span class="n">c</span><span class="p">]</span> <span class="o">=</span> <span class="n">dg</span><span class="o">.</span><span class="n">number_of_sequences</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">amount</span> <span class="o">&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">noslist</span><span class="p">):</span>
+        <span class="n">amount</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">noslist</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">amount</span><span class="p">):</span>
+        <span class="n">rand</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">sum</span><span class="p">(</span><span class="n">noslist</span><span class="o">.</span><span class="n">values</span><span class="p">())</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">keys</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">noslist</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="n">keys</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">rand</span> <span class="o">&lt;</span> <span class="nb">sum</span><span class="p">([</span><span class="n">noslist</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">keys</span><span class="p">]):</span>
+                <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
+                <span class="k">del</span> <span class="n">noslist</span><span class="p">[</span><span class="n">c</span><span class="p">]</span>
+                <span class="k">break</span>
+    <span class="k">return</span> <span class="n">result</span>
+
+<div class="viewcode-block" id="sample_count_unique_solutions"><a class="viewcode-back" href="../module.html#RNAsketch.sample_count_unique_solutions">[docs]</a><span class="k">def</span> <span class="nf">sample_count_unique_solutions</span><span class="p">(</span><span class="n">solution_space_size</span><span class="p">,</span> <span class="n">sample_size</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Calculates the expectancy value of how many time it is necessary to draw a</span>
+<span class="sd">    solution to gain a unique set of solutions with the given sample size</span>
+
+<span class="sd">    :param solution_space_size: The size of the complete solutions space to draw from</span>
+<span class="sd">    :param sample_size: The size of the requested unique set</span>
+<span class="sd">    :return: Expectancy value of how many times to draw from the solution space to gain this unique set</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="nb">sum</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">xrange</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">solution_space_size</span><span class="p">)</span> <span class="o">-</span> <span class="nb">int</span><span class="p">(</span><span class="n">sample_size</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">solution_space_size</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="nb">sum</span> <span class="o">+=</span> <span class="nb">float</span><span class="p">(</span><span class="n">solution_space_size</span><span class="p">)</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="nb">sum</span><span class="p">)</span></div>
+</pre></div>
+
+    </div>
+      
+  </div>
+</div>
+<footer class="footer">
+  <div class="container">
+    <p class="pull-right">
+      <a href="#">Back to top</a>
+      
+    </p>
+    <p>
+        &copy; Copyright 2016, Stefan Hammer.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.6.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>
