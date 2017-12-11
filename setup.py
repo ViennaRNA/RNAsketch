@@ -10,7 +10,7 @@ def read(fname):
 
 setup(
     name = "RNAsketch",
-    version = "1.2",
+    version = "1.3",
     author = "Stefan Hammer",
     author_email = "s.hammer@univie.ac.at",
     description = ("A wrapper framework to design RNA molecules."),
@@ -21,7 +21,7 @@ setup(
     test_suite="tests",
     install_requires=[
                     ],
-    scripts=['bin/design-cofold.py','bin/design-generategraphml.py','bin/design-multistate.py','bin/design-printgraphml.py','bin/design-thermoswitch.py'],
+    scripts=['bin/design-cofold.py','bin/design-generategraphml.py','bin/design-multistate.py','bin/design-printgraphml.py','bin/design-thermoswitch.py','bin/design-ligand_switch.py'],
     long_description=read('README.rst'),
     classifiers=[
         "Development Status :: 5 - Production/Stable",

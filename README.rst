@@ -1,5 +1,5 @@
 RNAsketch Library for designing RNA molecules
-============================================
+=============================================
 
 Installation
 ------------
@@ -38,7 +38,7 @@ all the given structural conformation. In case of a bistable molecule just call:
 
 .. code:: bash
 
-    echo -e '(((((....)))))....\n....(((((....)))))' | design-multistate.py -i -m random -e 500
+    echo -e '(((((....)))))....\n....(((((....)))))' | design-multistate.py -i -m random -s 500
 
 The program `barriers` can the be used to visualize the energy landscape to confirm the design goals:
 
@@ -69,7 +69,7 @@ Design a sRNA mediated translational regulation
     
     echo '...(((((((((((((((((&)))))))))))))))))((((....))));...(((((((((((((((((&)))))))))))))))))............
     ....................&.................((((....))));...xxxxxxxxxxxxxxxxx&xxxxxxxxxxxxxxxxx............
-    NNNNAAGGAGNNNNNNNAUG&NNNNNNNNNNNNNNNNNNNNNNNNNNNNN' | design-cofold.py -n 1 -e 1000
+    NNNNAAGGAGNNNNNNNAUG&NNNNNNNNNNNNNNNNNNNNNNNNNNNNN' | design-cofold.py -n 1 -s 1000
 
 This small example will design a simple device consisting of a 5'UTR region which can
 be translationally controlled by a sRNA molecule. In this case the sRNA will shut down
@@ -94,7 +94,7 @@ Design a multistate Thermoswitch
 
 .. code:: bash
 
-    echo -e "(((((((((((((....))))))))))))) 5.0\n(((((.....)))))(((((.....))))) 10.0\n(((((.....)))))............... 37.0" | design-thermoswitch.py -m random -e 1000
+    echo -e "(((((((((((((....))))))))))))) 5.0\n(((((.....)))))(((((.....))))) 10.0\n(((((.....)))))............... 37.0" | design-thermoswitch.py -m random -s 1000
 
 This results e.g in a sequence like `GAUCUGUGUGGGGUCGAUUUUGUGUGGGUU` which has the given MFE structures at the specified temperatures (lower plot).
 Folding it at all Temeratures from 10 to 100 degree Celsius shows, that the first structural change happens at ~7.0 degree
@@ -108,6 +108,27 @@ Celsius and the second one at ~26 degrees. After _72 degrees, the sequence occur
     :width: 350px
     
     RNAheat Plot, ViennaRNA v2.2.9, GAUCUGUGUGGGGUCGAUUUUGUGUGGGUU
+
+Design a ligand triggered switch
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. code:: bash
+    
+    echo -e "(((((...((((((((.....)))))...)))...)))))........................\n.........................(((((((((((......)))))))))))...........\nAAGUGAUACCAGCAUCGUCUUGAUGCCCUUGGCAGCACUUCANNNNNNNNNNNNNNNNNNNNNN" | design-ligand_switch.py -r 70:30 --ligand "GAUACCAG&CCCUUGGCAGC;(...((((&)...)))...);-9.22"
+
+This designs a simple theophylline triggered switch. It adapts to a certain ratio of 
+the aptamer structure (ligand competent state) and an alternative state as specified
+with the `--ratio` option. To model ligand binding we use the soft-constraints framework
+of the ViennaRNA package, similar to the `--motif` option of `RNAfold`.
+The specified objective function calculates the probabilities of the structural features with
+and without ligand. Thus, we optimize towards the given ratio without the ligand and maximize the
+ligand binding competent state in the presence of the ligand.
+
+.. figure:: data/ligandswitch.png
+    :width: 350px
+.. figure:: doc/data/ligandswitch.png
+    :width: 350px
+
 
 Display the Dependency Graph
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
