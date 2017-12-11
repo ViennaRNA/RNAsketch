@@ -109,6 +109,27 @@ Celsius and the second one at ~26 degrees. After _72 degrees, the sequence occur
     
     RNAheat Plot, ViennaRNA v2.2.9, GAUCUGUGUGGGGUCGAUUUUGUGUGGGUU
 
+Design a ligand triggered switch
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. code:: bash
+    
+    echo -e "(((((...((((((((.....)))))...)))...)))))........................\n.........................(((((((((((......)))))))))))...........\nAAGUGAUACCAGCAUCGUCUUGAUGCCCUUGGCAGCACUUCANNNNNNNNNNNNNNNNNNNNNN" | design-ligand_switch.py -r 70:30 --ligand "GAUACCAG&CCCUUGGCAGC;(...((((&)...)))...);-9.22"
+
+This designs a simple theophylline triggered switch. It adapts to a certain ratio of 
+the aptamer structure (ligand competent state) and an alternative state as specified
+with the `--ratio` option. To model ligand binding we use the soft-constraints framework
+of the ViennaRNA package, similar to the `--motif` option of `RNAfold`.
+The specified objective function calculates the probabilities of the structural features with
+and without ligand. Thus, we optimize towards the given ratio without the ligand and maximize the
+ligand binding competent state in the presence of the ligand.
+
+.. figure:: data/ligandswitch.png
+    :width: 350px
+.. figure:: doc/data/ligandswitch.png
+    :width: 350px
+
+
 Display the Dependency Graph
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
