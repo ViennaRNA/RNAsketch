@@ -21,7 +21,7 @@ setup(
     test_suite="tests",
     install_requires=[
                     ],
-    scripts=['bin/design-cofold.py','bin/design-generategraphml.py','bin/design-multistate.py','bin/design-printgraphml.py','bin/design-thermoswitch.py','bin/design-ligand_switch.py'],
+    scripts=['bin/design-cofold.py','bin/design-generategraphml.py','bin/design-multistate.py','bin/design-printgraphml.py','bin/design-thermoswitch.py','bin/design-ligandswitch.py'],
     long_description=read('README.rst'),
     classifiers=[
         "Development Status :: 5 - Production/Stable",
