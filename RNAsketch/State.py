@@ -14,6 +14,7 @@ __email__ = "s.hammer@univie.ac.at"
 
 import re
 import math
+import sys
 
 vrna_available = True
 nupack_available = True
