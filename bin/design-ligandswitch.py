@@ -180,12 +180,13 @@ def ligand_objective(design, printDetails=False):
 
     prob_bc = Z_from_G(design.state["bc"].pf_energy - design.state["pf"].pf_energy, design.state["pf"].temperature)
 
-    score = (1-prob_bc_ligand) + abs(design.ratio[0] - prob_ac) + abs(design.ratio[1] - prob_bc)
+    score = prob_bc_ligand * (1-abs(design.ratio[0] - prob_ac)) * (1-abs(design.ratio[1] - prob_bc))
 
     if printDetails:
         print("prob_bc_ligand: {0:}\nprob_ac: {1:}\nprob_bc: {2:}\nscore: {3:}".format(prob_bc_ligand, prob_ac, prob_bc, score))
-
-    return score
+    
+    # we need to maximize the score
+    return 1-score
 
 def G_from_Z(Z, temperature):
     return - ((temperature + 273.15)*1.98717)/1000.0 * math.log(Z)
