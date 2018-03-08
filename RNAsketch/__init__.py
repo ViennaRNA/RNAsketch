@@ -82,9 +82,10 @@ def read_input_additions(content):
         if re.match(re.compile("^[\(\)\.\{\}\[\]\<\>\+\&]+$"), line, flags=0):
             structures.append(line.rstrip('\n'))
             additions.append(addition.rstrip('\n'))
-        elif re.match(re.compile("^[\ ACGTUWSMKRYBDHVN\&\+]+$"), line, flags=0):
+        elif re.match(re.compile("^[\ ACGTUWSMKRYBDHVN\&\+]+$", re.IGNORECASE), line, flags=0):
             line = line.replace(" ", "N")
-            if re.match(re.compile("^[ACGTU\&\+]+$"), line, flags=0) and sequence == '':
+            line = line.upper();
+            if re.match(re.compile("^[ACGTU\&\+]+$", re.IGNORECASE), line, flags=0) and sequence == '':
                 sequence = line.rstrip('\n')
             elif constraint == '':
                 constraint = line.rstrip('\n')
