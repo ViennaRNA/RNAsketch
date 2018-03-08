@@ -165,7 +165,7 @@ def calculate_objective_1(design):
 def calculate_objective_2(design):
     '''
     Calculates the objective function given a Design object containing the designed sequence and input structures.
-    objective function (3 seqs):    |eos(1)-eos(2)| + |eos(1)-eos(3)| + |eos(2)-eos(3))| * 2 / (number_of_structures * (number_of_structures-1))
+    objective function (3 seqs):    abs(eos(1)-eos(2)) + abs(eos(1)-eos(3)) + abs(eos(2)-eos(3))) * 2 / (number_of_structures * (number_of_structures-1))
 
     :param design: Design object containing the sequence and structures
     :return: score calculated by the objective function
