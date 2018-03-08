@@ -1,43 +1,28 @@
 <!DOCTYPE html>
 
-
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
-    <title>RNAsketch.Design &#8212; RNAsketch 1.2.0 documentation</title>
-    
-    <link rel="stylesheet" href="../../_static/basic.css" type="text/css" />
-    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-    <link rel="stylesheet" href="../../_static/bootstrap-3.3.6/css/bootstrap.min.css" type="text/css" />
-    <link rel="stylesheet" href="../../_static/bootstrap-3.3.6/css/bootstrap-theme.min.css" type="text/css" />
+    <title>RNAsketch.Design &#8212; RNAsketch 1.4.0 documentation</title>
     <link rel="stylesheet" href="../../_static/bootstrap-sphinx.css" type="text/css" />
-    
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '../../',
-        VERSION:     '1.2.0',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
-      };
-    </script>
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" src="../../_static/documentation_options.js"></script>
     <script type="text/javascript" src="../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../_static/doctools.js"></script>
     <script type="text/javascript" src="../../_static/js/jquery-1.11.0.min.js"></script>
     <script type="text/javascript" src="../../_static/js/jquery-fix.js"></script>
-    <script type="text/javascript" src="../../_static/bootstrap-3.3.6/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="../../_static/bootstrap-3.3.7/js/bootstrap.min.js"></script>
     <script type="text/javascript" src="../../_static/bootstrap-sphinx.js"></script>
-    <link rel="top" title="RNAsketch 1.2.0 documentation" href="../../index.html" />
-    <link rel="up" title="RNAsketch" href="../RNAsketch.html" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
 <meta charset='utf-8'>
 <meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1'>
 <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1'>
 <meta name="apple-mobile-web-app-capable" content="yes">
 
-  </head>
-  <body role="document">
+  </head><body>
 
   <div id="navbar" class="navbar navbar-default navbar-fixed-top">
     <div class="container">
@@ -50,7 +35,7 @@
         </button>
         <a class="navbar-brand" href="../../index.html"><span><img src="../../_static/rnasketch.png"></span>
           RNAsketch</a>
-        <span class="navbar-text navbar-version pull-left"><b>1.2</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>1.4</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -112,7 +97,18 @@
 
 <div class="container">
   <div class="row">
-    <div class="col-md-12 content">
+      <div class="col-md-3">
+        <div id="sidebar" class="bs-sidenav" role="complementary">
+<form action="../../search.html" method="get">
+ <div class="form-group">
+  <input type="text" name="q" class="form-control" placeholder="Search" />
+ </div>
+  <input type="hidden" name="check_keywords" value="yes" />
+  <input type="hidden" name="area" value="default" />
+</form>
+        </div>
+      </div>
+    <div class="col-md-9 content">
       
   <h1>Source code for RNAsketch.Design</h1><div class="highlight"><pre>
 <span></span><span class="ch">#!/usr/bin/env python</span>
@@ -177,8 +173,8 @@
 <div class="viewcode-block" id="Design.newState"><a class="viewcode-back" href="../../classes.html#RNAsketch.Design.Design.newState">[docs]</a>    <span class="k">def</span> <span class="nf">newState</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">struct</span><span class="p">,</span> <span class="n">temperature</span><span class="o">=</span><span class="mf">37.0</span><span class="p">,</span> <span class="n">ligand</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">constraint</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">enforce_constraint</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Creates a new state of the given subclass.</span>
-<span class="sd">        &#39;&#39;&#39;</span>
-        <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
+<span class="sd">        &#39;&#39;&#39;</span></div>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
     
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">structures</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -229,8 +225,8 @@
             <span class="n">result</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="si">{0:}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
             <span class="n">result</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="si">{0:}</span><span class="se">\t</span><span class="si">{1:9.4f}</span><span class="se">\t</span><span class="si">{2:+9.4f}</span><span class="se">\t</span><span class="si">{3:9.4f}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">state</span><span class="o">.</span><span class="n">structure</span><span class="p">,</span> <span class="n">state</span><span class="o">.</span><span class="n">eos</span><span class="p">,</span> <span class="n">state</span><span class="o">.</span><span class="n">eos</span><span class="o">-</span><span class="n">state</span><span class="o">.</span><span class="n">mfe_energy</span><span class="p">,</span> <span class="n">state</span><span class="o">.</span><span class="n">pos</span><span class="p">)</span>
             <span class="n">result</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="si">{0:}</span><span class="se">\t</span><span class="si">{1:9.4f}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">state</span><span class="o">.</span><span class="n">mfe_structure</span><span class="p">,</span> <span class="n">state</span><span class="o">.</span><span class="n">mfe_energy</span><span class="p">)</span>
-            <span class="n">result</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="si">{0:}</span><span class="se">\t</span><span class="si">{1:9.4f}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">state</span><span class="o">.</span><span class="n">pf_structure</span><span class="p">,</span> <span class="n">state</span><span class="o">.</span><span class="n">pf_energy</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">result</span></div>
+            <span class="n">result</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="si">{0:}</span><span class="se">\t</span><span class="si">{1:9.4f}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">state</span><span class="o">.</span><span class="n">pf_structure</span><span class="p">,</span> <span class="n">state</span><span class="o">.</span><span class="n">pf_energy</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="n">result</span>
     
 <div class="viewcode-block" id="Design.write_csv"><a class="viewcode-back" href="../../classes.html#RNAsketch.Design.Design.write_csv">[docs]</a>    <span class="k">def</span> <span class="nf">write_csv</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">separator</span><span class="o">=</span><span class="s1">&#39;;&#39;</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
@@ -248,8 +244,8 @@
             <span class="n">state</span><span class="o">.</span><span class="n">eos</span><span class="p">,</span>
             <span class="n">state</span><span class="o">.</span><span class="n">eos_diff_mfe</span><span class="p">,</span> 
             <span class="n">state</span><span class="o">.</span><span class="n">eos_reached_mfe</span><span class="p">,</span>
-            <span class="n">state</span><span class="o">.</span><span class="n">pos</span><span class="p">]))</span>
-        <span class="k">return</span> <span class="n">result</span></div>
+            <span class="n">state</span><span class="o">.</span><span class="n">pos</span><span class="p">]))</span></div>
+        <span class="k">return</span> <span class="n">result</span>
     
 <div class="viewcode-block" id="Design.write_csv_header"><a class="viewcode-back" href="../../classes.html#RNAsketch.Design.Design.write_csv_header">[docs]</a>    <span class="k">def</span> <span class="nf">write_csv_header</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">separator</span><span class="o">=</span><span class="s1">&#39;;&#39;</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
@@ -261,8 +257,8 @@
         <span class="n">strings</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;mfe_energy_&#39;</span><span class="p">,</span> <span class="s1">&#39;mfe_structure_&#39;</span><span class="p">,</span> <span class="s1">&#39;pf_energy_&#39;</span><span class="p">,</span> <span class="s1">&#39;pf_structure_&#39;</span><span class="p">,</span> <span class="s1">&#39;eos_&#39;</span><span class="p">,</span> <span class="s1">&#39;diff_eos_mfe_&#39;</span><span class="p">,</span> <span class="s1">&#39;mfe_reached_&#39;</span><span class="p">,</span> <span class="s1">&#39;prob_&#39;</span><span class="p">]</span>
         <span class="k">for</span> <span class="n">state</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">strings</span><span class="p">:</span>
-                <span class="n">result</span> <span class="o">+=</span> <span class="n">separator</span> <span class="o">+</span> <span class="n">s</span> <span class="o">+</span> <span class="n">state</span>
-        <span class="k">return</span> <span class="n">result</span></div>
+                <span class="n">result</span> <span class="o">+=</span> <span class="n">separator</span> <span class="o">+</span> <span class="n">s</span> <span class="o">+</span> <span class="n">state</span></div>
+        <span class="k">return</span> <span class="n">result</span>
     
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">eos</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -356,24 +352,24 @@
     <span class="k">def</span> <span class="nf">length</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        :return: Length of the designed sequence</span>
-<span class="sd">        &#39;&#39;&#39;</span>
-        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sequence</span><span class="p">)</span></div>
+<span class="sd">        &#39;&#39;&#39;</span></div>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sequence</span><span class="p">)</span>
 
 <div class="viewcode-block" id="vrnaDesign"><a class="viewcode-back" href="../../classes.html#RNAsketch.Design.vrnaDesign">[docs]</a><span class="k">class</span> <span class="nc">vrnaDesign</span><span class="p">(</span><span class="n">Design</span><span class="p">):</span>
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">classtype</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="s1">&#39;vrna&#39;</span>
     
-<div class="viewcode-block" id="vrnaDesign.newState"><a class="viewcode-back" href="../../classes.html#RNAsketch.Design.vrnaDesign.newState">[docs]</a>    <span class="k">def</span> <span class="nf">newState</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">struct</span><span class="p">,</span> <span class="n">temperature</span><span class="o">=</span><span class="mf">37.0</span><span class="p">,</span> <span class="n">ligand</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">constraint</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">enforce_constraint</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">vrnaState</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">structure</span><span class="o">=</span><span class="n">struct</span><span class="p">,</span> <span class="n">temperature</span><span class="o">=</span><span class="n">temperature</span><span class="p">,</span> <span class="n">ligand</span><span class="o">=</span><span class="n">ligand</span><span class="p">,</span> <span class="n">constraint</span><span class="o">=</span><span class="n">constraint</span><span class="p">,</span> <span class="n">enforce_constraint</span><span class="o">=</span><span class="n">enforce_constraint</span><span class="p">)</span></div></div>
+<div class="viewcode-block" id="vrnaDesign.newState"><a class="viewcode-back" href="../../classes.html#RNAsketch.Design.vrnaDesign.newState">[docs]</a>    <span class="k">def</span> <span class="nf">newState</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">struct</span><span class="p">,</span> <span class="n">temperature</span><span class="o">=</span><span class="mf">37.0</span><span class="p">,</span> <span class="n">ligand</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">constraint</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">enforce_constraint</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span></div></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">vrnaState</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">structure</span><span class="o">=</span><span class="n">struct</span><span class="p">,</span> <span class="n">temperature</span><span class="o">=</span><span class="n">temperature</span><span class="p">,</span> <span class="n">ligand</span><span class="o">=</span><span class="n">ligand</span><span class="p">,</span> <span class="n">constraint</span><span class="o">=</span><span class="n">constraint</span><span class="p">,</span> <span class="n">enforce_constraint</span><span class="o">=</span><span class="n">enforce_constraint</span><span class="p">)</span>
 
 <div class="viewcode-block" id="nupackDesign"><a class="viewcode-back" href="../../classes.html#RNAsketch.Design.nupackDesign">[docs]</a><span class="k">class</span> <span class="nc">nupackDesign</span><span class="p">(</span><span class="n">Design</span><span class="p">):</span>
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">classtype</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="s1">&#39;nupack&#39;</span>
     
-<div class="viewcode-block" id="nupackDesign.newState"><a class="viewcode-back" href="../../classes.html#RNAsketch.Design.nupackDesign.newState">[docs]</a>    <span class="k">def</span> <span class="nf">newState</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">struct</span><span class="p">,</span> <span class="n">temperature</span><span class="o">=</span><span class="mf">37.0</span><span class="p">,</span> <span class="n">ligand</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">constraint</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">enforce_constraint</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">nupackState</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">structure</span><span class="o">=</span><span class="n">struct</span><span class="p">,</span> <span class="n">temperature</span><span class="o">=</span><span class="n">temperature</span><span class="p">,</span> <span class="n">ligand</span><span class="o">=</span><span class="n">ligand</span><span class="p">,</span> <span class="n">constraint</span><span class="o">=</span><span class="n">constraint</span><span class="p">,</span> <span class="n">enforce_constraint</span><span class="o">=</span><span class="n">enforce_constraint</span><span class="p">)</span></div></div>
+<div class="viewcode-block" id="nupackDesign.newState"><a class="viewcode-back" href="../../classes.html#RNAsketch.Design.nupackDesign.newState">[docs]</a>    <span class="k">def</span> <span class="nf">newState</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">struct</span><span class="p">,</span> <span class="n">temperature</span><span class="o">=</span><span class="mf">37.0</span><span class="p">,</span> <span class="n">ligand</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">constraint</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">enforce_constraint</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span></div></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">nupackState</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">structure</span><span class="o">=</span><span class="n">struct</span><span class="p">,</span> <span class="n">temperature</span><span class="o">=</span><span class="n">temperature</span><span class="p">,</span> <span class="n">ligand</span><span class="o">=</span><span class="n">ligand</span><span class="p">,</span> <span class="n">constraint</span><span class="o">=</span><span class="n">constraint</span><span class="p">,</span> <span class="n">enforce_constraint</span><span class="o">=</span><span class="n">enforce_constraint</span><span class="p">)</span>
 </pre></div>
 
     </div>
@@ -387,8 +383,8 @@
       
     </p>
     <p>
-        &copy; Copyright 2016, Stefan Hammer.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.6.<br/>
+        &copy; Copyright 2018, Stefan Hammer.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.1.<br/>
     </p>
   </div>
 </footer>
