@@ -202,7 +202,7 @@ def ligand_objective(design, printDetails=False):
         print("prob_bc_ligand: {0:}\nprob_ac: {1:}\nprob_bc: {2:}\nscore: {3:}".format(prob_bc_ligand, prob_ac, prob_bc, score))
     
     # we need to maximize the score
-    return 1-score
+    return score
 
 def G_from_Z(Z, temperature):
     return - ((temperature + 273.15)*1.98717)/1000.0 * math.log(Z)
