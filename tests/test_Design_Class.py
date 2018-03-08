@@ -10,6 +10,7 @@ __email__ = "s.hammer@univie.ac.at"
 
 from RNAsketch import *
 import unittest
+import RNA
 
 class TestDesignClass(unittest.TestCase):
 
@@ -47,11 +48,14 @@ class TestDesignClass(unittest.TestCase):
         self.assertEqual(b.state['first'].structure, '...')
     
     def test_calculations(self):
+        fc = RNA.fold_compound('A')
+        vrna_pfstruct, vrna_pfenergy = fc.pf()
+        # now test
         a = vrnaDesign(['.'], 'A')
         self.assertEqual(a.mfe_energy, {'0': 0.0})
         self.assertEqual(a.mfe_structure, {'0': '.'})
-        self.assertEqual(a.pf_energy, {'0': 0.0})
-        self.assertEqual(a.pf_structure, {'0': '.'})
+        self.assertEqual(a.pf_energy, {'0': vrna_pfenergy})
+        self.assertEqual(a.pf_structure, {'0': vrna_pfstruct})
         self.assertEqual(a.number_of_structures, 1)
         self.assertEqual(a.length, 1)
         self.assertEqual(a.eos, {'0': 0.0})
@@ -62,12 +66,12 @@ class TestDesignClass(unittest.TestCase):
     
     def test_print(self):
         a = vrnaDesign(['((((....))))','..((....))..'], 'AAGGACGUCCUU')
-        print '\n'
-        print a.write_out(1000)
-        print '\n'
-        print a.write_csv_header()
-        print a.write_csv()
-        print '\n'
+        print('\n')
+        print(a.write_out(1000))
+        print('\n')
+        print(a.write_csv_header())
+        print(a.write_csv())
+        print('\n')
     
     def test_reassign(self):
         a = vrnaDesign(['((((....))))'], 'AAAAGGGGUUUU')

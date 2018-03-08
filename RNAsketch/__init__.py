@@ -82,9 +82,10 @@ def read_input_additions(content):
         if re.match(re.compile("^[\(\)\.\{\}\[\]\<\>\+\&]+$"), line, flags=0):
             structures.append(line.rstrip('\n'))
             additions.append(addition.rstrip('\n'))
-        elif re.match(re.compile("^[\ ACGTUWSMKRYBDHVN\&\+]+$"), line, flags=0):
+        elif re.match(re.compile("^[\ ACGTUWSMKRYBDHVN\&\+]+$", re.IGNORECASE), line, flags=0):
             line = line.replace(" ", "N")
-            if re.match(re.compile("^[ACGTU\&\+]+$"), line, flags=0) and sequence == '':
+            line = line.upper();
+            if re.match(re.compile("^[ACGTU\&\+]+$", re.IGNORECASE), line, flags=0) and sequence == '':
                 sequence = line.rstrip('\n')
             elif constraint == '':
                 constraint = line.rstrip('\n')
@@ -164,7 +165,7 @@ def calculate_objective_1(design):
 def calculate_objective_2(design):
     '''
     Calculates the objective function given a Design object containing the designed sequence and input structures.
-    objective function (3 seqs):    |eos(1)-eos(2)| + |eos(1)-eos(3)| + |eos(2)-eos(3))| * 2 / (number_of_structures * (number_of_structures-1))
+    objective function (3 seqs):    abs(eos(1)-eos(2)) + abs(eos(1)-eos(3)) + abs(eos(2)-eos(3))) * 2 / (number_of_structures * (number_of_structures-1))
 
     :param design: Design object containing the sequence and structures
     :return: score calculated by the objective function
