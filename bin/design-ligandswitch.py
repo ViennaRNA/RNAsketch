@@ -1,18 +1,34 @@
+#!/usr/bin/env python
+# # -*- coding: utf-8 -*-
+
+"""design-ligandswitch.py: Design a ligand triggered device."""
+
 from __future__ import print_function
 
-try:
-    from RNAsketch import *
-except ImportError, e:
-    print(e.message)
-    exit(1)
+__author__ = "Stefan Hammer, Sven Findeiss"
+__copyright__ = "Copyright 2018, Ribonets Project"
+__credits__ = ["Stefan Hammer", "Sven Findeiss", "Ivo L. Hofacker",
+                    "Christoph Flamm"]
+__license__ = "GPLv3"
+__version__ = "1.0"
+__maintainer__ = "Stefan Hammer"
+__email__ = "s.hamer@univie.ac.at"
+__status__ = "Production"
 
 import RNAblueprint as rbp
 import argparse
 import sys
 import time
 
+try:
+    from RNAsketch import *
+except ImportError as e:
+    print( "Error: %s" % e , file=sys.stderr)
+    exit(1)
+
+
 def main():
-    parser = argparse.ArgumentParser(description='Design a multi-stable riboswitch similar to Hoehner 2013 paper.')
+    parser = argparse.ArgumentParser(description='Design a ligand triggered device.')
     parser.add_argument("-f", "--file", type = str, default=None, help='Read file in *.inp format')
     parser.add_argument("-i", "--input", default=False, action='store_true', help='Read custom structures and sequence constraints from stdin')
     parser.add_argument("-r", "--ratio", type=str, default='90:10', help='Ratio of the alternative to binding competent state in percent (default: 90:10)')

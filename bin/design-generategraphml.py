@@ -1,4 +1,17 @@
-# http://hadim.fr/pygraphml/usage.html
+#!/usr/bin/env python
+# # -*- coding: utf-8 -*-
+
+"""design-generategraphml.py: Generate a graphml file for given structural constraints."""
+
+__author__ = "Stefan Hammer"
+__copyright__ = "Copyright 2018, Ribonets Project"
+__credits__ = ["Stefan Hammer", "Sven Findeiss"]
+__license__ = "GPLv3"
+__version__ = "1.0"
+__maintainer__ = "Stefan Hammer"
+__email__ = "s.hamer@univie.ac.at"
+__status__ = "Production"
+
 import RNAblueprint
 import argparse
 import tempfile
@@ -6,7 +19,7 @@ import sys
 import re
 
 def main():
-    parser = argparse.ArgumentParser(description='Generate a graphml file with python given structural constraints.')
+    parser = argparse.ArgumentParser(description='Generate a graphml file for given structural constraints.')
     parser.add_argument("-i", "--input", default=False, action='store_true', help='Read custom structures and sequence constraints from stdin')
     parser.add_argument("-f", "--file", type = str, default=None, help='Read file in *.inp format')
     parser.add_argument("-o", "--output", type=str, default=None, help='Write graphml file with the given filename.')
