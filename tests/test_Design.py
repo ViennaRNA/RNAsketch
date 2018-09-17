@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 '''
-    test_Design_Class.py: UNIT tests for Design_Class.py
+    test_Design.py: UNIT tests for Design.py
 '''
 
 __author__ = "Stefan Hammer"
@@ -27,7 +27,7 @@ class TestDesignClass(unittest.TestCase):
         b = vrnaDesign({'eins': '..', 'zwei': '()'}, 'AU')
         self.assertEqual(b.state['eins'].structure, '..')
         self.assertEqual(b.state['zwei'].structure, '()')
-    
+
     def test_init_empty_sequence(self):
         a = vrnaDesign(['...'])
         self.assertEqual(a.sequence, None)
@@ -42,11 +42,11 @@ class TestDesignClass(unittest.TestCase):
         self.assertEqual(a.eos_reached_mfe, {'0': None})
         self.assertEqual(a.eos_diff_mfe, {'0': None})
         self.assertEqual(a.ensemble_defect, {'0': None})
-        
+
         b = vrnaDesign({'first': '...'})
         self.assertEqual(b.structures, ['...'])
         self.assertEqual(b.state['first'].structure, '...')
-    
+
     def test_calculations(self):
         fc = RNA.fold_compound('A')
         vrna_pfstruct, vrna_pfenergy = fc.pf()
@@ -63,7 +63,7 @@ class TestDesignClass(unittest.TestCase):
         self.assertEqual(a.eos_reached_mfe, {'0': 1})
         self.assertEqual(a.eos_diff_mfe, {'0': 0.0})
         self.assertEqual(a.ensemble_defect, {'0': 0.0})
-    
+
     def test_print(self):
         a = vrnaDesign(['((((....))))','..((....))..'], 'AAGGACGUCCUU')
         print('\n')
@@ -72,7 +72,7 @@ class TestDesignClass(unittest.TestCase):
         print(a.write_csv_header())
         print(a.write_csv())
         print('\n')
-    
+
     def test_reassign(self):
         a = vrnaDesign(['((((....))))'], 'AAAAGGGGUUUU')
         mfe_energy = a.mfe_energy

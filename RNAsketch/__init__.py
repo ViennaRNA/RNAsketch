@@ -17,6 +17,8 @@ import math
 
 import RNAblueprint as rbp
 from Design import *
+from Structure import RNAStructure
+from RNARedPrintSampler import RPSampler
 
 '''
 Global variable:

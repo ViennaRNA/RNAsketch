@@ -27,6 +27,11 @@ Cite
 
 Stefan Hammer, Birgit Tschiatschek, Christoph Flamm, Ivo L. Hofacker, and Sven Findeiß. “RNAblueprint: Flexible Multiple Target Nucleic Acid Sequence Design.” Bioinformatics, 2017. https://doi.org/10.1093/bioinformatics/btx263.
 
+If you used the multi-dimensional boltzmann sampling scripts `design-redprint-multistate.py` or `design-energyshift.py` please cite:
+
+Stefan Hammer, Yann Ponty, Wei Wang, and Sebastian Will. “Fixed-Parameter Tractable Sampling for RNA Design with Multiple Target Structures.” In RECOMB 2018. Paris, France, 2018. https://arxiv.org/abs/1804.00841.
+
+
 Provided Example Scripts
 ------------------------
 
@@ -114,7 +119,7 @@ Design a ligand triggered switch
 
 .. code:: bash
     
-    echo -e "(((((...((((((((.....)))))...)))...)))))........................\n.........................(((((((((((......)))))))))))...........\nAAGUGAUACCAGCAUCGUCUUGAUGCCCUUGGCAGCACUUCANNNNNNNNNNNNNNNNNNNNNN" | design-ligand_switch.py -r 70:30 --ligand "GAUACCAG&CCCUUGGCAGC;(...((((&)...)))...);-9.22"
+    echo -e "(((((...((((((((.....)))))...)))...)))))........................\n.........................(((((((((((......)))))))))))...........\nAAGUGAUACCAGCAUCGUCUUGAUGCCCUUGGCAGCACUUCANNNNNNNNNNNNNNNNNNNNNN" | design-ligandswitch.py -r 70:30 --ligand "GAUACCAG&CCCUUGGCAGC;(...((((&)...)))...);-9.22"
 
 This designs a simple theophylline triggered switch. It adapts to a certain ratio of 
 the aptamer structure (ligand competent state) and an alternative state as specified
@@ -127,6 +132,41 @@ ligand binding competent state in the presence of the ligand.
 .. figure:: data/ligandswitch.png
     :width: 350px
 .. figure:: doc/data/ligandswitch.png
+    :width: 350px
+    
+Design a multistate riboswitch with equal target energies
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. code:: bash
+    
+    export REDPRINT=</path/to/redprint/>
+    echo -e "(((((((((((((....)))))))))))))\n(((((.....)))))(((((.....)))))\n(((((.....)))))..............." | design-redprint-multistate.py -i -n 10
+
+Using this script you can design a multistate riboswitch similar to the `design-multistate.py` script with fundamental differences in the sampling technology.
+Here, we use `RNARedPrint` to gain Boltzmann-weighted sampling of sequences given the structural inputs. This script then implements a strategy to achieve multi-dimensional boltzmann sampling with the target energy being the mean achieveable energy of the target structures.
+
+The resulting sequences exhibit equal energies for the given target structurs. This does not mean that the target structures are highly populated in the ensemble. To additionally achieve this, specify the `-s 200` option to subsequently do a optimization towards the multi-target objective function.
+
+Either put the complete `RNARedPrint` project folder next to the scripts, or set a `REDPRINT` environmental variable before executing this script!
+
+Design a multistate riboswitch with specific target energies
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. code:: bash
+    
+    export REDPRINT=</path/to/redprint/>
+    echo -e ".((((((......)))))).((((...((((((...((((...(((.......)))..........(((....))).))))..))))))...))))....\n.((((((......)))))).((((...((((((...((((((.(((.......((........))..)))....)).))))..))))))...))))....\n......((.((((.(((((((.((.((...((((..((.....(((.......))).....))..)))).)).)))))))))..)).)).))........" | design-energyshift.py -i -e 40,40,20
+
+Design a multistate riboswitch with specific target energies and GC-content. This script uses RNARedPrint for Boltzmann-weighted sampling and implements a strategy to achieve multi-dimensional boltzmann sampling.
+
+Either put the complete `RNARedPrint` project folder next to the scripts, or set a `REDPRINT` environmental variable before executing this script!
+
+
+The resulting sequences are nicely distributed around the specified target energies:
+
+.. figure:: data/energyshift.png
+    :width: 350px
+.. figure:: doc/data/energyshift.png
     :width: 350px
 
 

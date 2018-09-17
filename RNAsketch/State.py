@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 '''
-    State_Class.py: Class as wrapper for ViennaRNA and Nupack
+    State.py: Class as wrapper for ViennaRNA and Nupack
     functions to design an RNA molecule.
     This implements the various states of a riboswitch.
 '''
@@ -18,41 +18,54 @@ import sys
 
 vrna_available = True
 nupack_available = True
+pKiss_available = True
+HotKnots_available = True
 
 try:
     import RNA
     #RNA.read_parameter_file('/usr/share/ViennaRNA/rna_turner1999.par')
-except ImportError, e:
+except ImportError as e:
     vrna_available = False
-    sys.stderr.write("-" * 60 + "\nWARNING: " + e.message + "!!!\n" + "-" * 60 + "\n")
+    sys.stderr.write("-" * 60 + "\nWARNING: " + str(e) + "!!!\n" + "-" * 60 + "\n")
     sys.stderr.flush()
 
 try:
     import nupack
-except ImportError, e:
+except ImportError as e:
     nupack_available = False
-    sys.stderr.write("-" * 60 + "\nWARNING: " + e.message + "!!!\n" + "-" * 60 + "\n")
+    sys.stderr.write("-" * 60 + "\nWARNING: " + str(e) + "!!!\n" + "-" * 60 + "\n")
     sys.stderr.flush()
 
-if not (vrna_available or nupack_available):
-    raise ImportError("Neither ViennaRNA package nor Nupack found!")
+try:
+    import pKiss
+except ImportError as e:
+    pKiss_available = False
+    sys.stderr.write("-" * 60 + "\nWARNING: " + str(e) + "!!!\n" + "-" * 60 + "\n")
+    sys.stderr.flush()
+
+try:
+    import HotKnots
+except ImportError as e:
+    HotKnots_available = False
+    sys.stderr.write("-" * 60 + "\nWARNING: " + str(e) + "!!!\n" + "-" * 60 + "\n")
+    sys.stderr.flush()
+
+if not (vrna_available or nupack_available or pKiss_available or HotKnots_available):
+    raise ImportError("Neither ViennaRNA package, Nupack or pKiss found!")
 
 class State(object):
     '''
-    State object holds structure, ligand, constraints and calculates all values
-    for this state.
+    State object holds structure, ligand, constraints and calculates
+    all values for this state.
+
+    :param structure: Dot-bracket structure string
+    :param parent: Parent Design object
     '''
-    
+
     def __init__(self, parent, structure=None, temperature=37.0, ligand=None, constraint=None, enforce_constraint=False):
-        '''
-        Construct a new State object.
-        
-        :param structure:
-        :param parent:
-        '''
         if not isinstance(structure, basestring):
             raise ValueError('Not a structure string: ' + repr(structure))
-        
+
         self._structure = structure
         self._parent = parent
         self.reset()
@@ -63,7 +76,7 @@ class State(object):
         self._length = None
         self._cut_points = None
         self._multifold = None
-    
+
     def reset(self):
         self._eos = None
         self._pos = None
@@ -74,18 +87,18 @@ class State(object):
         self._pf_structure = None
         self._pf_energy = None
         self._ensemble_defect = None
-    
+
     @property
     def structure(self):
         '''
         :return: Dot-bracket structure as constraint for this state
         '''
         return self._structure
-    
+
     @property
     def temperature(self):
         '''
-        :return: Temperature of this state 
+        :return: Temperature of this state
         '''
         return self._temperature
     @temperature.setter
@@ -94,7 +107,7 @@ class State(object):
             raise ValueError('Temperature must be a float pointing value')
         self.reset()
         self._temperature = t
-    
+
     @property
     def ligand(self):
         '''
@@ -107,7 +120,7 @@ class State(object):
             raise ValueError('Ligand must be a list with three items: sequence pattern, structure pattern and binding energy')
         self.reset()
         self._ligand = lig
-    
+
     @property
     def constraint(self):
         '''
@@ -122,11 +135,11 @@ class State(object):
                 raise ValueError('constraint and sequence must have equal length!')
         self.reset()
         self._constraint = constraint
-    
+
     @property
     def enforce_constraint(self):
         '''
-        :return: Boolean whether to enforce the hard constraint or not 
+        :return: Boolean whether to enforce the hard constraint or not
         '''
         return self._enforce_constraint
     @enforce_constraint.setter
@@ -134,11 +147,11 @@ class State(object):
         if enforced is not self._enforce_constraint:
             self.reset()
             self._enforce_constraint = enforced
-    
+
     @property
     def length(self):
         '''
-        :return: Length of the design sequence if available, otherwise of the stuctural input 
+        :return: Length of the design sequence if available, otherwise of the stuctural input
         '''
         if not self._length:
             if self._parent and self._parent.sequence:
@@ -147,7 +160,7 @@ class State(object):
                 self._length = len(self._structure)
 
         return self._length
-    
+
     @property
     def cut_points(self):
         '''
@@ -159,7 +172,7 @@ class State(object):
             for match in iterator:
                 self._cut_points.append(match.start()+1)
         return self._cut_points
-    
+
     @property
     def multifold(self):
         '''
@@ -168,11 +181,11 @@ class State(object):
         if not self._multifold:
             self._multifold = len(self.cut_points)
         return self._multifold
-    
+
     @property
     def classtype(self):
         return None
-    
+
     @property
     def eos(self):
         '''
@@ -181,7 +194,7 @@ class State(object):
         if not self._eos and self._parent.sequence and self._structure:
             self._eos = self._get_eos(self._parent.sequence, self._structure, self.temperature, self.ligand)
         return self._eos
-         
+
     @property
     def pos(self):
         '''
@@ -190,7 +203,7 @@ class State(object):
         if not self._pos and self._parent.sequence:
             self._pos = math.exp((self.pf_energy-self.eos) / self._get_KT(self.temperature) )
         return self._pos
-         
+
     @property
     def eos_diff_mfe(self):
         '''
@@ -199,7 +212,7 @@ class State(object):
         if not self._eos_diff_mfe and self._parent.sequence:
             self._eos_diff_mfe = self.eos - self.mfe_energy
         return self._eos_diff_mfe
-    
+
     @property
     def eos_reached_mfe(self):
         '''
@@ -211,7 +224,7 @@ class State(object):
             else:
                 self._eos_reached_mfe = 0
         return self._eos_reached_mfe
-    
+
     @property
     def mfe_energy(self):
         '''
@@ -220,7 +233,7 @@ class State(object):
         if not self._mfe_energy and self._parent.sequence:
             self._calculate_mfe_energy_structure()
         return self._mfe_energy
-    
+
     @property
     def mfe_structure(self):
         '''
@@ -229,23 +242,23 @@ class State(object):
         if not self._mfe_structure and self._parent.sequence:
             self._calculate_mfe_energy_structure()
         return self._mfe_structure
-    
+
     def _calculate_mfe_energy_structure(self):
         (structure, energie) = self._get_fold(self._parent.sequence, self.temperature, self.ligand, self.constraint)
         self._mfe_energy = energie
         self._mfe_structure = structure
-    
+
     @property
     def pf_energy(self):
         '''
         In case of a dimer cofold calculation with viennarna, the function returns the energy of true hybrid states only.
-        
+
         :return: Partition function energy value given all the properties of this state (constraints, temperature,...)
         '''
         if not self._pf_energy and self._parent.sequence:
             self._calculate_pf_energy_structure()
         return self._pf_energy
-    
+
     @property
     def pf_structure(self):
         '''
@@ -254,12 +267,12 @@ class State(object):
         if not self._pf_structure and self._parent.sequence:
             self._calculate_pf_energy_structure()
         return self._pf_structure
-    
+
     def _calculate_pf_energy_structure(self):
         (structure, energie) = self._get_pf_fold(self._parent.sequence, self.temperature, self.ligand, self.constraint)
         self._pf_energy = energie
         self._pf_structure = structure
-    
+
     @property
     def ensemble_defect(self):
         '''
@@ -270,23 +283,23 @@ class State(object):
                 raise ValueError('sequence and structure must have equal length to calculate the ensemble defect!')
             self._ensemble_defect = self._get_ensemble_defect(self._parent.sequence, self._structure, self.temperature, self.ligand)
         return self._ensemble_defect
-    
+
     def _get_KT(self, temperature):
         # KT = (betaScale*((temperature+K0)*GASCONST))/1000.0; /* in Kcal */
         return ((temperature + 273.15)*1.98717)/1000.0;
-    
+
     def _get_eos(self, sequence, structure, temperature, ligand):
         raise NotImplementedError
-    
+
     def _get_fold(self, sequence, temperature, ligand, constraint):
         raise NotImplementedError
-    
+
     def _get_pf_fold(self, sequence, temperature, ligand, constraint):
         raise NotImplementedError
-    
+
     def _get_ensemble_defect(self, sequence, structure, temperature, ligand):
         raise NotImplementedError
-    
+
 if vrna_available:
     class vrnaState(State):
         @property
@@ -295,7 +308,7 @@ if vrna_available:
 
         def _change_cuts(self, input):
             return re.sub('[+]', '&', input)
-        
+
         def _get_fold_compound(self, sequence, temperature, ligand=None, constraint=None, options=RNA.OPTION_PF):
             md = RNA.md()
             md.temperature = temperature
@@ -338,7 +351,7 @@ if vrna_available:
             elif self.multifold > 1:
                 raise NotImplementedError
             return (structure, energie)
-        
+
         def _get_ensemble_defect(self, sequence, structure, temperature, ligand=None):
             #TODO finish implementation with pairing matrix. need to ask ronny how it is done now or use old interface
             fc = self._get_fold_compound(sequence, temperature, ligand)
@@ -375,7 +388,7 @@ if nupack_available:
         def _change_cuts(self, input):
             return re.sub('[&]', '+', input)
 
-        def _get_eos(self, sequence, structure, temperature, ligand=None):            
+        def _get_eos(self, sequence, structure, temperature, ligand=None):
             #TODO nupack.energy can not handle unconnected cofold structures
             return nupack.energy([self._change_cuts(sequence)], self._change_cuts(structure), material = 'rna', pseudo = True, T = temperature)
 
@@ -394,13 +407,68 @@ if nupack_available:
         def _get_pf_fold(self, sequence, temperature, ligand=None, constraint=None):
             # Nupack doesn't return ensemble structure
             return re.sub('[^\+]', '?', self._change_cuts(sequence)), nupack.pfunc([sequence], material = 'rna', pseudo = True, T = temperature)
-        
+
         def _get_ensemble_defect(self, sequence, structure, temperature, ligand=None):
             return nupack.defect([self._change_cuts(sequence)], structure, material = 'rna', pseudo = True, T = temperature)
-        
+
+if pKiss_available:
+    class pKissState(State):
+        @property
+        def classtype(self):
+            return 'pKiss'
+
+        def _change_cuts(self, input):
+            if re.match(r'[&+]', input):
+                raise IOError('pKiss cannot handle concatenated RNAs')
+            return input
+
+        def _get_eos(self, sequence, structure, temperature, ligand=None):
+            #TODO pKiss cannot handle ligands
+            # pkiss eval returns multiple answers to the eval question, take lowest energy!
+            shape, energy, structure = pKiss.eval(self._change_cuts(sequence), self._change_cuts(structure), temperature = temperature)
+            return energy
+
+        def _get_fold(self, sequence, temperature, ligand=None, constraint=None):
+            return pKiss.mfe(self._change_cuts(sequence), temperature = temperature)
+
+        def _get_pf_fold(self, sequence, temperature, ligand=None, constraint=None):
+            #TODO return mfe as a bad approximation it cannot calculate the partition function
+            return pKiss.mfe(self._change_cuts(sequence), temperature = temperature)
+
+        def _get_ensemble_defect(self, sequence, structure, temperature, ligand=None):
+            raise NotImplementedError
+
+if HotKnots_available:
+    class hotknotsState(State):
+        @property
+        def classtype(self):
+            return 'hotknots'
+
+        def _change_cuts(self, input):
+            if re.match(r'[&+]', input):
+                raise IOError('Hotknots cannot handle concatenated RNAs')
+            return input
+
+        def _get_eos(self, sequence, structure, temperature, ligand=None):
+            #TODO Hotknots cannot handle ligands and temperature
+            structure, energy = HotKnots.eval(self._change_cuts(sequence), self._change_cuts(structure))
+            return energy
+
+        def _get_fold(self, sequence, temperature, ligand=None, constraint=None):
+            #TODO Hotknots cannot handle ligands and temperature
+            return HotKnots.mfe(self._change_cuts(sequence))
+
+        def _get_pf_fold(self, sequence, temperature, ligand=None, constraint=None):
+            #TODO return mfe as a bad approximation it cannot calculate the partition function
+            return HotKnots.mfe(self._change_cuts(sequence))
+
+        def _get_ensemble_defect(self, sequence, structure, temperature, ligand=None):
+            raise NotImplementedError
+
 def remove_cuts(input):
     '''
     Takes a string and removes all cut characters (+&) from this string
+
     :param input: string containing cut point characters
     :return: string without cut point characters
     '''

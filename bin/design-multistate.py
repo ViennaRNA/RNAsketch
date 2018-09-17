@@ -30,7 +30,7 @@ def main():
     parser = argparse.ArgumentParser(description='Design a multi-stable riboswitch similar to Hoehner 2013 paper.')
     parser.add_argument("-f", "--file", type = str, default=None, help='Read file in *.inp format')
     parser.add_argument("-i", "--input", default=False, action='store_true', help='Read custom structures and sequence constraints from stdin')
-    parser.add_argument("-q", "--package", type=str, default='vrna', help='Chose the calculation package: nupack (for pseudoknots) or ViennaRNA (default: vrna)')
+    parser.add_argument("-q", "--package", type=str, default='vrna', help='Chose the calculation package: hotknots, pkiss, nupack, or vrna/ViennaRNA (default: vrna)')
     parser.add_argument("-j", "--objective", type=str, default='1', help='Chose the objective function: 1 for abs differences and 2 for squared (default: 1)')
     parser.add_argument("-T", "--temperature", type=float, default=37.0, help='Temperature of the energy calculations.')
     parser.add_argument("-n", "--number", type=int, default=4, help='Number of designs to generate')
@@ -97,10 +97,7 @@ def main():
         # remember general DG values
         graph_properties = get_graph_properties(dg)
         # create a initial design object
-        if (args.package is 'nupack'):
-            design = nupackDesign(structures, start_sequence)
-        else:
-            design = vrnaDesign(structures, start_sequence)
+        design = get_Design(structures, start_sequence, args.package, args.temperature)
 
         # print header for csv file
         if (args.csv):
@@ -116,14 +113,7 @@ def main():
         # main loop from zero to number of solutions
         for n in range(0, args.number):
             # reset the design object
-            if (args.package is 'nupack'):
-                design = nupackDesign(structures, start_sequence)
-            else:
-                design = vrnaDesign(structures, start_sequence)
-
-            # Set the given temperature for all states
-            for state in design.state.values():
-                state.temperature = args.temperature
+            design = get_Design(structures, start_sequence, args.package, args.temperature)
 
             start = time.clock()
 
