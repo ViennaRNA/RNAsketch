@@ -4,10 +4,10 @@
   <head>
     <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Classes &#8212; RNAsketch 1.4.0 documentation</title>
+    <title>Classes &#8212; RNAsketch 1.5.0 documentation</title>
     <link rel="stylesheet" href="_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <script type="text/javascript" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
@@ -36,7 +36,7 @@
         </button>
         <a class="navbar-brand" href="index.html"><span><img src="_static/rnasketch.png"></span>
           RNAsketch</a>
-        <span class="navbar-text navbar-version pull-left"><b>1.4</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>1.5</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -70,6 +70,8 @@
 <li><a class="reference internal" href="#">Classes</a><ul>
 <li><a class="reference internal" href="#module-RNAsketch.Design">RNAsketch.Design</a></li>
 <li><a class="reference internal" href="#module-RNAsketch.State">RNAsketch.State</a></li>
+<li><a class="reference internal" href="#module-RNAsketch.Structure">RNAsketch.RNAStructure</a></li>
+<li><a class="reference internal" href="#module-RNAsketch.RNARedPrintSampler">RNAsketch.RPSampler</a></li>
 </ul>
 </li>
 </ul>
@@ -118,6 +120,8 @@
 <li><a class="reference internal" href="#">Classes</a><ul>
 <li><a class="reference internal" href="#module-RNAsketch.Design">RNAsketch.Design</a></li>
 <li><a class="reference internal" href="#module-RNAsketch.State">RNAsketch.State</a></li>
+<li><a class="reference internal" href="#module-RNAsketch.Structure">RNAsketch.RNAStructure</a></li>
+<li><a class="reference internal" href="#module-RNAsketch.RNARedPrintSampler">RNAsketch.RPSampler</a></li>
 </ul>
 </li>
 </ul>
@@ -145,16 +149,28 @@
 <h1>Classes<a class="headerlink" href="#classes" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="module-RNAsketch.Design">
 <span id="rnasketch-design"></span><h2>RNAsketch.Design<a class="headerlink" href="#module-RNAsketch.Design" title="Permalink to this headline">¶</a></h2>
-<p>Design_Class.py: Class as wrapper for ViennaRNA and Nupack
+<p>Design.py: Class as wrapper for ViennaRNA and Nupack
 functions to design an RNA molecule
 This implements the core class which holds all the states of a riboswitch</p>
 <dl class="class">
 <dt id="RNAsketch.Design.Design">
 <em class="property">class </em><code class="descclassname">RNAsketch.Design.</code><code class="descname">Design</code><span class="sig-paren">(</span><em>structures</em>, <em>sequence=''</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/RNAsketch/Design.html#Design"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#RNAsketch.Design.Design" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>Design contains all neccessary information to generate a RNA device
 or to return a solution. It is used as a container between the different
 functions.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>structures</strong> – RNA secondary structure string in dot-bracket notation</li>
+<li><strong>sequence</strong> – RNA sequence string in IUPAC notation [AUGC]</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 <dl class="attribute">
 <dt id="RNAsketch.Design.Design.classtype">
 <code class="descname">classtype</code><a class="headerlink" href="#RNAsketch.Design.Design.classtype" title="Permalink to this definition">¶</a></dt>
@@ -255,6 +271,22 @@ functions.</p>
 <dt id="RNAsketch.Design.Design.newState">
 <code class="descname">newState</code><span class="sig-paren">(</span><em>key</em>, <em>struct</em>, <em>temperature=37.0</em>, <em>ligand=None</em>, <em>constraint=None</em>, <em>enforce_constraint=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/RNAsketch/Design.html#Design.newState"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#RNAsketch.Design.Design.newState" title="Permalink to this definition">¶</a></dt>
 <dd><p>Creates a new state of the given subclass.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>key</strong> – Name of the state (string)</li>
+<li><strong>struct</strong> – Dot-bracket notation of a structure input</li>
+<li><strong>temperature</strong> – Temperature for the folding predictions of this state (default: 37.0 degree celsius)</li>
+<li><strong>ligand</strong> – List specifying the ligand binding-pocket and energy, e.g. for Theophylline [“GAUACCAG&amp;CCCUUGGCAGC”,”(…((((&amp;)…)))…)”,-9.22]</li>
+<li><strong>constraint</strong> – specify a hard constraint string</li>
+<li><strong>enforce_constraint</strong> – boolean if we should enforce constraints</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="attribute">
@@ -338,25 +370,102 @@ functions.</p>
 <dl class="method">
 <dt id="RNAsketch.Design.Design.write_csv">
 <code class="descname">write_csv</code><span class="sig-paren">(</span><em>separator=';'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/RNAsketch/Design.html#Design.write_csv"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#RNAsketch.Design.Design.write_csv" title="Permalink to this definition">¶</a></dt>
-<dd><p>Generates a csv version of all values of this design separated by the given separator
-:param separator: separator for the values
-:return: string containing all values of this design separated by the given separator</p>
+<dd><p>Generates a csv version of all values of this design separated by the given separator</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>separator</strong> – separator for the values</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">string containing all values of this design separated by the given separator</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
 <dt id="RNAsketch.Design.Design.write_csv_header">
 <code class="descname">write_csv_header</code><span class="sig-paren">(</span><em>separator=';'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/RNAsketch/Design.html#Design.write_csv_header"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#RNAsketch.Design.Design.write_csv_header" title="Permalink to this definition">¶</a></dt>
-<dd><p>Generates a csv header for all values of this design separated by the given separator
-:param separator: separator for the values
-:return: string containing a csv header for this design separated by the given separator</p>
+<dd><p>Generates a csv header for all values of this design separated by the given separator</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>separator</strong> – separator for the values</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">string containing a csv header for this design separated by the given separator</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
 <dt id="RNAsketch.Design.Design.write_out">
 <code class="descname">write_out</code><span class="sig-paren">(</span><em>score=0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/RNAsketch/Design.html#Design.write_out"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#RNAsketch.Design.Design.write_out" title="Permalink to this definition">¶</a></dt>
-<dd><p>Generates a nice human readable version of all values of this design
-:param score: optimization score for this design
-:return: string containing a nicely formatted version of all design values</p>
+<dd><p>Generates a nice human readable version of all values of this design</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>score</strong> – optimization score for this design</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">string containing a nicely formatted version of all design values</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="RNAsketch.Design.get_Design">
+<code class="descclassname">RNAsketch.Design.</code><code class="descname">get_Design</code><span class="sig-paren">(</span><em>structures</em>, <em>sequence</em>, <em>package</em>, <em>temperature=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/RNAsketch/Design.html#get_Design"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#RNAsketch.Design.get_Design" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convenience function to build and return the right Design object</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>structures</strong> – RNA secondary structure string in dot-brackete notation</li>
+<li><strong>sequence</strong> – RNA sequence string in IUPAC notation [AUGC]</li>
+<li><strong>package</strong> – String specifying the folding energy evaluation package (‘nupack’, ‘vrna’, ‘pkiss’, ‘hotknots’)</li>
+<li><strong>temperature</strong> – Temperature for the folding predictions in degree celsius (default: 37.0)</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="RNAsketch.Design.hotknotsDesign">
+<em class="property">class </em><code class="descclassname">RNAsketch.Design.</code><code class="descname">hotknotsDesign</code><span class="sig-paren">(</span><em>structures</em>, <em>sequence=''</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/RNAsketch/Design.html#hotknotsDesign"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#RNAsketch.Design.hotknotsDesign" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#RNAsketch.Design.Design" title="RNAsketch.Design.Design"><code class="xref py py-class docutils literal notranslate"><span class="pre">RNAsketch.Design.Design</span></code></a></p>
+<dl class="attribute">
+<dt id="RNAsketch.Design.hotknotsDesign.classtype">
+<code class="descname">classtype</code><a class="headerlink" href="#RNAsketch.Design.hotknotsDesign.classtype" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="RNAsketch.Design.hotknotsDesign.newState">
+<code class="descname">newState</code><span class="sig-paren">(</span><em>key</em>, <em>struct</em>, <em>temperature=37.0</em>, <em>ligand=None</em>, <em>constraint=None</em>, <em>enforce_constraint=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/RNAsketch/Design.html#hotknotsDesign.newState"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#RNAsketch.Design.hotknotsDesign.newState" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a new state of the given subclass.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>key</strong> – Name of the state (string)</li>
+<li><strong>struct</strong> – Dot-bracket notation of a structure input</li>
+<li><strong>temperature</strong> – Temperature for the folding predictions of this state (default: 37.0 degree celsius)</li>
+<li><strong>ligand</strong> – List specifying the ligand binding-pocket and energy, e.g. for Theophylline [“GAUACCAG&amp;CCCUUGGCAGC”,”(…((((&amp;)…)))…)”,-9.22]</li>
+<li><strong>constraint</strong> – specify a hard constraint string</li>
+<li><strong>enforce_constraint</strong> – boolean if we should enforce constraints</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 </dd></dl>
@@ -374,6 +483,55 @@ functions.</p>
 <dt id="RNAsketch.Design.nupackDesign.newState">
 <code class="descname">newState</code><span class="sig-paren">(</span><em>key</em>, <em>struct</em>, <em>temperature=37.0</em>, <em>ligand=None</em>, <em>constraint=None</em>, <em>enforce_constraint=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/RNAsketch/Design.html#nupackDesign.newState"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#RNAsketch.Design.nupackDesign.newState" title="Permalink to this definition">¶</a></dt>
 <dd><p>Creates a new state of the given subclass.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>key</strong> – Name of the state (string)</li>
+<li><strong>struct</strong> – Dot-bracket notation of a structure input</li>
+<li><strong>temperature</strong> – Temperature for the folding predictions of this state (default: 37.0 degree celsius)</li>
+<li><strong>ligand</strong> – List specifying the ligand binding-pocket and energy, e.g. for Theophylline [“GAUACCAG&amp;CCCUUGGCAGC”,”(…((((&amp;)…)))…)”,-9.22]</li>
+<li><strong>constraint</strong> – specify a hard constraint string</li>
+<li><strong>enforce_constraint</strong> – boolean if we should enforce constraints</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="RNAsketch.Design.pkissDesign">
+<em class="property">class </em><code class="descclassname">RNAsketch.Design.</code><code class="descname">pkissDesign</code><span class="sig-paren">(</span><em>structures</em>, <em>sequence=''</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/RNAsketch/Design.html#pkissDesign"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#RNAsketch.Design.pkissDesign" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#RNAsketch.Design.Design" title="RNAsketch.Design.Design"><code class="xref py py-class docutils literal notranslate"><span class="pre">RNAsketch.Design.Design</span></code></a></p>
+<dl class="attribute">
+<dt id="RNAsketch.Design.pkissDesign.classtype">
+<code class="descname">classtype</code><a class="headerlink" href="#RNAsketch.Design.pkissDesign.classtype" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="RNAsketch.Design.pkissDesign.newState">
+<code class="descname">newState</code><span class="sig-paren">(</span><em>key</em>, <em>struct</em>, <em>temperature=37.0</em>, <em>ligand=None</em>, <em>constraint=None</em>, <em>enforce_constraint=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/RNAsketch/Design.html#pkissDesign.newState"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#RNAsketch.Design.pkissDesign.newState" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a new state of the given subclass.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>key</strong> – Name of the state (string)</li>
+<li><strong>struct</strong> – Dot-bracket notation of a structure input</li>
+<li><strong>temperature</strong> – Temperature for the folding predictions of this state (default: 37.0 degree celsius)</li>
+<li><strong>ligand</strong> – List specifying the ligand binding-pocket and energy, e.g. for Theophylline [“GAUACCAG&amp;CCCUUGGCAGC”,”(…((((&amp;)…)))…)”,-9.22]</li>
+<li><strong>constraint</strong> – specify a hard constraint string</li>
+<li><strong>enforce_constraint</strong> – boolean if we should enforce constraints</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 </dd></dl>
@@ -391,6 +549,22 @@ functions.</p>
 <dt id="RNAsketch.Design.vrnaDesign.newState">
 <code class="descname">newState</code><span class="sig-paren">(</span><em>key</em>, <em>struct</em>, <em>temperature=37.0</em>, <em>ligand=None</em>, <em>constraint=None</em>, <em>enforce_constraint=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/RNAsketch/Design.html#vrnaDesign.newState"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#RNAsketch.Design.vrnaDesign.newState" title="Permalink to this definition">¶</a></dt>
 <dd><p>Creates a new state of the given subclass.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>key</strong> – Name of the state (string)</li>
+<li><strong>struct</strong> – Dot-bracket notation of a structure input</li>
+<li><strong>temperature</strong> – Temperature for the folding predictions of this state (default: 37.0 degree celsius)</li>
+<li><strong>ligand</strong> – List specifying the ligand binding-pocket and energy, e.g. for Theophylline [“GAUACCAG&amp;CCCUUGGCAGC”,”(…((((&amp;)…)))…)”,-9.22]</li>
+<li><strong>constraint</strong> – specify a hard constraint string</li>
+<li><strong>enforce_constraint</strong> – boolean if we should enforce constraints</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 </dd></dl>
@@ -398,15 +572,27 @@ functions.</p>
 </div>
 <div class="section" id="module-RNAsketch.State">
 <span id="rnasketch-state"></span><h2>RNAsketch.State<a class="headerlink" href="#module-RNAsketch.State" title="Permalink to this headline">¶</a></h2>
-<p>State_Class.py: Class as wrapper for ViennaRNA and Nupack
+<p>State.py: Class as wrapper for ViennaRNA and Nupack
 functions to design an RNA molecule.
 This implements the various states of a riboswitch.</p>
 <dl class="class">
 <dt id="RNAsketch.State.State">
 <em class="property">class </em><code class="descclassname">RNAsketch.State.</code><code class="descname">State</code><span class="sig-paren">(</span><em>parent</em>, <em>structure=None</em>, <em>temperature=37.0</em>, <em>ligand=None</em>, <em>constraint=None</em>, <em>enforce_constraint=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/RNAsketch/State.html#State"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#RNAsketch.State.State" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
-<p>State object holds structure, ligand, constraints and calculates all values
-for this state.</p>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>State object holds structure, ligand, constraints and calculates
+all values for this state.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>structure</strong> – Dot-bracket structure string</li>
+<li><strong>parent</strong> – Parent Design object</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 <dl class="attribute">
 <dt id="RNAsketch.State.State.classtype">
 <code class="descname">classtype</code><a class="headerlink" href="#RNAsketch.State.State.classtype" title="Permalink to this definition">¶</a></dt>
@@ -675,6 +861,17 @@ Unpaired positions are -1, otherwise the index of the adjacent bracket is listed
 </dd></dl>
 
 <dl class="class">
+<dt id="RNAsketch.State.hotknotsState">
+<em class="property">class </em><code class="descclassname">RNAsketch.State.</code><code class="descname">hotknotsState</code><span class="sig-paren">(</span><em>parent</em>, <em>structure=None</em>, <em>temperature=37.0</em>, <em>ligand=None</em>, <em>constraint=None</em>, <em>enforce_constraint=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/RNAsketch/State.html#hotknotsState"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#RNAsketch.State.hotknotsState" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#RNAsketch.State.State" title="RNAsketch.State.State"><code class="xref py py-class docutils literal notranslate"><span class="pre">RNAsketch.State.State</span></code></a></p>
+<dl class="attribute">
+<dt id="RNAsketch.State.hotknotsState.classtype">
+<code class="descname">classtype</code><a class="headerlink" href="#RNAsketch.State.hotknotsState.classtype" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
 <dt id="RNAsketch.State.nupackState">
 <em class="property">class </em><code class="descclassname">RNAsketch.State.</code><code class="descname">nupackState</code><span class="sig-paren">(</span><em>parent</em>, <em>structure=None</em>, <em>temperature=37.0</em>, <em>ligand=None</em>, <em>constraint=None</em>, <em>enforce_constraint=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/RNAsketch/State.html#nupackState"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#RNAsketch.State.nupackState" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#RNAsketch.State.State" title="RNAsketch.State.State"><code class="xref py py-class docutils literal notranslate"><span class="pre">RNAsketch.State.State</span></code></a></p>
@@ -685,12 +882,31 @@ Unpaired positions are -1, otherwise the index of the adjacent bracket is listed
 
 </dd></dl>
 
+<dl class="class">
+<dt id="RNAsketch.State.pKissState">
+<em class="property">class </em><code class="descclassname">RNAsketch.State.</code><code class="descname">pKissState</code><span class="sig-paren">(</span><em>parent</em>, <em>structure=None</em>, <em>temperature=37.0</em>, <em>ligand=None</em>, <em>constraint=None</em>, <em>enforce_constraint=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/RNAsketch/State.html#pKissState"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#RNAsketch.State.pKissState" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#RNAsketch.State.State" title="RNAsketch.State.State"><code class="xref py py-class docutils literal notranslate"><span class="pre">RNAsketch.State.State</span></code></a></p>
+<dl class="attribute">
+<dt id="RNAsketch.State.pKissState.classtype">
+<code class="descname">classtype</code><a class="headerlink" href="#RNAsketch.State.pKissState.classtype" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
 <dl class="function">
 <dt id="RNAsketch.State.remove_cuts">
 <code class="descclassname">RNAsketch.State.</code><code class="descname">remove_cuts</code><span class="sig-paren">(</span><em>input</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/RNAsketch/State.html#remove_cuts"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#RNAsketch.State.remove_cuts" title="Permalink to this definition">¶</a></dt>
-<dd><p>Takes a string and removes all cut characters (+&amp;) from this string
-:param input: string containing cut point characters
-:return: string without cut point characters</p>
+<dd><p>Takes a string and removes all cut characters (+&amp;) from this string</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>input</strong> – string containing cut point characters</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">string without cut point characters</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="class">
@@ -701,6 +917,194 @@ Unpaired positions are -1, otherwise the index of the adjacent bracket is listed
 <dt id="RNAsketch.State.vrnaState.classtype">
 <code class="descname">classtype</code><a class="headerlink" href="#RNAsketch.State.vrnaState.classtype" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-RNAsketch.Structure">
+<span id="rnasketch-rnastructure"></span><h2>RNAsketch.RNAStructure<a class="headerlink" href="#module-RNAsketch.Structure" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="RNAsketch.Structure.RNAStructure">
+<em class="property">class </em><code class="descclassname">RNAsketch.Structure.</code><code class="descname">RNAStructure</code><span class="sig-paren">(</span><em>dotbracket</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/RNAsketch/Structure.html#RNAStructure"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#RNAsketch.Structure.RNAStructure" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>RNAStructure object to handle RNA secondary structures. Holds a pairtable internally to operate on.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>dotbracket</strong> – Dot-bracket notation of the RNA secondary structure as string</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="RNAsketch.Structure.RNAStructure.hasLonelyPairs">
+<code class="descname">hasLonelyPairs</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/RNAsketch/Structure.html#RNAStructure.hasLonelyPairs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#RNAsketch.Structure.RNAStructure.hasLonelyPairs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a boolean whether the structure has lonely pairs</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">boolean</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="RNAsketch.Structure.RNAStructure.removeLonelyPairs">
+<code class="descname">removeLonelyPairs</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/RNAsketch/Structure.html#RNAStructure.removeLonelyPairs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#RNAsketch.Structure.RNAStructure.removeLonelyPairs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a dotbracket string without lonely pairs.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">structure string in dot-bracket notation without any lonely pairs</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="RNAsketch.Structure.RNAStructure.resolvePKs">
+<code class="descname">resolvePKs</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/RNAsketch/Structure.html#RNAStructure.resolvePKs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#RNAsketch.Structure.RNAStructure.resolvePKs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Removes any pseudoknots from the structure. Pseudoknotted base-pairs are missing in the returned structure!</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">list of pseudoknot-free structure strings in dot-bracket notation</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-RNAsketch.RNARedPrintSampler">
+<span id="rnasketch-rpsampler"></span><h2>RNAsketch.RPSampler<a class="headerlink" href="#module-RNAsketch.RNARedPrintSampler" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="RNAsketch.RNARedPrintSampler.RPSampler">
+<em class="property">class </em><code class="descclassname">RNAsketch.RNARedPrintSampler.</code><code class="descname">RPSampler</code><span class="sig-paren">(</span><em>structures</em>, <em>constraint=''</em>, <em>model='nussinov'</em>, <em>weights=[]</em>, <em>gcweight=1</em>, <em>temperature=37.0</em>, <em>stacksize=1000</em>, <em>StopConstruct=False</em>, <em>RedPrintFolder=None</em>, <em>debug=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/RNAsketch/RNARedPrintSampler.html#RPSampler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#RNAsketch.RNARedPrintSampler.RPSampler" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>RPSampler is a python wrapper for RNARedPrint and implements a similar interface to the RNAblueprint DependencyGraphMT object.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>structures</strong> – List of Dot-bracket structure strings</li>
+<li><strong>constraint</strong> – Sequence constraints in IUPACK notation</li>
+<li><strong>model</strong> – String specifying the model, can be ‘uniform’,  ‘nussinov’, ‘basepairs’ or ‘stacking’</li>
+<li><strong>weights</strong> – List of integers specifying the boltzmann weight for the target structures, range in ]0, +infinity]</li>
+<li><strong>gcweight</strong> – Integer specifying the GC-weight, ]0, +infinity]</li>
+<li><strong>temperature</strong> – Temperature for the folding predictions (default: 37.0 degree celsius)</li>
+<li><strong>stacksize</strong> – Size of one sequence sampling batch (default: 1000 sequences)</li>
+<li><strong>StopConstruct</strong> – Bool specifying if we want to benchmark the construction time. Measured time can be obtained from construction_time after construction (default: False)</li>
+<li><strong>RedPrintFolder</strong> – Location of the RNARedPrint project folder (default: ‘./RNARedPrint/’)</li>
+<li><strong>debug</strong> – Bool to print debug statements (default: False)</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="RNAsketch.RNARedPrintSampler.RPSampler.dump_new_stack">
+<code class="descname">dump_new_stack</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/RNAsketch/RNARedPrintSampler.html#RPSampler.dump_new_stack"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#RNAsketch.RNARedPrintSampler.RPSampler.dump_new_stack" title="Permalink to this definition">¶</a></dt>
+<dd><p>Draws a sample from RNARedPrint and returns the list of generated sequences at once. The variable stacksize specifies the amount of sequences.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">List of RNA sequence strings</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="RNAsketch.RNARedPrintSampler.RPSampler.gcweight">
+<code class="descname">gcweight</code><a class="headerlink" href="#RNAsketch.RNARedPrintSampler.RPSampler.gcweight" title="Permalink to this definition">¶</a></dt>
+<dd><p>Integer specifying the GC-weight, ]0, +infinity]</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="RNAsketch.RNARedPrintSampler.RPSampler.get_sequence">
+<code class="descname">get_sequence</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/RNAsketch/RNARedPrintSampler.html#RPSampler.get_sequence"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#RNAsketch.RNARedPrintSampler.RPSampler.get_sequence" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the sampled sequence as a string.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">RNA Sequence string in IUPACK notation</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="RNAsketch.RNARedPrintSampler.RPSampler.model">
+<code class="descname">model</code><a class="headerlink" href="#RNAsketch.RNARedPrintSampler.RPSampler.model" title="Permalink to this definition">¶</a></dt>
+<dd><p>String specifying the sampling model.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">string, can be ‘uniform’,  ‘nussinov’, ‘basepairs’ or ‘stacking’</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="RNAsketch.RNARedPrintSampler.RPSampler.revert_sequence">
+<code class="descname">revert_sequence</code><span class="sig-paren">(</span><em>amount</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/RNAsketch/RNARedPrintSampler.html#RPSampler.revert_sequence"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#RNAsketch.RNARedPrintSampler.RPSampler.revert_sequence" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compatibility to the DependencyGraphMT object, does nothing internally.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="RNAsketch.RNARedPrintSampler.RPSampler.sample">
+<code class="descname">sample</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/RNAsketch/RNARedPrintSampler.html#RPSampler.sample"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#RNAsketch.RNARedPrintSampler.RPSampler.sample" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sample a new sequence.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Returns 0 for compatibility to DependencyGraphMT.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="RNAsketch.RNARedPrintSampler.RPSampler.sample_clocal">
+<code class="descname">sample_clocal</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/RNAsketch/RNARedPrintSampler.html#RPSampler.sample_clocal"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#RNAsketch.RNARedPrintSampler.RPSampler.sample_clocal" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compatibility to the DependencyGraphMT object, calls sample() internally.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="RNAsketch.RNARedPrintSampler.RPSampler.sample_plocal">
+<code class="descname">sample_plocal</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/RNAsketch/RNARedPrintSampler.html#RPSampler.sample_plocal"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#RNAsketch.RNARedPrintSampler.RPSampler.sample_plocal" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compatibility to the DependencyGraphMT object, calls sample() internally.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="RNAsketch.RNARedPrintSampler.RPSampler.set_history_size">
+<code class="descname">set_history_size</code><span class="sig-paren">(</span><em>size</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/RNAsketch/RNARedPrintSampler.html#RPSampler.set_history_size"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#RNAsketch.RNARedPrintSampler.RPSampler.set_history_size" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compatibility to the DependencyGraphMT object, does nothing internally.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="RNAsketch.RNARedPrintSampler.RPSampler.set_sequence">
+<code class="descname">set_sequence</code><span class="sig-paren">(</span><em>seq</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/RNAsketch/RNARedPrintSampler.html#RPSampler.set_sequence"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#RNAsketch.RNARedPrintSampler.RPSampler.set_sequence" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compatibility to the DependencyGraphMT object, does nothing internally.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="RNAsketch.RNARedPrintSampler.RPSampler.weights">
+<code class="descname">weights</code><a class="headerlink" href="#RNAsketch.RNARedPrintSampler.RPSampler.weights" title="Permalink to this definition">¶</a></dt>
+<dd><p>List of integers specifying the boltzmann weight for the target structures, range in ]0, +infinity]</p>
+</dd></dl>
 
 </dd></dl>
 
@@ -720,7 +1124,7 @@ Unpaired positions are -1, otherwise the index of the adjacent bracket is listed
     </p>
     <p>
         &copy; Copyright 2018, Stefan Hammer.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.1.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.8.<br/>
     </p>
   </div>
 </footer>

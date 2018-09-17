@@ -4,10 +4,10 @@
   <head>
     <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>RNAsketch Library for designing RNA molecules &#8212; RNAsketch 1.4.0 documentation</title>
+    <title>RNAsketch Library for designing RNA molecules &#8212; RNAsketch 1.5.0 documentation</title>
     <link rel="stylesheet" href="_static/bootstrap-sphinx.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <script type="text/javascript" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
@@ -36,7 +36,7 @@
         </button>
         <a class="navbar-brand" href="#"><span><img src="_static/rnasketch.png"></span>
           RNAsketch</a>
-        <span class="navbar-text navbar-version pull-left"><b>1.4</b></span>
+        <span class="navbar-text navbar-version pull-left"><b>1.5</b></span>
       </div>
 
         <div class="collapse navbar-collapse nav-collapse">
@@ -76,6 +76,8 @@
 <li><a class="reference internal" href="#design-a-srna-mediated-translational-regulation">Design a sRNA mediated translational regulation</a></li>
 <li><a class="reference internal" href="#design-a-multistate-thermoswitch">Design a multistate Thermoswitch</a></li>
 <li><a class="reference internal" href="#design-a-ligand-triggered-switch">Design a ligand triggered switch</a></li>
+<li><a class="reference internal" href="#design-a-multistate-riboswitch-with-equal-target-energies">Design a multistate riboswitch with equal target energies</a></li>
+<li><a class="reference internal" href="#design-a-multistate-riboswitch-with-specific-target-energies">Design a multistate riboswitch with specific target energies</a></li>
 <li><a class="reference internal" href="#display-the-dependency-graph">Display the Dependency Graph</a></li>
 </ul>
 </li>
@@ -134,6 +136,8 @@
 <li><a class="reference internal" href="#design-a-srna-mediated-translational-regulation">Design a sRNA mediated translational regulation</a></li>
 <li><a class="reference internal" href="#design-a-multistate-thermoswitch">Design a multistate Thermoswitch</a></li>
 <li><a class="reference internal" href="#design-a-ligand-triggered-switch">Design a ligand triggered switch</a></li>
+<li><a class="reference internal" href="#design-a-multistate-riboswitch-with-equal-target-energies">Design a multistate riboswitch with equal target energies</a></li>
+<li><a class="reference internal" href="#design-a-multistate-riboswitch-with-specific-target-energies">Design a multistate riboswitch with specific target energies</a></li>
 <li><a class="reference internal" href="#display-the-dependency-graph">Display the Dependency Graph</a></li>
 </ul>
 </li>
@@ -185,6 +189,8 @@ argument, or in case <code class="code docutils literal notranslate"><span class
 <div class="section" id="cite">
 <h2>Cite<a class="headerlink" href="#cite" title="Permalink to this headline">¶</a></h2>
 <p>Stefan Hammer, Birgit Tschiatschek, Christoph Flamm, Ivo L. Hofacker, and Sven Findeiß. “RNAblueprint: Flexible Multiple Target Nucleic Acid Sequence Design.” Bioinformatics, 2017. <a class="reference external" href="https://doi.org/10.1093/bioinformatics/btx263">https://doi.org/10.1093/bioinformatics/btx263</a>.</p>
+<p>If you used the multi-dimensional boltzmann sampling scripts <cite>design-redprint-multistate.py</cite> or <cite>design-energyshift.py</cite> please cite:</p>
+<p>Stefan Hammer, Yann Ponty, Wei Wang, and Sebastian Will. “Fixed-Parameter Tractable Sampling for RNA Design with Multiple Target Structures.” In RECOMB 2018. Paris, France, 2018. <a class="reference external" href="https://arxiv.org/abs/1804.00841">https://arxiv.org/abs/1804.00841</a>.</p>
 </div>
 <div class="section" id="provided-example-scripts">
 <h2>Provided Example Scripts<a class="headerlink" href="#provided-example-scripts" title="Permalink to this headline">¶</a></h2>
@@ -259,7 +265,7 @@ Celsius and the second one at ~26 degrees. After _72 degrees, the sequence occur
 </div>
 <div class="section" id="design-a-ligand-triggered-switch">
 <h3>Design a ligand triggered switch<a class="headerlink" href="#design-a-ligand-triggered-switch" title="Permalink to this headline">¶</a></h3>
-<div class="code bash highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">echo</span> <span class="o">-</span><span class="n">e</span> <span class="s2">&quot;(((((...((((((((.....)))))...)))...)))))........................</span><span class="se">\n</span><span class="s2">.........................(((((((((((......)))))))))))...........</span><span class="se">\n</span><span class="s2">AAGUGAUACCAGCAUCGUCUUGAUGCCCUUGGCAGCACUUCANNNNNNNNNNNNNNNNNNNNNN&quot;</span> <span class="o">|</span> <span class="n">design</span><span class="o">-</span><span class="n">ligand_switch</span><span class="o">.</span><span class="n">py</span> <span class="o">-</span><span class="n">r</span> <span class="mi">70</span><span class="p">:</span><span class="mi">30</span> <span class="o">--</span><span class="n">ligand</span> <span class="s2">&quot;GAUACCAG&amp;CCCUUGGCAGC;(...((((&amp;)...)))...);-9.22&quot;</span>
+<div class="code bash highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">echo</span> <span class="o">-</span><span class="n">e</span> <span class="s2">&quot;(((((...((((((((.....)))))...)))...)))))........................</span><span class="se">\n</span><span class="s2">.........................(((((((((((......)))))))))))...........</span><span class="se">\n</span><span class="s2">AAGUGAUACCAGCAUCGUCUUGAUGCCCUUGGCAGCACUUCANNNNNNNNNNNNNNNNNNNNNN&quot;</span> <span class="o">|</span> <span class="n">design</span><span class="o">-</span><span class="n">ligandswitch</span><span class="o">.</span><span class="n">py</span> <span class="o">-</span><span class="n">r</span> <span class="mi">70</span><span class="p">:</span><span class="mi">30</span> <span class="o">--</span><span class="n">ligand</span> <span class="s2">&quot;GAUACCAG&amp;CCCUUGGCAGC;(...((((&amp;)...)))...);-9.22&quot;</span>
 </pre></div>
 </div>
 <p>This designs a simple theophylline triggered switch. It adapts to a certain ratio of
@@ -274,6 +280,33 @@ ligand binding competent state in the presence of the ligand.</p>
 </div>
 <div class="figure">
 <a class="reference internal image-reference" href="doc/data/ligandswitch.png"><img alt="doc/data/ligandswitch.png" src="doc/data/ligandswitch.png" style="width: 350px;" /></a>
+</div>
+</div>
+<div class="section" id="design-a-multistate-riboswitch-with-equal-target-energies">
+<h3>Design a multistate riboswitch with equal target energies<a class="headerlink" href="#design-a-multistate-riboswitch-with-equal-target-energies" title="Permalink to this headline">¶</a></h3>
+<div class="code bash highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">export</span> <span class="n">REDPRINT</span><span class="o">=&lt;/</span><span class="n">path</span><span class="o">/</span><span class="n">to</span><span class="o">/</span><span class="n">redprint</span><span class="o">/&gt;</span>
+<span class="n">echo</span> <span class="o">-</span><span class="n">e</span> <span class="s2">&quot;(((((((((((((....)))))))))))))</span><span class="se">\n</span><span class="s2">(((((.....)))))(((((.....)))))</span><span class="se">\n</span><span class="s2">(((((.....)))))...............&quot;</span> <span class="o">|</span> <span class="n">design</span><span class="o">-</span><span class="n">redprint</span><span class="o">-</span><span class="n">multistate</span><span class="o">.</span><span class="n">py</span> <span class="o">-</span><span class="n">i</span> <span class="o">-</span><span class="n">n</span> <span class="mi">10</span>
+</pre></div>
+</div>
+<p>Using this script you can design a multistate riboswitch similar to the <cite>design-multistate.py</cite> script with fundamental differences in the sampling technology.
+Here, we use <cite>RNARedPrint</cite> to gain Boltzmann-weighted sampling of sequences given the structural inputs. This script then implements a strategy to achieve multi-dimensional boltzmann sampling with the target energy being the mean achieveable energy of the target structures.</p>
+<p>The resulting sequences exhibit equal energies for the given target structurs. This does not mean that the target structures are highly populated in the ensemble. To additionally achieve this, specify the <cite>-s 200</cite> option to subsequently do a optimization towards the multi-target objective function.</p>
+<p>Either put the complete <cite>RNARedPrint</cite> project folder next to the scripts, or set a <cite>REDPRINT</cite> environmental variable before executing this script!</p>
+</div>
+<div class="section" id="design-a-multistate-riboswitch-with-specific-target-energies">
+<h3>Design a multistate riboswitch with specific target energies<a class="headerlink" href="#design-a-multistate-riboswitch-with-specific-target-energies" title="Permalink to this headline">¶</a></h3>
+<div class="code bash highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">export</span> <span class="n">REDPRINT</span><span class="o">=&lt;/</span><span class="n">path</span><span class="o">/</span><span class="n">to</span><span class="o">/</span><span class="n">redprint</span><span class="o">/&gt;</span>
+<span class="n">echo</span> <span class="o">-</span><span class="n">e</span> <span class="s2">&quot;.((((((......)))))).((((...((((((...((((...(((.......)))..........(((....))).))))..))))))...))))....</span><span class="se">\n</span><span class="s2">.((((((......)))))).((((...((((((...((((((.(((.......((........))..)))....)).))))..))))))...))))....</span><span class="se">\n</span><span class="s2">......((.((((.(((((((.((.((...((((..((.....(((.......))).....))..)))).)).)))))))))..)).)).))........&quot;</span> <span class="o">|</span> <span class="n">design</span><span class="o">-</span><span class="n">energyshift</span><span class="o">.</span><span class="n">py</span> <span class="o">-</span><span class="n">i</span> <span class="o">-</span><span class="n">e</span> <span class="mi">40</span><span class="p">,</span><span class="mi">40</span><span class="p">,</span><span class="mi">20</span>
+</pre></div>
+</div>
+<p>Design a multistate riboswitch with specific target energies and GC-content. This script uses RNARedPrint for Boltzmann-weighted sampling and implements a strategy to achieve multi-dimensional boltzmann sampling.</p>
+<p>Either put the complete <cite>RNARedPrint</cite> project folder next to the scripts, or set a <cite>REDPRINT</cite> environmental variable before executing this script!</p>
+<p>The resulting sequences are nicely distributed around the specified target energies:</p>
+<div class="figure">
+<a class="reference internal image-reference" href="_images/energyshift.png"><img alt="_images/energyshift.png" src="_images/energyshift.png" style="width: 350px;" /></a>
+</div>
+<div class="figure">
+<a class="reference internal image-reference" href="doc/data/energyshift.png"><img alt="doc/data/energyshift.png" src="doc/data/energyshift.png" style="width: 350px;" /></a>
 </div>
 </div>
 <div class="section" id="display-the-dependency-graph">
@@ -323,7 +356,7 @@ Following example input is possible:</p>
     </p>
     <p>
         &copy; Copyright 2018, Stefan Hammer.<br/>
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.1.<br/>
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.8.<br/>
     </p>
   </div>
 </footer>
