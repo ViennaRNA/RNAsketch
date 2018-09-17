@@ -1,9 +1,23 @@
-# http://hadim.fr/pygraphml/usage.html
+#!/usr/bin/env python
+# # -*- coding: utf-8 -*-
+
+"""design-printgraphml.py: Display a Dependency Graph given structural constraints or a graphml file."""
+
+__author__ = "Stefan Hammer"
+__copyright__ = "Copyright 2018, Ribonets Project"
+__credits__ = ["Stefan Hammer", "Sven Findeiss"]
+__license__ = "GPLv3"
+__version__ = "1.0"
+__maintainer__ = "Stefan Hammer"
+__email__ = "s.hamer@univie.ac.at"
+__status__ = "Production"
+
 import RNAblueprint
 import argparse
 import tempfile
 import sys
 import re
+# http://hadim.fr/pygraphml/usage.html
 import igraph
 
 def graph_from_input(structures, constraint):
@@ -24,7 +38,7 @@ def graph_from_input(structures, constraint):
     return g
 
 def main():
-    parser = argparse.ArgumentParser(description='Display a Dependency Graph with python given structural constraints or a graphml file.')
+    parser = argparse.ArgumentParser(description='Display a Dependency Graph given structural constraints or a graphml file.')
     parser.add_argument("-g", "--graphml", type=str, default=None, help='Read graphml file with the given filename.')
     parser.add_argument("-i", "--input", default=False, action='store_true', help='Read custom structures and sequence constraints from stdin')
     parser.add_argument("-l", "--layout", type=str, default='components', help='Specify the plotting layout: components - vertice in connected components will be close to each other; circle: vertices will be drawn on a circle')

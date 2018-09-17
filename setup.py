@@ -1,16 +1,13 @@
 import os
-from setuptools import setup
+from os.path import join
+from distutils.core import setup
 
-# Utility function to read the README file.
-# Used for the long_description.  It's nice, because now 1) we have a top level
-# README file and 2) it's easier to type in the README file than to put a raw
-# string in below ...
 def read(fname):
-    return open(os.path.join(os.path.dirname(__file__), fname)).read()
+    return open(join(os.path.dirname(__file__), fname)).read()
 
 setup(
     name = "RNAsketch",
-    version = "1.3",
+    version = "1.4",
     author = "Stefan Hammer",
     author_email = "s.hammer@univie.ac.at",
     description = ("A wrapper framework to design RNA molecules."),
@@ -21,11 +18,7 @@ setup(
     test_suite="tests",
     install_requires=[
                     ],
-<<<<<<< HEAD
-    scripts=['bin/design-cofold.py','bin/design-generategraphml.py','bin/design-multistate.py','bin/design-printgraphml.py','bin/design-thermoswitch.py','bin/design-ligand_switch.py'],
-=======
-    scripts=['bin/design-cofold.py','bin/design-generategraphml.py','bin/design-multistate.py','bin/design-printgraphml.py','bin/design-thermoswitch.py','bin/design-ligandswitch.py'],
->>>>>>> master
+    scripts=[ join('bin', 'design-cofold.py'), join('bin', 'design-generategraphml.py'), join('bin', 'design-multistate.py'), join('bin', 'design-printgraphml.py'), join('bin', 'design-thermoswitch.py'), join('bin', 'design-ligandswitch.py')],
     long_description=read('README.rst'),
     classifiers=[
         "Development Status :: 5 - Production/Stable",

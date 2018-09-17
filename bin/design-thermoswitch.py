@@ -1,10 +1,19 @@
+#!/usr/bin/env python
+# # -*- coding: utf-8 -*-
+
+"""design-ligandswitch.py: Design a multi-stable thermoswitch as suggested in the Flamm 2001 publication."""
+
 from __future__ import print_function
 
-try:
-    from RNAsketch import *
-except ImportError, e:
-    print(e.message)
-    exit(1)
+__author__ = "Stefan Hammer, Sven Findeiss"
+__copyright__ = "Copyright 2018, Ribonets Project"
+__credits__ = ["Stefan Hammer", "Sven Findeiss", "Ivo L. Hofacker",
+                    "Christoph Flamm"]
+__license__ = "GPLv3"
+__version__ = "1.0"
+__maintainer__ = "Stefan Hammer"
+__email__ = "s.hamer@univie.ac.at"
+__status__ = "Production"
 
 import RNAblueprint as rbp
 import argparse
@@ -12,8 +21,14 @@ import sys
 import time
 import re
 
+try:
+    from RNAsketch import *
+except ImportError as e:
+    print( "Error: %s" % e , file=sys.stderr)
+    exit(1)
+
 def main():
-    parser = argparse.ArgumentParser(description='Design a multi-stable thermoswitch as suggested in the Flamm 2001 paper.')
+    parser = argparse.ArgumentParser(description='Design a multi-stable thermoswitch as suggested in the Flamm 2001 publication.')
     parser.add_argument("-q", "--package", type=str, default='vrna', help='Chose the calculation package: nupack (for pseudoknots) or ViennaRNA (default: vrna)')
     parser.add_argument("-n", "--number", type=int, default=4, help='Number of designs to generate')
     parser.add_argument("-e", "--stop", type=int, default=500, help='Stop optimization run if no better solution is aquired after (stop) trials.')
